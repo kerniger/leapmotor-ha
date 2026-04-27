@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.9 - Planned
+
+- Ask for optional ABRP live-data settings during the initial setup flow, not
+  only in the integration options.
+- Move local brand images into the Home Assistant custom-integration brand
+  folder so the integration logo/icon can be discovered by newer HA versions.
+
 ## 0.5.8 - 2026-04-27
 
 - Add Home Assistant service `leapmotor.send_destination`.

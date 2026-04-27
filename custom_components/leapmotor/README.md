@@ -168,9 +168,9 @@ marked stale.
 - A `Last vehicle action` sensor and action attributes show the latest
   remote-control status per VIN.
 - The repository now includes HACS brand assets in `brand/icon.png` and
-  `brand/logo.png`. Home Assistant still does not automatically use arbitrary
-  local integration images in every UI location, so logo visibility depends on
-  the consumer (for example HACS branding vs. Devices & Services UI).
+  `brand/logo.png`, plus local integration brand assets in
+  `custom_components/leapmotor/brand/`. Home Assistant and browser caches can
+  keep old brand assets for a while after installation or update.
 - The current proof set is strongest on the C10. Main-account and shared-car
   handling are both implemented; feature availability may still vary by model,
   especially for climate, sunshade, trunk, and window actions.

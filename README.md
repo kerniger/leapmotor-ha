@@ -31,6 +31,7 @@ It intentionally does not contain:
 - Redacted diagnostics export
 - Multi-language translations
 - Multi-vehicle support for main-account and shared-car vehicles
+- HACS and Home Assistant brand/icon assets
 - Single Custom Component package with entity layer and backend/auth layer
 
 ## Important
@@ -147,6 +148,13 @@ In addition to the regular vehicle entities, the integration exposes:
 - optional raw candidate status signals for future mapping work
 
 ## FAQ
+
+### Why does the logo not show immediately?
+
+Home Assistant and browser caches can keep old integration brand assets for a
+while. After installing or updating, restart Home Assistant and hard-refresh the
+browser or app. The repository includes brand assets both for HACS and for the
+local custom integration package.
 
 ### Why are app_cert.pem and app_key.pem not included?
 
