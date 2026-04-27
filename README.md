@@ -110,6 +110,9 @@ Without these files, direct authentication fails by design.
 - `send_destination` does not require the Vehicle PIN, matching the observed app flow
 - Remote-control actions have a short cooldown to reduce accidental duplicate commands
 - If multiple vehicles are available, entities are created per VIN and services can target a vehicle by `vin` or a Leapmotor `entity_id`
+- The charging sensor reports active charging only. Plugged-in but stopped/idle
+  sessions stay `off` because the currently observed API signals do not
+  reliably distinguish plugged-in from unplugged when the car is not charging.
 
 ## Services
 

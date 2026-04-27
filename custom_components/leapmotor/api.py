@@ -1286,7 +1286,7 @@ def normalize_vehicle(
             "is_charging": _is_charging(signal),
             "charge_limit_percent": charge_plan.get("percent"),
             "remaining_charge_minutes": _safe_int(signal.get("1200")),
-            "charging_power_kw": _safe_float(signal.get("2191", signal.get("2"))),
+            "charging_power_kw": _charging_power_kw(signal),
             "charging_current_a": _safe_float(signal.get("1178")),
             "charging_voltage_v": _safe_float(signal.get("1177")),
             "charging_planned_enabled": charge_plan.get("isEnable"),
@@ -1368,32 +1368,39 @@ def _derive_vehicle_state(signal: dict[str, Any]) -> str | None:
     return None
 
 
-def _is_plugged_in(signal: dict[str, Any]) -> bool:
-    """Return whether a charging cable appears connected."""
-    return _safe_int(signal.get("1480")) == 1
-
-
 def _is_charging(signal: dict[str, Any]) -> bool:
     """Return whether the vehicle is currently charging."""
+    remaining_charge_minutes = _safe_int(signal.get("1200"))
     charging_current_a = _safe_float(signal.get("1178"))
-    if charging_current_a is not None:
+    if charging_current_a is not None and remaining_charge_minutes is not None:
         # Confirmed charging sessions show a clearly non-zero current
         # (typically negative while energy flows into the pack). Treat
         # sub-1A noise as idle / just plugged in.
-        return abs(charging_current_a) >= 1.0 and _safe_int(signal.get("1200")) is not None
+        return abs(charging_current_a) >= 1.0
 
-    charging_power_kw = _safe_float(signal.get("2191", signal.get("2")))
+    charging_power_kw = _charging_power_kw(signal)
     if charging_power_kw is not None:
-        return charging_power_kw >= 1.0
+        return charging_power_kw >= 1.0 and remaining_charge_minutes is not None
 
     charge_status = _safe_int(signal.get("1939"))
     drive_status = _safe_int(signal.get("1941"))
     vehicle_state = _safe_int(signal.get("1944"))
-    plugged_in = _is_plugged_in(signal)
 
     # `1939` alone is too noisy and can remain non-zero outside active charging.
-    # Only trust it as a last fallback when the car is actually plugged in and
-    # the secondary state fields line up with an active charge session.
+    # Only trust it as a last fallback when a remaining charge time is present
+    # and secondary state fields line up with an active charge session.
     return charge_status in (1, 2, 3) and (
-        plugged_in and (drive_status == 2 or vehicle_state == 0)
+        remaining_charge_minutes is not None and (drive_status == 2 or vehicle_state == 0)
     )
+
+
+def _charging_power_kw(signal: dict[str, Any]) -> float | None:
+    """Return charging power without using GPS longitude-like signal 2191."""
+    current = _safe_float(signal.get("1178"))
+    voltage = _safe_float(signal.get("1177"))
+    if current is None or voltage is None:
+        return None
+    # The C10 plugged-idle snapshot shows about 1.5A without active charging.
+    if abs(current) < 3.0:
+        return None
+    return round(abs(current * voltage) / 1000.0, 3)

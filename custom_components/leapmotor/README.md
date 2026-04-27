@@ -129,6 +129,9 @@ integration options without recreating the entry.
 - Lock state is treated conservatively. If the cloud vehicle timestamp is too
   old, the lock falls back to `unknown` instead of showing a stale unlocked
   state for hours.
+- The `Lädt` binary sensor represents active charging only. Plugged-in but
+  stopped/idle sessions stay `off`; the currently observed API signals do not
+  reliably distinguish plugged-in from unplugged when the car is not charging.
 - Vehicle state and GPS location expose freshness metadata in entity
   attributes and diagnostics so stale backend data is easier to identify.
 - Each vehicle also gets a `Refresh data` button to trigger an immediate poll

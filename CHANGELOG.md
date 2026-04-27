@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.10 - 2026-04-27
+
+- Fix charging-power mapping by deriving it from voltage/current instead of the
+  GPS-like `2191` signal.
+- Keep `Lädt` false for plugged-in but stopped/idle charging sessions.
+- Document that the currently observed Leapmotor API signals do not reliably
+  distinguish plugged-in from unplugged when the vehicle is not charging.
+
 ## 0.5.9 - 2026-04-27
 
 - Ask for optional ABRP live-data settings during the initial setup flow, not
