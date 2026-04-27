@@ -42,6 +42,7 @@ Available data includes:
   - Window action
 - Native Home Assistant service `leapmotor.send_destination` for sending a
   latitude/longitude destination to the vehicle navigation.
+- Optional ABRP Generic Telemetry live-data push after successful vehicle polls.
 
 ## Install
 

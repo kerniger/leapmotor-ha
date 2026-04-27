@@ -25,6 +25,8 @@ It intentionally does not contain:
 - Device tracker from vehicle GPS position
 - Remote-control buttons for supported actions
 - Native Home Assistant services for supported remote actions
+- Send destination to vehicle navigation via Home Assistant service
+- Optional ABRP Generic Telemetry live-data push
 - Options flow for vehicle PIN and update interval
 - Redacted diagnostics export
 - Multi-language translations
