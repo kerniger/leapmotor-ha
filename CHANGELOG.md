@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.13 - 2026-04-27
+
+- Replace the rejected generated logo/icon with the cleaned user-provided
+  artwork, scaled to 512x512 for Home Assistant and HACS.
+
 ## 0.5.12 - 2026-04-27
 
 - Replace logo/icon PNG assets with clean transparent-background images and
