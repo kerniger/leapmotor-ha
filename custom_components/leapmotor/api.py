@@ -1362,21 +1362,17 @@ def _to_bar(raw: Any) -> float | None:
 
 def _derive_vehicle_state(signal: dict[str, Any]) -> str | None:
     """Return the movement state independent from charging state."""
-    drive_status = _safe_int(signal.get("1941"))
-    vehicle_state = _safe_int(signal.get("1944"))
-
-    # Fresh recorder/app correlations:
-    # - 1941=3 / 1944=2 matched confirmed drives on 2026-04-28 and 2026-04-29.
-    # - `1298` can remain parked and must not override these movement states.
-    if drive_status in (3, 5) or vehicle_state in (2, 4, 5):
-        return "driving"
-    if drive_status in (1, 2, 4) or vehicle_state in (0, 1, 3):
-        return "parked"
-
     parked = _safe_int(signal.get("1298"))
     if parked == 1:
         return "parked"
     if parked == 0:
+        return "driving"
+
+    drive_status = _safe_int(signal.get("1941"))
+    vehicle_state = _safe_int(signal.get("1944"))
+    if drive_status in (1, 2, 4) or vehicle_state in (0, 1, 3):
+        return "parked"
+    if drive_status in (3, 5) or vehicle_state in (2, 4, 5):
         return "driving"
 
     return None

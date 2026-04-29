@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.16 - 2026-04-29
+
+- Restore app-aligned vehicle-state precedence: `1298` is the primary
+  parked/driving signal, while `1941` and `1944` remain fallback diagnostics.
+- Fix the `0.5.15` regression where fresh `1941=3` / `1944=2` could show
+  `driving` even when the app and `1298=1` showed the vehicle as parked.
+
 ## 0.5.15 - 2026-04-29
 
 - Fix vehicle-state mapping so confirmed fresh `1941=3` / `1944=2` drive
