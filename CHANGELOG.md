@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.21 - 2026-05-04
+
+- Fix active-charging detection when signal `1149` remains `1` during a real
+  charging session; current, power, and remaining charge time now take
+  precedence.
+- Show `Ladeverbindung` as `charging` for confirmed active charging instead of
+  `plugged_in`/`connecting`.
+
 ## 0.5.20 - 2026-05-04
 
 - Restore app-correlated lock state using validated signal `1298`

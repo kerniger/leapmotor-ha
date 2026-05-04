@@ -1722,12 +1722,6 @@ def _is_locked(signal: dict[str, Any]) -> bool | None:
 
 def _is_charging(signal: dict[str, Any]) -> bool:
     """Return whether the vehicle is currently charging."""
-    connection_status = _safe_int(signal.get("1149"))
-    if connection_status == 2:
-        return True
-    if connection_status in (0, 1):
-        return False
-
     remaining_charge_minutes = _safe_int(signal.get("1200"))
     charging_current_a = _safe_float(signal.get("1178"))
     if charging_current_a is not None and remaining_charge_minutes is not None:
@@ -1739,6 +1733,12 @@ def _is_charging(signal: dict[str, Any]) -> bool:
     charging_power_kw = _charging_power_kw(signal)
     if charging_power_kw is not None:
         return charging_power_kw >= 1.0 and remaining_charge_minutes is not None
+
+    connection_status = _safe_int(signal.get("1149"))
+    if connection_status == 2:
+        return True
+    if connection_status in (0, 1):
+        return False
 
     charge_status = _safe_int(signal.get("1939"))
     drive_status = _safe_int(signal.get("1941"))
@@ -1765,11 +1765,13 @@ def _is_plugged_in(signal: dict[str, Any]) -> bool | None:
 
 def _charging_connection_state(signal: dict[str, Any]) -> str | None:
     """Return the observed charge-connection state."""
+    if _is_charging(signal):
+        return "charging"
     connection_status = _safe_int(signal.get("1149"))
     if connection_status == 0:
         return "unplugged"
     if connection_status == 1:
-        return "connecting"
+        return "plugged_in"
     if connection_status == 2:
         return "charging"
     return None
