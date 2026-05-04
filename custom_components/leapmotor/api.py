@@ -1426,9 +1426,9 @@ def normalize_vehicle(
             "odometer_km": signal.get("1318"),
             "battery_percent_precise": _safe_float(signal.get("100003")),
             "wltp_max_range_km": _safe_int(signal.get("3257")),
-            "is_locked": None,
-            "raw_lock_status_code": None,
-            "lock_state_source": "unsupported",
+            "is_locked": _is_locked(signal),
+            "raw_lock_status_code": signal.get("1298"),
+            "lock_state_source": "raw_signal_1298",
             "is_parked": vehicle_state == "parked" if vehicle_state is not None else None,
             "vehicle_state": vehicle_state,
             "vehicle_state_source": "raw_signal",
@@ -1705,10 +1705,18 @@ def _derive_vehicle_state(signal: dict[str, Any]) -> str | None:
     if drive_status in (3, 5) or vehicle_state in (5,):
         return "driving"
 
-    parked = _safe_int(signal.get("1298"))
-    if parked == 0:
-        return "parked"
+    return None
 
+
+def _is_locked(signal: dict[str, Any]) -> bool | None:
+    """Return app-correlated door-lock state from the validated home-screen signal."""
+    lock_status = _safe_int(signal.get("1298"))
+    if lock_status is None:
+        return None
+    if lock_status == 1:
+        return True
+    if lock_status == 0:
+        return False
     return None
 
 

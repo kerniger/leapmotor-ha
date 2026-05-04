@@ -208,9 +208,7 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 
             status["lock_state_age_seconds"] = age_seconds
             status["lock_state_is_stale"] = is_stale
-            if status.get("lock_state_source") == "unsupported":
-                status["is_locked"] = None
-            elif is_stale:
+            if is_stale:
                 status["lock_state_source"] = "cloud_stale"
                 if status.get("is_locked") is False:
                     status["is_locked"] = None

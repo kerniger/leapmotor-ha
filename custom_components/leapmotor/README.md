@@ -136,9 +136,8 @@ integration options without recreating the entry.
 - Lock state is treated conservatively. If the cloud vehicle timestamp is too
   old, the lock falls back to `unknown` instead of showing a stale unlocked
   state for hours.
-- Current cloud data does not expose a validated lock-state signal. The lock
-  entity remains available for remote lock/unlock commands, but the state is
-  conservative/unknown unless a recent command override is active.
+- Lock state follows the app home-screen state using validated signal `1298`
+  (`1=locked`, `0=unlocked`). Signal `47` is not used for lock state.
 - The `Lädt` binary sensor represents active charging only. Plugged-in but
   stopped/idle sessions stay `off`; use the separate charge-cable sensor for
   plugged-in state.

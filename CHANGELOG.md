@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.20 - 2026-05-04
+
+- Restore app-correlated lock state using validated signal `1298`
+  (`1=locked`, `0=unlocked`) instead of signal `47`.
+- Keep vehicle movement state derived from `1941`/`1944` so lock state and
+  parked/driving state are no longer coupled.
+
 ## 0.5.19 - 2026-05-04
 
 - Correct signal `47` to charge-cable plugged-in state instead of lock state.

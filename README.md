@@ -115,9 +115,8 @@ Without these files, direct authentication fails by design.
 - The charging sensor reports active charging only. Plugged-in but stopped/idle
   sessions stay `off`; use the separate charge-cable sensor for plugged-in
   state.
-- Current cloud data does not expose a validated lock-state signal. The lock
-  entity remains available for remote lock/unlock commands, but the state is
-  conservative/unknown unless a recent command override is active.
+- Lock state follows the app home-screen state using validated signal `1298`
+  (`1=locked`, `0=unlocked`). Signal `47` is not used for lock state.
 
 ## Services
 
