@@ -23,6 +23,7 @@ from .const import (
     STATIC_CERT_STORAGE_DIR,
 )
 from .coordinator import LeapmotorDataUpdateCoordinator
+from .entity_migration import async_migrate_entity_registry_to_english
 from .lock import LOCK_ACTION, UNLOCK_ACTION
 from .remote_helpers import async_execute_remote_action, format_remote_error, resolve_target_vin
 
@@ -115,6 +116,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         update_interval=timedelta(minutes=scan_interval),
     )
     await coordinator.async_config_entry_first_refresh()
+    await async_migrate_entity_registry_to_english(
+        hass,
+        set(coordinator.data.get("vehicles") or {}),
+    )
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     if not hass.services.has_service(DOMAIN, "lock"):

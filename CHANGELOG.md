@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.25 - 2026-05-04
+
+- Add an automatic Entity Registry migration for existing Leapmotor entries:
+  known German-generated entity IDs are renamed to English IDs on startup after
+  a HACS update/restart.
+- This intentionally changes entity IDs such as `sensor.c10_batterie` to
+  `sensor.c10_battery`; existing dashboards and automations may need to be
+  updated.
+
 ## 0.5.24 - 2026-05-04
 
 - Switch hardcoded default entity names for sensors, binary sensors, and the
