@@ -3,38 +3,38 @@
     "step": {
       "user": {
         "title": "Leapmotor verbinden",
-        "description": "Sets up Leapmotor vehicle data. App certificate and app private key are required for login; paste or upload them here, or place them as app_cert.pem and app_key.pem in /config/leapmotor first. The vehicle PIN is optional; without it only read-only data works, not remote control. ABRP live data is optional; use your ABRP Generic token from the ABRP vehicle live-data setup. Unofficial integration: use at your own risk; no liability for account restrictions, API changes, or vehicle consequences.",
+        "description": "Stelt Leapmotor-voertuiggegevens in. Een app-certificaat en app-privésleutel zijn verplicht om in te loggen; plak ze hier of upload ze, of plaats app_cert.pem en app_key.pem eerst in /config/leapmotor. De voertuig-PIN is optioneel; zonder PIN werken alleen leesgegevens, geen afstandsbediening. ABRP live-data is optioneel; gebruik het ABRP Generic-token uit de ABRP-livedatainstellingen. Onofficiële integratie: gebruik op eigen risico; geen aansprakelijkheid voor accountbeperkingen, API-wijzigingen of gevolgen voor het voertuig.",
         "data": {
           "username": "Gebruikersnaam / e-mail",
           "password": "Wachtwoord",
-          "app_cert_file": "Upload app_cert.pem (certificate)",
-          "app_key_file": "Upload app_key.pem (private key)",
-          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
-          "app_key_pem": "Paste app_key.pem PEM (private key)",
+          "app_cert_file": "app_cert.pem uploaden (certificaat)",
+          "app_key_file": "app_key.pem uploaden (privésleutel)",
+          "app_cert_pem": "app_cert.pem PEM plakken (certificaat)",
+          "app_key_pem": "app_key.pem PEM plakken (privésleutel)",
           "operation_password": "Voertuig-PIN (optioneel, voor bediening)",
           "scan_interval": "Update-interval in minuten"
         }
       },
       "init": {
         "title": "Leapmotor opties",
-        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login and are stored as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem. Without a PIN, remote-control actions remain disabled.",
+        "description": "Wijzig certificaatmateriaal, voertuig-PIN, update-interval en optionele ABRP live-data doorsturen. App-certificaat en privésleutel zijn verplicht voor inloggen en worden opgeslagen als /config/leapmotor/app_cert.pem en /config/leapmotor/app_key.pem. Zonder PIN blijven afstandsbediening-acties uitgeschakeld.",
         "data": {
-          "app_cert_file": "Upload app_cert.pem (certificate)",
-          "app_key_file": "Upload app_key.pem (private key)",
-          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
-          "app_key_pem": "Paste app_key.pem PEM (private key)",
+          "app_cert_file": "app_cert.pem uploaden (certificaat)",
+          "app_key_file": "app_key.pem uploaden (privésleutel)",
+          "app_cert_pem": "app_cert.pem PEM plakken (certificaat)",
+          "app_key_pem": "app_key.pem PEM plakken (privésleutel)",
           "operation_password": "Voertuig-PIN (optioneel, voor bediening)",
           "scan_interval": "Update-interval in minuten"
         }
       },
       "certificates": {
         "title": "Leapmotor-certificaten",
-        "description": "Upload the required app certificate and private key, or paste their PEM contents. They are stored locally as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem and are not included in the public repository.",
+        "description": "Upload het vereiste app-certificaat en de privésleutel, of plak hun PEM-inhoud. Ze worden lokaal opgeslagen als /config/leapmotor/app_cert.pem en /config/leapmotor/app_key.pem en staan niet in de publieke repository.",
         "data": {
-          "app_cert_file": "Upload app_cert.pem (certificate)",
-          "app_key_file": "Upload app_key.pem (private key)",
-          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
-          "app_key_pem": "Paste app_key.pem PEM (private key)"
+          "app_cert_file": "app_cert.pem uploaden (certificaat)",
+          "app_key_file": "app_key.pem uploaden (privésleutel)",
+          "app_cert_pem": "app_cert.pem PEM plakken (certificaat)",
+          "app_key_pem": "app_key.pem PEM plakken (privésleutel)"
         }
       },
       "account": {
@@ -53,7 +53,7 @@
       "account_cert_error": "Inloggen is gelukt, maar het accountcertificaat kon niet worden geopend.",
       "cannot_connect": "Verbinding of API-update mislukt.",
       "unknown": "Onverwachte fout.",
-      "missing_app_cert": "Missing app certificate/private key. Paste both PEM values or place app_cert.pem and app_key.pem in /config/leapmotor.",
+      "missing_app_cert": "App-certificaat of privésleutel ontbreekt. Plak beide PEM-waarden of plaats app_cert.pem en app_key.pem in /config/leapmotor.",
       "certificate_import_error": "Certificaatimport mislukt. Controleer het PEM-certificaat en de privesleutel."
     },
     "abort": {
@@ -179,12 +179,12 @@
     "step": {
       "init": {
         "title": "Leapmotor opties",
-        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login and are stored as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem. Without a PIN, remote-control actions remain disabled.",
+        "description": "Wijzig certificaatmateriaal, voertuig-PIN, update-interval en optionele ABRP live-data doorsturen. App-certificaat en privésleutel zijn verplicht voor inloggen en worden opgeslagen als /config/leapmotor/app_cert.pem en /config/leapmotor/app_key.pem. Zonder PIN blijven afstandsbediening-acties uitgeschakeld.",
         "data": {
-          "app_cert_file": "Upload app_cert.pem (certificate)",
-          "app_key_file": "Upload app_key.pem (private key)",
-          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
-          "app_key_pem": "Paste app_key.pem PEM (private key)",
+          "app_cert_file": "app_cert.pem uploaden (certificaat)",
+          "app_key_file": "app_key.pem uploaden (privésleutel)",
+          "app_cert_pem": "app_cert.pem PEM plakken (certificaat)",
+          "app_key_pem": "app_key.pem PEM plakken (privésleutel)",
           "operation_password": "Voertuig-PIN (optioneel, voor bediening)",
           "scan_interval": "Update-interval in minuten"
         }

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.24 - 2026-05-04
+
+- Switch hardcoded default entity names for sensors, binary sensors, and the
+  device tracker from German to English.
+- Add a diagnostic `Regenerative braking` binary sensor derived from confirmed
+  charging current while no external charge cable is plugged in.
+- Complete the Dutch setup/options certificate wording based on community PR
+  feedback while preserving the current `/config/leapmotor/app_cert.pem` and
+  `/config/leapmotor/app_key.pem` guidance.
+
 ## 0.5.23 - 2026-05-04
 
 - Fix charge-complete handling when the backend keeps signal `1149=2` but

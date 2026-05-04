@@ -42,7 +42,7 @@ class LeapmotorDeviceTracker(
         self._attr_unique_id = f"{vin}_location"
         vehicle = self.vehicle_data["vehicle"]
         self._attr_has_entity_name = True
-        self._attr_name = "Standort"
+        self._attr_name = "Location"
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, vin)},
             manufacturer="Leapmotor",

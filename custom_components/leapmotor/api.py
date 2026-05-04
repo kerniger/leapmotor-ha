@@ -1461,6 +1461,7 @@ def normalize_vehicle(
         "charging": {
             "is_charging": _is_charging(signal),
             "is_plugged_in": _is_plugged_in(signal),
+            "is_regening": _is_regening(signal),
             "connection_state": _charging_connection_state(signal),
             "charge_limit_percent": charge_plan.get("percent"),
             "remaining_charge_minutes": _safe_int(signal.get("1200")),
@@ -1844,6 +1845,16 @@ def _is_plugged_in(signal: dict[str, Any]) -> bool | None:
     if connection_status is not None:
         return connection_status in (1, 2)
     return None
+
+
+def _is_regening(signal: dict[str, Any]) -> bool | None:
+    """Return whether energy is flowing into the battery without a charge cable."""
+    plugged_in = _is_plugged_in(signal)
+    if plugged_in is None:
+        return None
+    if plugged_in:
+        return False
+    return _is_charging(signal)
 
 
 def _charging_connection_state(signal: dict[str, Any]) -> str | None:
