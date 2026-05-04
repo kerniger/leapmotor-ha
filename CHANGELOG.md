@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.28 - 2026-05-04
+
+- Add account notification sensors from PR #5: unread message count, latest
+  message title, and latest message timestamp.
+- Fetch notification data once per coordinator refresh and keep vehicle updates
+  working if the message endpoints are unavailable.
+
 ## 0.5.27 - 2026-05-04
 
 - Hotfix entity display names after `0.5.26`: restore explicit entity names so

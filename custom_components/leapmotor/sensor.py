@@ -510,6 +510,31 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("tire_pressure_rear_right_bar"),
     ),
+    LeapmotorSensorEntityDescription(
+        key="unread_message_count",
+        name='Ungelesene Nachrichten',
+        icon="mdi:message-badge",
+        state_class=SensorStateClass.MEASUREMENT,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("notifications") or {}).get("unread_count"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="last_message_title",
+        name='Letzte Nachricht',
+        icon="mdi:message-text",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("notifications") or {}).get("last_message_title"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="last_message_time",
+        name='Zeitpunkt letzte Nachricht',
+        device_class=SensorDeviceClass.TIMESTAMP,
+        icon="mdi:message-clock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: _message_timestamp(
+            (data.get("notifications") or {}).get("last_message_time")
+        ),
+    ),
 )
 
 
@@ -662,4 +687,25 @@ def _coordinator_timestamp(value: Any) -> datetime | None:
     try:
         return datetime.fromtimestamp(float(value), tz=UTC)
     except (TypeError, ValueError, OSError):
+        return None
+
+
+def _message_timestamp(value: Any) -> datetime | None:
+    """Return a timezone-aware datetime from a message API timestamp."""
+    if value is None:
+        return None
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        if not isinstance(value, str):
+            return None
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError:
+            return None
+    if numeric > 10_000_000_000:
+        numeric /= 1000
+    try:
+        return datetime.fromtimestamp(numeric, tz=UTC)
+    except (OSError, ValueError):
         return None
