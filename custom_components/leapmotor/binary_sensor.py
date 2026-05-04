@@ -244,6 +244,13 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("fully_charged"),
     ),
+    LeapmotorBinarySensorEntityDescription(
+        key="is_regening",
+        translation_key="is_regening",
+        icon="mdi:car-electric",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["charging"].get("is_regening"),
+    ),
 )
 
 

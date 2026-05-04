@@ -123,6 +123,9 @@
       },
       "charging_planned_enabled": {
         "name": "Gepland laden"
+      },
+      "is_regening": {
+        "name": "Regeneratief remmen"
       }
     },
     "image": {

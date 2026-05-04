@@ -132,6 +132,9 @@
       },
       "charging_planned_enabled": {
         "name": "Scheduled charging"
+      },
+      "is_regening": {
+        "name": "Regenerative braking"
       }
     },
     "image": {
