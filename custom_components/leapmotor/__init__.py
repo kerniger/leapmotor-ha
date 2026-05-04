@@ -35,6 +35,29 @@ SERVICE_FIELDS = vol.Schema(
     }
 )
 
+WINDOW_POSITION_SERVICE_FIELDS = vol.Schema(
+    {
+        vol.Optional("value"): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
+        vol.Optional("vin"): str,
+        vol.Optional("entity_id"): str,
+    }
+)
+
+SUNSHADE_POSITION_SERVICE_FIELDS = vol.Schema(
+    {
+        vol.Optional("value"): vol.All(vol.Coerce(int), vol.Range(min=0, max=10)),
+        vol.Optional("vin"): str,
+        vol.Optional("entity_id"): str,
+    }
+)
+
+_SERVICE_SCHEMAS = {
+    "windows_open": WINDOW_POSITION_SERVICE_FIELDS,
+    "windows_close": WINDOW_POSITION_SERVICE_FIELDS,
+    "sunshade_open": SUNSHADE_POSITION_SERVICE_FIELDS,
+    "sunshade_close": SUNSHADE_POSITION_SERVICE_FIELDS,
+}
+
 SET_CHARGE_LIMIT_FIELDS = vol.Schema(
     {
         vol.Required("charge_limit_percent"): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
@@ -154,7 +177,9 @@ async def _async_register_services(hass: HomeAssistant) -> None:
                 "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
             )
 
-        await async_execute_remote_action(coordinator, target_vin, action_spec)
+        raw_value = call.data.get("value")
+        kwargs = {"value": raw_value} if raw_value is not None else None
+        await async_execute_remote_action(coordinator, target_vin, action_spec, kwargs)
 
     async def handle_set_charge_limit(call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}
@@ -278,7 +303,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
             DOMAIN,
             service_name,
             make_handler(service_name),
-            schema=SERVICE_FIELDS,
+            schema=_SERVICE_SCHEMAS.get(service_name, SERVICE_FIELDS),
         )
         _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, service_name)
     hass.services.async_register(

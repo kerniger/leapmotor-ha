@@ -75,8 +75,10 @@ Available data includes:
    Settings -> Devices & services -> Add integration -> Leapmotor
    ```
 
-8. During setup, upload/paste the required `app_cert.pem` and `app_key.pem`
-   material, or place both files in `config/leapmotor/` before setup.
+8. During setup, upload/paste the required certificate/key material. Uploaded
+   or pasted values are stored as `/config/leapmotor/app_cert.pem` and
+   `/config/leapmotor/app_key.pem`. Alternatively, place both files there
+   before setup.
 
 ### Manual
 
@@ -105,7 +107,8 @@ This public repository does not ship app certificate material.
 Normal setup path:
 
 - install the Custom Component
-- provide local `app_cert.pem` and `app_key.pem` in `config/leapmotor/`, or upload/paste them during setup/options
+- provide local files as `/config/leapmotor/app_cert.pem` and
+  `/config/leapmotor/app_key.pem`, or upload/paste them during setup/options
 - optionally enable ABRP live data and enter your ABRP Generic token
 - configure the integration in Home Assistant
 
@@ -118,9 +121,9 @@ normal user install path.
 - Username / email: your Leapmotor account email
 - Password: your Leapmotor account password
 - App certificate file: required for login; upload it here or leave the field
-  empty only if `app_cert.pem` already exists under `config/leapmotor/`.
+  empty only if `/config/leapmotor/app_cert.pem` already exists.
 - App private key file: required for login; upload it here or leave the field
-  empty only if `app_key.pem` already exists under `config/leapmotor/`.
+  empty only if `/config/leapmotor/app_key.pem` already exists.
 - App certificate/private key PEM: fallback paste fields if file upload is not
   convenient.
 - Vehicle PIN: optional; leave empty for read-only mode. Remote-control actions
@@ -176,6 +179,10 @@ marked stale.
 - Most remote-control actions use the verified `operatePassword` flow and
   require a configured Vehicle PIN. `leapmotor.send_destination` uses the
   observed app flow without `operatePassword`.
+- `leapmotor.windows_open` and `leapmotor.windows_close` accept optional
+  `value` from `0` to `100` for partial window positioning.
+- `leapmotor.sunshade_open` and `leapmotor.sunshade_close` accept optional
+  `value` from `0` to `10` for partial sunshade positioning.
 - The account certificate password is derived internally and is no longer asked
   during setup. Known captured values remain as fallback only.
 - The integration exposes Home Assistant diagnostics with secrets redacted:
@@ -193,6 +200,17 @@ marked stale.
 - The current proof set is strongest on the C10. Main-account and shared-car
   handling are both implemented; feature availability may still vary by model,
   especially for climate, sunshade, trunk, and window actions.
+
+## Certificate Retrieval
+
+The integration cannot generate or retrieve backend-trusted app certificate
+material and does not include or download it automatically. Users must provide
+legitimate certificate/key material themselves, either as
+`/config/leapmotor/app_cert.pem` and `/config/leapmotor/app_key.pem` or via the
+setup/options upload fields. Without those files, login cannot complete
+reliably. Community resources may discuss compatible PEM certificate/key
+material, but users must review and decide themselves whether using such
+material is acceptable for their setup.
 
 ## Special Thanks
 

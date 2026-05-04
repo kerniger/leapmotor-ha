@@ -273,13 +273,13 @@ class LeapmotorApiClient:
         """Trigger the verified sunshade action."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_SUNSHADE)
 
-    def open_sunshade(self, vin: str) -> dict[str, Any]:
+    def open_sunshade(self, vin: str, value: int | None = None) -> dict[str, Any]:
         """Open the sunshade via remote control."""
-        return self._remote_control(vin=vin, action=REMOTE_CTL_SUNSHADE_OPEN)
+        return self._remote_control(vin=vin, action=REMOTE_CTL_SUNSHADE_OPEN, value=value)
 
-    def close_sunshade(self, vin: str) -> dict[str, Any]:
+    def close_sunshade(self, vin: str, value: int | None = None) -> dict[str, Any]:
         """Close the sunshade via remote control."""
-        return self._remote_control(vin=vin, action=REMOTE_CTL_SUNSHADE_CLOSE)
+        return self._remote_control(vin=vin, action=REMOTE_CTL_SUNSHADE_CLOSE, value=value)
 
     def battery_preheat(self, vin: str) -> dict[str, Any]:
         """Trigger the verified battery-preheat action."""
@@ -289,13 +289,13 @@ class LeapmotorApiClient:
         """Trigger the verified window action."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS)
 
-    def open_windows(self, vin: str) -> dict[str, Any]:
+    def open_windows(self, vin: str, value: int | None = None) -> dict[str, Any]:
         """Open the windows via remote control."""
-        return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_OPEN)
+        return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_OPEN, value=value)
 
-    def close_windows(self, vin: str) -> dict[str, Any]:
+    def close_windows(self, vin: str, value: int | None = None) -> dict[str, Any]:
         """Close the windows via remote control."""
-        return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_CLOSE)
+        return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_CLOSE, value=value)
 
     def ac_switch(self, vin: str) -> dict[str, Any]:
         """Trigger the verified A/C switch profile."""
@@ -586,7 +586,7 @@ class LeapmotorApiClient:
             )
         return response["body"]
 
-    def _remote_control(self, *, vin: str, action: str) -> dict[str, Any]:
+    def _remote_control(self, *, vin: str, action: str, value: int | None = None) -> dict[str, Any]:
         """Execute a remote-control action using the verified operatePassword flow."""
         if not self.token:
             self.login()
@@ -600,10 +600,13 @@ class LeapmotorApiClient:
 
         vehicle = self._find_vehicle_by_vin(vin)
         spec = REMOTE_ACTION_SPECS[action]
+        cmd_content = spec.cmd_content
+        if value is not None:
+            cmd_content = json.dumps({"value": str(value)}, separators=(",", ":"))
         return self._remote_control_raw(
             vin=vehicle.vin,
             cmd_id=spec.cmd_id,
-            cmd_content=spec.cmd_content,
+            cmd_content=cmd_content,
             action_label=action,
             vehicle=vehicle,
         )
@@ -1809,13 +1812,17 @@ def _is_charging(signal: dict[str, Any]) -> bool:
     """Return whether the vehicle is currently charging."""
     remaining_charge_minutes = _safe_int(signal.get("1200"))
     charging_current_a = _safe_float(signal.get("1178"))
-    if charging_current_a is not None and remaining_charge_minutes is not None:
-        # Confirmed charging sessions show a clearly non-zero current
-        # (typically negative while energy flows into the pack). Treat
-        # sub-1A noise as idle / just plugged in.
-        return abs(charging_current_a) >= 1.0
-
     charging_power_kw = _charging_power_kw(signal)
+    if charging_current_a is not None:
+        # Confirmed charging sessions show a clearly non-zero current
+        # (typically negative while energy flows into the pack). After
+        # charge completion the backend can keep 1149=2 while current is 0.
+        if abs(charging_current_a) < 3.0:
+            return False
+        return remaining_charge_minutes is not None or (
+            charging_power_kw is not None and charging_power_kw >= 1.0
+        )
+
     if charging_power_kw is not None:
         return charging_power_kw >= 1.0 and remaining_charge_minutes is not None
 
@@ -1843,6 +1850,9 @@ def _charging_connection_state(signal: dict[str, Any]) -> str | None:
     """Return the observed charge-connection state."""
     if _is_charging(signal):
         return "charging"
+    charging_current_a = _safe_float(signal.get("1178"))
+    if charging_current_a is not None and abs(charging_current_a) < 3.0:
+        return "plugged_in" if _is_plugged_in(signal) else "unplugged"
     connection_status = _safe_int(signal.get("1149"))
     if connection_status == 0:
         return "unplugged"

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.23 - 2026-05-04
+
+- Fix charge-complete handling when the backend keeps signal `1149=2` but
+  reports zero charging current and no remaining charge time; Home Assistant now
+  shows plugged-in instead of active charging.
+- Add optional `value` support for `windows_open`, `windows_close`,
+  `sunshade_open`, and `sunshade_close` services to support partial
+  positioning while preserving the previous full open/close default.
+- Clarify certificate setup labels and documentation: uploaded/pasted material
+  is stored as `/config/leapmotor/app_cert.pem` and
+  `/config/leapmotor/app_key.pem`; certificates are still not bundled or
+  downloaded automatically.
+
 ## 0.5.22 - 2026-05-04
 
 - Add APK-verified read-only signal mappings for gear, speed, battery

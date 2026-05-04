@@ -3,14 +3,14 @@
     "step": {
       "user": {
         "title": "Leapmotor verbinden",
-        "description": "Richtet Leapmotor-Fahrzeugdaten ein. App-Zertifikat und App-Private-Key sind für den Login erforderlich; hier einfügen oder app_cert.pem/app_key.pem vorher unter config/leapmotor ablegen. Die Fahrzeug-PIN ist optional; ohne PIN funktionieren nur Lesedaten, keine Fahrzeugsteuerung. ABRP Live-Daten sind optional; benötigt wird nur der ABRP Generic Token aus der ABRP-Fahrzeug-Livedaten-Einrichtung. Inoffizielle Integration: Nutzung auf eigenes Risiko; keine Haftung für Account-Sperren, API-Änderungen oder Fahrzeugfolgen.",
+        "description": "Richtet Leapmotor-Fahrzeugdaten ein. App-Zertifikat und App-Private-Key sind für den Login erforderlich; hier einfügen/hochladen oder vorher als app_cert.pem und app_key.pem unter /config/leapmotor ablegen. Die Fahrzeug-PIN ist optional; ohne PIN funktionieren nur Lesedaten, keine Fahrzeugsteuerung. ABRP Live-Daten sind optional; benötigt wird nur der ABRP Generic Token aus der ABRP-Fahrzeug-Livedaten-Einrichtung. Inoffizielle Integration: Nutzung auf eigenes Risiko; keine Haftung für Account-Sperren, API-Änderungen oder Fahrzeugfolgen.",
         "data": {
           "username": "Benutzername / E-Mail",
           "password": "Passwort",
-          "app_cert_file": "App-Zertifikatdatei (erforderlich)",
-          "app_key_file": "App-Private-Key-Datei (erforderlich)",
-          "app_cert_pem": "App-Zertifikat PEM (Fallback)",
-          "app_key_pem": "App-Private-Key PEM (Fallback)",
+          "app_cert_file": "app_cert.pem hochladen (Zertifikat)",
+          "app_key_file": "app_key.pem hochladen (Private Key)",
+          "app_cert_pem": "app_cert.pem PEM einfügen (Zertifikat)",
+          "app_key_pem": "app_key.pem PEM einfügen (Private Key)",
           "operation_password": "Fahrzeug-PIN (optional, für Steuerung)",
           "scan_interval": "Aktualisierungsintervall in Minuten",
           "abrp_enabled": "ABRP Live-Daten aktivieren",
@@ -19,24 +19,24 @@
       },
       "init": {
         "title": "Leapmotor Optionen",
-        "description": "Zertifikatsmaterial, Fahrzeug-PIN und Aktualisierungsintervall nachträglich anpassen. App-Zertifikat/Private-Key sind für den Login erforderlich. Ohne PIN bleiben Steuerfunktionen deaktiviert.",
+        "description": "Zertifikatsmaterial, Fahrzeug-PIN, Aktualisierungsintervall und optionale ABRP Live-Daten nachträglich anpassen. App-Zertifikat/Private-Key sind für den Login erforderlich und werden als /config/leapmotor/app_cert.pem und /config/leapmotor/app_key.pem gespeichert. Ohne PIN bleiben Steuerfunktionen deaktiviert.",
         "data": {
-          "app_cert_file": "App-Zertifikatdatei (erforderlich)",
-          "app_key_file": "App-Private-Key-Datei (erforderlich)",
-          "app_cert_pem": "App-Zertifikat PEM (Fallback)",
-          "app_key_pem": "App-Private-Key PEM (Fallback)",
+          "app_cert_file": "app_cert.pem hochladen (Zertifikat)",
+          "app_key_file": "app_key.pem hochladen (Private Key)",
+          "app_cert_pem": "app_cert.pem PEM einfügen (Zertifikat)",
+          "app_key_pem": "app_key.pem PEM einfügen (Private Key)",
           "operation_password": "Fahrzeug-PIN (optional, für Steuerung)",
           "scan_interval": "Aktualisierungsintervall in Minuten"
         }
       },
       "certificates": {
         "title": "Leapmotor Zertifikate",
-        "description": "Erforderliches App-Zertifikat und Private-Key hochladen oder PEM-Inhalte einfügen. Sie werden nur lokal in dieser Home-Assistant-Installation gespeichert und sind nicht im Public-Repo enthalten.",
+        "description": "Erforderliches App-Zertifikat und Private-Key hochladen oder PEM-Inhalte einfügen. Sie werden lokal als /config/leapmotor/app_cert.pem und /config/leapmotor/app_key.pem gespeichert und sind nicht im Public-Repo enthalten.",
         "data": {
-          "app_cert_file": "App-Zertifikatdatei (erforderlich)",
-          "app_key_file": "App-Private-Key-Datei (erforderlich)",
-          "app_cert_pem": "App-Zertifikat PEM (Fallback)",
-          "app_key_pem": "App-Private-Key PEM (Fallback)"
+          "app_cert_file": "app_cert.pem hochladen (Zertifikat)",
+          "app_key_file": "app_key.pem hochladen (Private Key)",
+          "app_cert_pem": "app_cert.pem PEM einfügen (Zertifikat)",
+          "app_key_pem": "app_key.pem PEM einfügen (Private Key)"
         }
       },
       "account": {
@@ -59,7 +59,7 @@
       "api_refresh_failed": "Login war erfolgreich, aber der erste API-Abruf der Fahrzeugdaten ist fehlgeschlagen.",
       "no_vehicle": "Dieses Konto hat kein verknüpftes Fahrzeug.",
       "unknown": "Unerwarteter Fehler.",
-      "missing_app_cert": "App-Zertifikat/Private-Key fehlen. Beide PEM-Werte einfügen oder app_cert.pem und app_key.pem unter config/leapmotor ablegen.",
+      "missing_app_cert": "App-Zertifikat/Private-Key fehlen. Beide PEM-Werte einfügen oder app_cert.pem und app_key.pem unter /config/leapmotor ablegen.",
       "certificate_import_error": "Zertifikatsimport fehlgeschlagen. PEM-Zertifikat und Private-Key prüfen."
     },
     "abort": {
@@ -206,12 +206,12 @@
     "step": {
       "init": {
         "title": "Leapmotor Optionen",
-        "description": "Zertifikatsmaterial, Fahrzeug-PIN, Aktualisierungsintervall und optionale ABRP Live-Daten nachträglich anpassen. App-Zertifikat/Private-Key sind für den Login erforderlich. Ohne PIN bleiben Steuerfunktionen deaktiviert.",
+        "description": "Zertifikatsmaterial, Fahrzeug-PIN, Aktualisierungsintervall und optionale ABRP Live-Daten nachträglich anpassen. App-Zertifikat/Private-Key sind für den Login erforderlich und werden als /config/leapmotor/app_cert.pem und /config/leapmotor/app_key.pem gespeichert. Ohne PIN bleiben Steuerfunktionen deaktiviert.",
         "data": {
-          "app_cert_file": "App-Zertifikatdatei (erforderlich)",
-          "app_key_file": "App-Private-Key-Datei (erforderlich)",
-          "app_cert_pem": "App-Zertifikat PEM (Fallback)",
-          "app_key_pem": "App-Private-Key PEM (Fallback)",
+          "app_cert_file": "app_cert.pem hochladen (Zertifikat)",
+          "app_key_file": "app_key.pem hochladen (Private Key)",
+          "app_cert_pem": "app_cert.pem PEM einfügen (Zertifikat)",
+          "app_key_pem": "app_key.pem PEM einfügen (Private Key)",
           "operation_password": "Fahrzeug-PIN (optional, für Steuerung)",
           "scan_interval": "Aktualisierungsintervall in Minuten",
           "abrp_enabled": "ABRP Live-Daten aktivieren",

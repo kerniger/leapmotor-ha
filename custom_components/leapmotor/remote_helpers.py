@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
+from functools import partial
 from typing import Any
 
 from homeassistant.exceptions import HomeAssistantError
@@ -75,6 +76,7 @@ async def async_execute_remote_action(
     coordinator: LeapmotorDataUpdateCoordinator,
     vin: str,
     spec: RemoteActionSpec,
+    kwargs: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Execute one remote action with shared cooldown, error and refresh handling."""
     cooldown = coordinator.remote_action_cooldown_remaining(vin)
@@ -89,8 +91,9 @@ async def async_execute_remote_action(
         )
 
     method = getattr(coordinator.client, spec.method_name)
+    callable_ = partial(method, vin, **kwargs) if kwargs else partial(method, vin)
     try:
-        result = await coordinator.hass.async_add_executor_job(method, vin)
+        result = await coordinator.hass.async_add_executor_job(callable_)
     except LeapmotorApiError as exc:
         coordinator.record_remote_action(
             vin,

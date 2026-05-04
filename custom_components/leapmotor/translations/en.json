@@ -3,14 +3,14 @@
     "step": {
       "user": {
         "title": "Connect Leapmotor",
-        "description": "Sets up Leapmotor vehicle data. App certificate and app private key are required for login; paste them here or place app_cert.pem/app_key.pem in config/leapmotor first. The vehicle PIN is optional; without it only read-only data works, not remote control. ABRP live data is optional; use your ABRP Generic token from the ABRP vehicle live-data setup. Unofficial integration: use at your own risk; no liability for account restrictions, API changes, or vehicle consequences.",
+        "description": "Sets up Leapmotor vehicle data. App certificate and app private key are required for login; paste or upload them here, or place them as app_cert.pem and app_key.pem in /config/leapmotor first. The vehicle PIN is optional; without it only read-only data works, not remote control. ABRP live data is optional; use your ABRP Generic token from the ABRP vehicle live-data setup. Unofficial integration: use at your own risk; no liability for account restrictions, API changes, or vehicle consequences.",
         "data": {
           "username": "Username / email",
           "password": "Password",
-          "app_cert_file": "App certificate file (required)",
-          "app_key_file": "App private key file (required)",
-          "app_cert_pem": "App certificate PEM (fallback)",
-          "app_key_pem": "App private key PEM (fallback)",
+          "app_cert_file": "Upload app_cert.pem (certificate)",
+          "app_key_file": "Upload app_key.pem (private key)",
+          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
+          "app_key_pem": "Paste app_key.pem PEM (private key)",
           "operation_password": "Vehicle PIN (optional, for control)",
           "scan_interval": "Update interval in minutes",
           "abrp_enabled": "Enable ABRP live data",
@@ -19,24 +19,24 @@
       },
       "init": {
         "title": "Leapmotor options",
-        "description": "Change certificate material, vehicle PIN, and update interval. App certificate/private key are required for login. Without a PIN, remote-control actions remain disabled.",
+        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login and are stored as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem. Without a PIN, remote-control actions remain disabled.",
         "data": {
-          "app_cert_file": "App certificate file (required)",
-          "app_key_file": "App private key file (required)",
-          "app_cert_pem": "App certificate PEM (fallback)",
-          "app_key_pem": "App private key PEM (fallback)",
+          "app_cert_file": "Upload app_cert.pem (certificate)",
+          "app_key_file": "Upload app_key.pem (private key)",
+          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
+          "app_key_pem": "Paste app_key.pem PEM (private key)",
           "operation_password": "Vehicle PIN (optional, for control)",
           "scan_interval": "Update interval in minutes"
         }
       },
       "certificates": {
         "title": "Leapmotor certificates",
-        "description": "Upload the required app certificate and private key, or paste their PEM contents. They are stored only locally in this Home Assistant installation and are not included in the public repository.",
+        "description": "Upload the required app certificate and private key, or paste their PEM contents. They are stored locally as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem and are not included in the public repository.",
         "data": {
-          "app_cert_file": "App certificate file (required)",
-          "app_key_file": "App private key file (required)",
-          "app_cert_pem": "App certificate PEM (fallback)",
-          "app_key_pem": "App private key PEM (fallback)"
+          "app_cert_file": "Upload app_cert.pem (certificate)",
+          "app_key_file": "Upload app_key.pem (private key)",
+          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
+          "app_key_pem": "Paste app_key.pem PEM (private key)"
         }
       },
       "account": {
@@ -59,7 +59,7 @@
       "api_refresh_failed": "Login succeeded, but the first vehicle-data API refresh failed.",
       "no_vehicle": "This account has no linked vehicle.",
       "unknown": "Unexpected error.",
-      "missing_app_cert": "Missing app certificate/private key. Paste both PEM values or place app_cert.pem and app_key.pem in config/leapmotor.",
+      "missing_app_cert": "Missing app certificate/private key. Paste both PEM values or place app_cert.pem and app_key.pem in /config/leapmotor.",
       "certificate_import_error": "Certificate import failed. Check the PEM certificate and private key."
     },
     "abort": {
@@ -206,12 +206,12 @@
     "step": {
       "init": {
         "title": "Leapmotor options",
-        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login. Without a PIN, remote-control actions remain disabled.",
+        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login and are stored as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem. Without a PIN, remote-control actions remain disabled.",
         "data": {
-          "app_cert_file": "App certificate file (required)",
-          "app_key_file": "App private key file (required)",
-          "app_cert_pem": "App certificate PEM (fallback)",
-          "app_key_pem": "App private key PEM (fallback)",
+          "app_cert_file": "Upload app_cert.pem (certificate)",
+          "app_key_file": "Upload app_key.pem (private key)",
+          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
+          "app_key_pem": "Paste app_key.pem PEM (private key)",
           "operation_password": "Vehicle PIN (optional, for control)",
           "scan_interval": "Update interval in minutes",
           "abrp_enabled": "Enable ABRP live data",

@@ -3,38 +3,38 @@
     "step": {
       "user": {
         "title": "Polacz Leapmotor",
-        "description": "Konfiguruje dane pojazdu Leapmotor. Certyfikat aplikacji i klucz prywatny sa wymagane do logowania; wklej je tutaj albo umiesc app_cert.pem/app_key.pem w folderze integracji. PIN pojazdu jest opcjonalny; bez niego dzialaja tylko dane odczytu. Integracja nieoficjalna: uzywasz na wlasne ryzyko.",
+        "description": "Sets up Leapmotor vehicle data. App certificate and app private key are required for login; paste or upload them here, or place them as app_cert.pem and app_key.pem in /config/leapmotor first. The vehicle PIN is optional; without it only read-only data works, not remote control. ABRP live data is optional; use your ABRP Generic token from the ABRP vehicle live-data setup. Unofficial integration: use at your own risk; no liability for account restrictions, API changes, or vehicle consequences.",
         "data": {
           "username": "Nazwa uzytkownika / e-mail",
           "password": "Haslo",
-          "app_cert_file": "Plik certyfikatu aplikacji (wymagany)",
-          "app_key_file": "Plik klucza prywatnego aplikacji (wymagany)",
-          "app_cert_pem": "Certyfikat PEM aplikacji (awaryjnie)",
-          "app_key_pem": "Klucz prywatny PEM aplikacji (awaryjnie)",
+          "app_cert_file": "Upload app_cert.pem (certificate)",
+          "app_key_file": "Upload app_key.pem (private key)",
+          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
+          "app_key_pem": "Paste app_key.pem PEM (private key)",
           "operation_password": "PIN pojazdu (opcjonalny, do sterowania)",
           "scan_interval": "Interwal aktualizacji w minutach"
         }
       },
       "init": {
         "title": "Opcje Leapmotor",
-        "description": "Zmien certyfikat, klucz prywatny, PIN pojazdu i interwal. Certyfikat/klucz sa wymagane do logowania. Bez PIN akcje zdalne sa wylaczone.",
+        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login and are stored as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem. Without a PIN, remote-control actions remain disabled.",
         "data": {
-          "app_cert_file": "Plik certyfikatu aplikacji (wymagany)",
-          "app_key_file": "Plik klucza prywatnego aplikacji (wymagany)",
-          "app_cert_pem": "Certyfikat PEM aplikacji (awaryjnie)",
-          "app_key_pem": "Klucz prywatny PEM aplikacji (awaryjnie)",
+          "app_cert_file": "Upload app_cert.pem (certificate)",
+          "app_key_file": "Upload app_key.pem (private key)",
+          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
+          "app_key_pem": "Paste app_key.pem PEM (private key)",
           "operation_password": "PIN pojazdu (opcjonalny, do sterowania)",
           "scan_interval": "Interwal aktualizacji w minutach"
         }
       },
       "certificates": {
         "title": "Certyfikaty Leapmotor",
-        "description": "Przeslij wymagany certyfikat aplikacji i klucz prywatny albo wklej ich tresc PEM. Sa zapisywane tylko lokalnie w tej instalacji Home Assistant i nie sa zawarte w publicznym repozytorium.",
+        "description": "Upload the required app certificate and private key, or paste their PEM contents. They are stored locally as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem and are not included in the public repository.",
         "data": {
-          "app_cert_file": "Plik certyfikatu aplikacji (wymagany)",
-          "app_key_file": "Plik klucza prywatnego aplikacji (wymagany)",
-          "app_cert_pem": "Certyfikat PEM aplikacji (awaryjnie)",
-          "app_key_pem": "Klucz prywatny PEM aplikacji (awaryjnie)"
+          "app_cert_file": "Upload app_cert.pem (certificate)",
+          "app_key_file": "Upload app_key.pem (private key)",
+          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
+          "app_key_pem": "Paste app_key.pem PEM (private key)"
         }
       },
       "account": {
@@ -53,7 +53,7 @@
       "account_cert_error": "Logowanie powiodlo sie, ale nie mozna otworzyc certyfikatu konta.",
       "cannot_connect": "Polaczenie lub odswiezanie API nie powiodlo sie.",
       "unknown": "Nieoczekiwany blad.",
-      "missing_app_cert": "Brak certyfikatu/klucza prywatnego aplikacji. Wklej oba PEM lub umiesc app_cert.pem i app_key.pem w folderze integracji.",
+      "missing_app_cert": "Missing app certificate/private key. Paste both PEM values or place app_cert.pem and app_key.pem in /config/leapmotor.",
       "certificate_import_error": "Import certyfikatu nie powiodl sie. Sprawdz certyfikat PEM i klucz prywatny."
     },
     "abort": {
@@ -179,12 +179,12 @@
     "step": {
       "init": {
         "title": "Opcje Leapmotor",
-        "description": "Zmien certyfikat, klucz prywatny, PIN pojazdu i interwal. Certyfikat/klucz sa wymagane do logowania. Bez PIN akcje zdalne sa wylaczone.",
+        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login and are stored as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem. Without a PIN, remote-control actions remain disabled.",
         "data": {
-          "app_cert_file": "Plik certyfikatu aplikacji (wymagany)",
-          "app_key_file": "Plik klucza prywatnego aplikacji (wymagany)",
-          "app_cert_pem": "Certyfikat PEM aplikacji (awaryjnie)",
-          "app_key_pem": "Klucz prywatny PEM aplikacji (awaryjnie)",
+          "app_cert_file": "Upload app_cert.pem (certificate)",
+          "app_key_file": "Upload app_key.pem (private key)",
+          "app_cert_pem": "Paste app_cert.pem PEM (certificate)",
+          "app_key_pem": "Paste app_key.pem PEM (private key)",
           "operation_password": "PIN pojazdu (opcjonalny, do sterowania)",
           "scan_interval": "Interwal aktualizacji w minutach"
         }

@@ -67,8 +67,8 @@ Current reality:
 
 Expected local files for persistent storage:
 
-- `config/leapmotor/app_cert.pem`
-- `config/leapmotor/app_key.pem`
+- `/config/leapmotor/app_cert.pem`
+- `/config/leapmotor/app_key.pem`
 
 They can be copied manually or pasted into the setup/options form if you already
 have legitimate certificate material. The setup/options form also supports
@@ -93,13 +93,15 @@ Without these files, direct authentication fails by design.
 5. Search for `Leapmotor` in HACS and install it.
 6. Restart Home Assistant.
 7. Add the `Leapmotor` integration from `Settings -> Devices & services`.
-8. During setup, upload/paste the required `app_cert.pem` and `app_key.pem`
-   material, or place both files in `config/leapmotor/` before setup.
+8. During setup, upload/paste the required certificate/key material. Uploaded
+   or pasted values are stored as `/config/leapmotor/app_cert.pem` and
+   `/config/leapmotor/app_key.pem`. Alternatively, place both files there
+   before setup.
 
 ### Manual
 
 1. Copy `custom_components/leapmotor` into your Home Assistant config directory under `config/custom_components/leapmotor`.
-2. Provide the required local `app_cert.pem` and `app_key.pem` files under `config/leapmotor/`, or upload/paste them during setup.
+2. Provide the required local files as `/config/leapmotor/app_cert.pem` and `/config/leapmotor/app_key.pem`, or upload/paste them during setup.
 3. Restart Home Assistant.
 4. Add the `Leapmotor` integration from `Settings -> Devices & services`.
 
@@ -145,6 +147,12 @@ Each service accepts:
 - `vin` for direct vehicle targeting
 - `entity_id` as an optional shortcut to resolve the target vehicle from an existing Leapmotor entity
 
+`windows_open` and `windows_close` additionally accept optional `value` from
+`0` to `100` for partial window positioning. `sunshade_open` and
+`sunshade_close` additionally accept optional `value` from `0` to `10` for
+partial sunshade positioning. Omitting `value` keeps the previous fully
+open/closed behavior.
+
 `send_destination` additionally requires `name`, `latitude`, and `longitude`.
 `address` is optional and defaults to `name`.
 
@@ -186,7 +194,7 @@ provide legitimate local certificate material themselves.
 
 ### Where are app_cert.pem and app_key.pem stored?
 
-Uploaded or pasted certificate files are stored under `config/leapmotor/`.
+Uploaded or pasted certificate files are stored under `/config/leapmotor/`.
 This folder is outside `custom_components`, so HACS updates do not remove the
 files. Older installs that still have the files in
 `config/custom_components/leapmotor/` are copied to the persistent folder
@@ -197,6 +205,15 @@ automatically when possible.
 No. Self-generated certificates are not useful unless the Leapmotor backend
 trusts them. The integration can import existing PEM files, but it cannot create
 valid backend-trusted app certificates.
+
+### I cannot retrieve the certificates. What can I do?
+
+At the moment there is no built-in public, rootless, user-friendly certificate
+retrieval flow. The known working setup still requires legitimate app client
+certificate material supplied by the user. The integration does not include or
+download these files automatically. Community resources may discuss compatible
+PEM certificate/key material, but users must review and decide themselves
+whether using such material is acceptable for their setup.
 
 ### Why do range and odometer not show `.00`?
 
