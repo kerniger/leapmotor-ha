@@ -112,6 +112,15 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Presion neumatico trasero derecho"
+      },
+      "unread_message_count": {
+        "name": "Mensajes no leídos"
+      },
+      "last_message_title": {
+        "name": "Último mensaje"
+      },
+      "last_message_time": {
+        "name": "Hora último mensaje"
       }
     },
     "binary_sensor": {

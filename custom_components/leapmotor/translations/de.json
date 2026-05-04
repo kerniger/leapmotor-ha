@@ -121,6 +121,15 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Reifendruck hinten rechts"
+      },
+      "unread_message_count": {
+        "name": "Ungelesene Nachrichten"
+      },
+      "last_message_title": {
+        "name": "Letzte Nachricht"
+      },
+      "last_message_time": {
+        "name": "Zeitpunkt letzte Nachricht"
       }
     },
     "binary_sensor": {

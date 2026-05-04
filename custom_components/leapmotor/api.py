@@ -384,6 +384,7 @@ class LeapmotorApiClient:
             "vehicles": {},
             "account_p12_password_source": self.account_p12_password_source,
         }
+        notifications = self._fetch_account_notifications()
         for vehicle in vehicles:
             status = self.get_vehicle_status(vehicle)
             mileage = self._fetch_optional_read(
@@ -406,7 +407,7 @@ class LeapmotorApiClient:
                 self.get_car_picture,
                 vehicle,
             )
-            result["vehicles"][vehicle.vin] = normalize_vehicle(
+            vehicle_data = normalize_vehicle(
                 vehicle,
                 status,
                 self.user_id,
@@ -415,6 +416,8 @@ class LeapmotorApiClient:
                 consumption_breakdown_json=consumption_breakdown,
                 picture_json=picture,
             )
+            vehicle_data["notifications"] = notifications
+            result["vehicles"][vehicle.vin] = vehicle_data
         return result
 
     def _fetch_optional_read(
@@ -429,6 +432,45 @@ class LeapmotorApiClient:
         except LeapmotorApiError as exc:
             _LOGGER.debug("Leapmotor optional read failed for %s: %s", label, exc)
             return None
+
+    def _fetch_account_notifications(self) -> dict[str, Any]:
+        """Fetch account-level notification data; returns empty values on failure."""
+        empty: dict[str, Any] = {
+            "unread_count": None,
+            "last_message_title": None,
+            "last_message_time": None,
+        }
+        try:
+            headers = self._build_signed_headers()
+            headers.update(self._auth_headers(content_type="application/x-www-form-urlencoded"))
+            resp = self._post_with_curl(
+                path="/carownerservice/oversea/message/v1/unread/count",
+                headers=headers,
+                data="",
+                cert=self.account_cert,
+            )
+            body = self._parse_api_body(resp["status_code"], resp["body"], "unread count")
+            unread = int((body.get("data") or {}).get("unread", 0))
+
+            list_headers = self._build_message_list_headers()
+            list_headers.update(self._auth_headers(content_type="application/x-www-form-urlencoded"))
+            resp2 = self._post_with_curl(
+                path="/carownerservice/oversea/message/v1/list",
+                headers=list_headers,
+                data="pageNo=1&pageSize=1",
+                cert=self.account_cert,
+            )
+            body2 = self._parse_api_body(resp2["status_code"], resp2["body"], "message list")
+            messages = (body2.get("data") or {}).get("list") or []
+            latest = messages[0] if messages else {}
+            return {
+                "unread_count": unread,
+                "last_message_title": latest.get("title"),
+                "last_message_time": latest.get("sendTime"),
+            }
+        except LeapmotorApiError as exc:
+            _LOGGER.debug("Leapmotor notification fetch failed: %s", exc)
+            return empty
 
     def login(self) -> None:
         """Login with the static app cert and load the account cert from the response."""
@@ -963,6 +1005,28 @@ class LeapmotorApiClient:
             "timestamp": timestamp,
             "sign": hmac.new(self.sign_key, sign_input.encode("utf-8"), hashlib.sha256).hexdigest(),
         }
+
+    def _build_message_list_headers(self, *, page_no: int = 1, page_size: int = 1) -> dict[str, str]:
+        """Build signed headers for the message list endpoint.
+
+        The pageNo and pageSize body params are included in the signature,
+        sorted alphabetically with the standard fields (between nonce and source).
+        """
+        nonce = str(random.randint(100000, 9999999))
+        timestamp = str(int(time.time() * 1000))
+        sign_input = "".join([
+            DEFAULT_LANGUAGE,
+            DEFAULT_CHANNEL,
+            self.device_id,
+            DEFAULT_DEVICE_TYPE,
+            nonce,
+            str(page_no),
+            str(page_size),
+            DEFAULT_SOURCE,
+            timestamp,
+            DEFAULT_APP_VERSION,
+        ])
+        return self._signed_header_dict(nonce=nonce, timestamp=timestamp, sign_input=sign_input)
 
     def _build_consumption_weekly_rank_headers(self, *, carvin: str) -> dict[str, str]:
         """Build the signature variant used by getLastNweeks100kmECAndRank."""

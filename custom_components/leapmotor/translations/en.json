@@ -121,6 +121,15 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Tire pressure rear right"
+      },
+      "unread_message_count": {
+        "name": "Unread messages"
+      },
+      "last_message_title": {
+        "name": "Last message"
+      },
+      "last_message_time": {
+        "name": "Last message time"
       }
     },
     "binary_sensor": {

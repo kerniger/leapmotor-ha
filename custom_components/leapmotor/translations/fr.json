@@ -112,6 +112,15 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Pression pneu arriere droit"
+      },
+      "unread_message_count": {
+        "name": "Messages non lus"
+      },
+      "last_message_title": {
+        "name": "Dernier message"
+      },
+      "last_message_time": {
+        "name": "Heure dernier message"
       }
     },
     "binary_sensor": {

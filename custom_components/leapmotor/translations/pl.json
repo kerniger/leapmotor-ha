@@ -112,6 +112,15 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Cisnienie opony tylnej prawej"
+      },
+      "unread_message_count": {
+        "name": "Nieprzeczytane wiadomości"
+      },
+      "last_message_title": {
+        "name": "Ostatnia wiadomość"
+      },
+      "last_message_time": {
+        "name": "Czas ostatniej wiadomości"
       }
     },
     "binary_sensor": {

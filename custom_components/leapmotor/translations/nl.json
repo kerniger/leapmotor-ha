@@ -112,6 +112,15 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Bandenspanning rechtsachter"
+      },
+      "unread_message_count": {
+        "name": "Ongelezen berichten"
+      },
+      "last_message_title": {
+        "name": "Laatste bericht"
+      },
+      "last_message_time": {
+        "name": "Tijd laatste bericht"
       }
     },
     "binary_sensor": {

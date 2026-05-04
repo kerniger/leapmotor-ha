@@ -510,6 +510,27 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("tire_pressure_rear_right_bar"),
     ),
+    LeapmotorSensorEntityDescription(
+        key="unread_message_count",
+        translation_key="unread_message_count",
+        icon="mdi:message-badge",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("notifications") or {}).get("unread_count"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="last_message_title",
+        translation_key="last_message_title",
+        icon="mdi:message-text",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("notifications") or {}).get("last_message_title"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="last_message_time",
+        translation_key="last_message_time",
+        icon="mdi:message-clock",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("notifications") or {}).get("last_message_time"),
+    ),
 )
 
 

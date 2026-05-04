@@ -112,6 +112,15 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Pressione pneumatico posteriore destro"
+      },
+      "unread_message_count": {
+        "name": "Messaggi non letti"
+      },
+      "last_message_title": {
+        "name": "Ultimo messaggio"
+      },
+      "last_message_time": {
+        "name": "Ora ultimo messaggio"
       }
     },
     "binary_sensor": {
