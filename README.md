@@ -24,6 +24,8 @@ It intentionally does not contain:
 - Native Home Assistant lock entity for remote lock/unlock actions
 - Charge-cable plugged-in state and active-charging state
 - Door and trunk open states
+- Window, skylight, gear, speed, battery temperature, PTC power, and range-mode
+  diagnostics from APK-verified status signals
 - Device tracker from vehicle GPS position
 - Remote-control buttons for supported actions
 - Native Home Assistant services for supported remote actions

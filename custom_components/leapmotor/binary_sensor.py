@@ -46,6 +46,14 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
         value_fn=lambda data: data["charging"].get("is_plugged_in"),
     ),
     LeapmotorBinarySensorEntityDescription(
+        key="dc_cable_connected",
+        name="DC-Ladekabel eingesteckt",
+        icon="mdi:ev-plug-ccs2",
+        device_class=BinarySensorDeviceClass.PLUG,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["charging"].get("dc_cable_connected"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
         key="charging_planned_enabled",
         name="Geplantes Laden",
         icon="mdi:calendar-clock",
@@ -63,6 +71,20 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
         icon="mdi:remote",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("remote_session_active"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="vehicle_security_active",
+        name="Fahrzeugsicherung aktiv",
+        icon="mdi:shield-car",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("vehicle_security_active"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="battery_heating",
+        name="Batterieheizung",
+        icon="mdi:battery-heart",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("battery_heating"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="driver_door_open",
@@ -93,6 +115,37 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
         name="Kofferraum",
         device_class=BinarySensorDeviceClass.OPENING,
         value_fn=lambda data: data["diagnostics"].get("trunk_open"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="front_left_window_open",
+        name="Fenster vorne links",
+        device_class=BinarySensorDeviceClass.WINDOW,
+        value_fn=lambda data: data["diagnostics"].get("front_left_window_open"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="front_right_window_open",
+        name="Fenster vorne rechts",
+        device_class=BinarySensorDeviceClass.WINDOW,
+        value_fn=lambda data: data["diagnostics"].get("front_right_window_open"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="rear_left_window_open",
+        name="Fenster hinten links",
+        device_class=BinarySensorDeviceClass.WINDOW,
+        value_fn=lambda data: data["diagnostics"].get("rear_left_window_open"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="rear_right_window_open",
+        name="Fenster hinten rechts",
+        device_class=BinarySensorDeviceClass.WINDOW,
+        value_fn=lambda data: data["diagnostics"].get("rear_right_window_open"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="skylight_open",
+        name="Panoramadach geöffnet",
+        icon="mdi:window-open",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("skylight_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="climate_on",
@@ -129,6 +182,13 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
         value_fn=lambda data: data["diagnostics"].get("rear_window_heating"),
     ),
     LeapmotorBinarySensorEntityDescription(
+        key="air_recirculation",
+        name="Umluft",
+        icon="mdi:air-filter",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("air_recirculation"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
         key="steering_wheel_heating",
         name="Lenkradheizung",
         icon="mdi:steering",
@@ -155,6 +215,34 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
         icon="mdi:speedometer",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("speed_limit_enabled"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="park_assist_enabled",
+        name="Parkassistent aktiv",
+        icon="mdi:car-brake-parking",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("park_assist_enabled"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="sentinel_mode",
+        name="Sentinel-Modus",
+        icon="mdi:shield-car",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("sentinel_mode"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="parking_photo",
+        name="Parking Photo",
+        icon="mdi:camera",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("parking_photo"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="fully_charged",
+        name="Voll geladen",
+        icon="mdi:battery-check",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("fully_charged"),
     ),
 )
 

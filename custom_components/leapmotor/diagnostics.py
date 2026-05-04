@@ -70,6 +70,7 @@ async def async_get_config_entry_diagnostics(
                     "lock_state_is_stale": status.get("lock_state_is_stale"),
                     "raw_lock_status_code": status.get("raw_lock_status_code"),
                     "raw_charge_status_code": status.get("raw_charge_status_code"),
+                    "raw_ac_fan_mode_code": status.get("raw_ac_fan_mode_code"),
                     "raw_charge_connection_code": status.get("raw_charge_connection_code"),
                     "raw_drive_status_code": status.get("raw_drive_status_code"),
                     "raw_vehicle_state_code": status.get("raw_vehicle_state_code"),

@@ -30,6 +30,8 @@ Available data includes:
 - Vehicle state as a readable status sensor
 - Charge-cable plugged-in state and active-charging state
 - Door and trunk open states
+- Window, skylight, gear, speed, battery temperature, PTC power, and range-mode
+  diagnostics from APK-verified status signals
 - Interior and climate target temperatures
 - Climate mode and climate/heating activity diagnostics
 - Seat heating/ventilation levels and mirror heating diagnostics

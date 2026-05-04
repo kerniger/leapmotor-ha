@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.22 - 2026-05-04
+
+- Add APK-verified read-only signal mappings for gear, speed, battery
+  temperature, PTC power, DC charge cable, window/skylight state, parking
+  camera, sentinel/parking-photo flags, range mode, live range, and tire
+  pressure alarms.
+- Correct speed-limit switch mapping to signal `12054`; signal `6047` is kept
+  as raw speed-limit unit metadata.
+- Treat signal `1939` as A/C fan mode metadata and stop using it as a charging
+  fallback.
+- Rename the `3257` diagnostic range display to CLTC remaining range while
+  keeping the existing entity key for compatibility.
+
 ## 0.5.21 - 2026-05-04
 
 - Fix active-charging detection when signal `1149` remains `1` during a real

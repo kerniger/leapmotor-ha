@@ -1424,8 +1424,13 @@ def normalize_vehicle(
             "battery_percent": signal.get("1204"),
             "remaining_range_km": signal.get("3260"),
             "odometer_km": signal.get("1318"),
+            "speed_kmh": _safe_float(signal.get("1319")),
+            "gear": _gear_state(signal),
             "battery_percent_precise": _safe_float(signal.get("100003")),
+            "cltc_range_km": _safe_int(signal.get("3257")),
             "wltp_max_range_km": _safe_int(signal.get("3257")),
+            "live_remaining_range_km": _safe_int(signal.get("2188")),
+            "range_mode": _range_mode(signal),
             "is_locked": _is_locked(signal),
             "raw_lock_status_code": signal.get("1298"),
             "lock_state_source": "raw_signal_1298",
@@ -1433,6 +1438,7 @@ def normalize_vehicle(
             "vehicle_state": vehicle_state,
             "vehicle_state_source": "raw_signal",
             "raw_charge_status_code": signal.get("1939"),
+            "raw_ac_fan_mode_code": signal.get("1939"),
             "raw_charge_connection_code": signal.get("1149"),
             "raw_drive_status_code": signal.get("1941"),
             "raw_vehicle_state_code": signal.get("1944"),
@@ -1458,6 +1464,7 @@ def normalize_vehicle(
             "charging_power_kw": _charging_power_kw(signal),
             "charging_current_a": _safe_float(signal.get("1178")),
             "charging_voltage_v": _safe_float(signal.get("1177")),
+            "dc_cable_connected": _not_zero(signal.get("1197")),
             "charging_planned_enabled": charge_plan.get("isEnable"),
             "charging_planned_start": charge_plan.get("beginTime"),
             "charging_planned_end": charge_plan.get("endTime"),
@@ -1498,13 +1505,30 @@ def normalize_vehicle(
             "raw_signal_47": signal.get("47"),
             "raw_signal_1149": signal.get("1149"),
             "remote_session_active": _one_is_on(signal.get("1256")) or _one_is_on(signal.get("1257")),
+            "vehicle_security_active": _positive_int(signal.get("1255")),
+            "on3_open": _one_is_on(signal.get("1258")),
             "driver_door_open": _one_is_on(signal.get("1277")),
             "passenger_door_open": _one_is_on(signal.get("1278")),
             "rear_left_door_open": _one_is_on(signal.get("1279")),
             "rear_right_door_open": _one_is_on(signal.get("1280")),
             "trunk_open": _one_is_on(signal.get("1281")),
+            "ptc_power_w": _safe_int(signal.get("1348")),
+            "parking_camera_state": signal.get("1480"),
+            "battery_min_temp_c": _safe_int(signal.get("1182")),
+            "battery_thermal_request": _safe_int(signal.get("1186")),
+            "battery_heating": _safe_int(signal.get("1186")) == 4 if signal.get("1186") is not None else None,
+            "front_left_window_open": _not_zero(signal.get("1693")),
+            "front_right_window_open": _not_zero(signal.get("1694")),
+            "rear_left_window_open": _not_zero(signal.get("1695")),
+            "rear_right_window_open": _not_zero(signal.get("1696")),
+            "skylight_open": _not_zero(signal.get("1724")),
+            "front_left_window_position_percent": _safe_int(signal.get("3727")),
+            "front_right_window_position_percent": _safe_int(signal.get("3728")),
+            "rear_left_window_position_percent": _safe_int(signal.get("1879")),
+            "rear_right_window_position_percent": _safe_int(signal.get("1880")),
             "climate_on": _one_is_on(signal.get("1938")),
             "climate_mode": _climate_mode(signal),
+            "air_recirculation": _not_zero(signal.get("1943")),
             "fast_cooling_active": _two_is_on(signal.get("2669")),
             "fast_heating_active": _two_is_on(signal.get("2681")),
             "windshield_defrosting": _two_is_on(signal.get("1945")),
@@ -1517,11 +1541,28 @@ def normalize_vehicle(
             "passenger_seat_ventilation_level": _safe_int(signal.get("2119")),
             "left_mirror_heating": _one_is_on(signal.get("49")),
             "right_mirror_heating": _one_is_on(signal.get("50")),
-            "speed_limit_enabled": _one_is_on(signal.get("6047")),
+            "park_assist_enabled": _one_is_on(signal.get("2189")),
+            "sentinel_mode": _one_is_on(signal.get("3636")),
+            "parking_photo": _one_is_on(signal.get("3638")),
+            "fully_charged": _one_is_on(signal.get("3736")),
+            "speed_limit_enabled": _one_is_on(signal.get("12054")),
             "speed_limit_kmh": _safe_int(signal.get("6048")),
+            "speed_limit_unit": signal.get("6047"),
+            "tire_pressure_alarm_front_left": _safe_int(signal.get("2641")),
+            "tire_pressure_alarm_front_right": _safe_int(signal.get("2648")),
+            "tire_pressure_alarm_rear_left": _safe_int(signal.get("2655")),
+            "tire_pressure_alarm_rear_right": _safe_int(signal.get("2662")),
+            "raw_signal_1010": signal.get("1010"),
+            "raw_signal_1182": signal.get("1182"),
+            "raw_signal_1186": signal.get("1186"),
+            "raw_signal_1197": signal.get("1197"),
+            "raw_signal_1255": signal.get("1255"),
             "raw_signal_1256": signal.get("1256"),
             "raw_signal_1257": signal.get("1257"),
             "raw_signal_1258": signal.get("1258"),
+            "raw_signal_1319": signal.get("1319"),
+            "raw_signal_1348": signal.get("1348"),
+            "raw_signal_1480": signal.get("1480"),
             "raw_signal_1277": signal.get("1277"),
             "raw_signal_1278": signal.get("1278"),
             "raw_signal_1279": signal.get("1279"),
@@ -1531,7 +1572,10 @@ def normalize_vehicle(
             "raw_signal_1694": signal.get("1694"),
             "raw_signal_1695": signal.get("1695"),
             "raw_signal_1696": signal.get("1696"),
+            "raw_signal_1724": signal.get("1724"),
             "raw_signal_1816": signal.get("1816"),
+            "raw_signal_1879": signal.get("1879"),
+            "raw_signal_1880": signal.get("1880"),
             "raw_signal_1938": signal.get("1938"),
             "raw_signal_1939": signal.get("1939"),
             "raw_signal_1943": signal.get("1943"),
@@ -1541,15 +1585,27 @@ def normalize_vehicle(
             "raw_signal_2101": signal.get("2101"),
             "raw_signal_2118": signal.get("2118"),
             "raw_signal_2119": signal.get("2119"),
+            "raw_signal_2189": signal.get("2189"),
             "raw_signal_2188": signal.get("2188"),
+            "raw_signal_2641": signal.get("2641"),
+            "raw_signal_2648": signal.get("2648"),
+            "raw_signal_2655": signal.get("2655"),
+            "raw_signal_2662": signal.get("2662"),
             "raw_signal_2669": signal.get("2669"),
             "raw_signal_2681": signal.get("2681"),
+            "raw_signal_3262": signal.get("3262"),
+            "raw_signal_3636": signal.get("3636"),
+            "raw_signal_3638": signal.get("3638"),
             "raw_signal_3710": signal.get("3710"),
             "raw_signal_3712": signal.get("3712"),
             "raw_signal_3713": signal.get("3713"),
+            "raw_signal_3727": signal.get("3727"),
+            "raw_signal_3728": signal.get("3728"),
+            "raw_signal_3736": signal.get("3736"),
             "raw_signal_3257": signal.get("3257"),
             "raw_signal_6047": signal.get("6047"),
             "raw_signal_6048": signal.get("6048"),
+            "raw_signal_12054": signal.get("12054"),
             "raw_signal_100003": signal.get("100003"),
             "raw_signal_100010": signal.get("100010"),
             "raw_signal_100011": signal.get("100011"),
@@ -1696,6 +1752,35 @@ def _two_is_on(raw: Any) -> bool | None:
     return value == 2
 
 
+def _not_zero(raw: Any) -> bool | None:
+    if raw is None:
+        return None
+    return str(raw) != "0"
+
+
+def _positive_int(raw: Any) -> bool | None:
+    value = _safe_int(raw)
+    if value is None:
+        return None
+    return value > 0
+
+
+def _gear_state(signal: dict[str, Any]) -> str | None:
+    return {
+        0: "P",
+        1: "R",
+        2: "N",
+        3: "D",
+    }.get(_safe_int(signal.get("1010")))
+
+
+def _range_mode(signal: dict[str, Any]) -> str | None:
+    return {
+        0: "CLTC",
+        1: "WLTP",
+    }.get(_safe_int(signal.get("3262")))
+
+
 def _derive_vehicle_state(signal: dict[str, Any]) -> str | None:
     """Return the movement state independent from charging state."""
     drive_status = _safe_int(signal.get("1941"))
@@ -1740,16 +1825,7 @@ def _is_charging(signal: dict[str, Any]) -> bool:
     if connection_status in (0, 1):
         return False
 
-    charge_status = _safe_int(signal.get("1939"))
-    drive_status = _safe_int(signal.get("1941"))
-    vehicle_state = _safe_int(signal.get("1944"))
-
-    # `1939` alone is too noisy and can remain non-zero outside active charging.
-    # Only trust it as a last fallback when a remaining charge time is present
-    # and secondary state fields line up with an active charge session.
-    return charge_status in (1, 2, 3) and (
-        remaining_charge_minutes is not None and (drive_status == 2 or vehicle_state == 0)
-    )
+    return False
 
 
 def _is_plugged_in(signal: dict[str, Any]) -> bool | None:
