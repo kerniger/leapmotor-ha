@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.27 - 2026-05-04
+
+- Hotfix entity display names after `0.5.26`: restore explicit entity names so
+  Home Assistant no longer shows only the vehicle/device name.
+
 ## 0.5.26 - 2026-05-04
 
 - Keep English entity IDs from the registry migration, but restore localized
