@@ -72,8 +72,18 @@ find_car:
         text:
 sunshade_open:
   name: Open sunshade
-  description: Open the sunshade.
+  description: Open the sunshade. Optionally set a partial position (0–10, 10 = fully open).
   fields:
+    value:
+      name: Position
+      description: Optional position 0–10. Omit for fully open.
+      example: 5
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 1
+          mode: box
     vin:
       name: VIN
       description: Target VIN. Required when multiple vehicles are configured.
@@ -86,8 +96,18 @@ sunshade_open:
         text:
 sunshade_close:
   name: Close sunshade
-  description: Close the sunshade.
+  description: Close the sunshade. Optionally set a partial position (0–10, 0 = fully closed).
   fields:
+    value:
+      name: Position
+      description: Optional position 0–10. Omit for fully closed.
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 10
+          step: 1
+          mode: box
     vin:
       name: VIN
       description: Target VIN. Required when multiple vehicles are configured.
@@ -114,8 +134,18 @@ battery_preheat:
         text:
 windows_open:
   name: Open windows
-  description: Open the windows.
+  description: Open the windows. Optionally set a partial position (0–100, 100 = fully open).
   fields:
+    value:
+      name: Position
+      description: Optional position 0–100. Omit for fully open.
+      example: 30
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: slider
     vin:
       name: VIN
       description: Target VIN. Required when multiple vehicles are configured.
@@ -128,8 +158,18 @@ windows_open:
         text:
 windows_close:
   name: Close windows
-  description: Close the windows.
+  description: Close the windows. Optionally set a partial position (0–100, 0 = fully closed).
   fields:
+    value:
+      name: Position
+      description: Optional position 0–100. Omit for fully closed.
+      example: 0
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          mode: slider
     vin:
       name: VIN
       description: Target VIN. Required when multiple vehicles are configured.

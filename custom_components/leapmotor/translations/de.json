@@ -121,6 +121,33 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Reifendruck hinten rechts"
+      },
+      "total_energy_kwh": {
+        "name": "Gesamtenergie"
+      },
+      "window_left_front_percent": {
+        "name": "Fenster vorne links"
+      },
+      "window_right_front_percent": {
+        "name": "Fenster vorne rechts"
+      },
+      "window_left_rear_percent": {
+        "name": "Fenster hinten links"
+      },
+      "window_right_rear_percent": {
+        "name": "Fenster hinten rechts"
+      },
+      "sunshade_position": {
+        "name": "Sonnenschutzposition"
+      },
+      "unread_message_count": {
+        "name": "Ungelesene Nachrichten"
+      },
+      "last_message_title": {
+        "name": "Letzte Nachricht"
+      },
+      "last_message_time": {
+        "name": "Letzte Nachricht Zeit"
       }
     },
     "binary_sensor": {
@@ -132,6 +159,12 @@
       },
       "charging_planned_enabled": {
         "name": "Geplantes Laden"
+      },
+      "is_plugged": {
+        "name": "Angesteckt"
+      },
+      "is_regening": {
+        "name": "Rekuperiert"
       }
     },
     "image": {

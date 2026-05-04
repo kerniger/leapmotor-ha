@@ -112,6 +112,33 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Cisnienie opony tylnej prawej"
+      },
+      "total_energy_kwh": {
+        "name": "Energia całkowita"
+      },
+      "window_left_front_percent": {
+        "name": "Okno przednie lewe"
+      },
+      "window_right_front_percent": {
+        "name": "Okno przednie prawe"
+      },
+      "window_left_rear_percent": {
+        "name": "Okno tylne lewe"
+      },
+      "window_right_rear_percent": {
+        "name": "Okno tylne prawe"
+      },
+      "sunshade_position": {
+        "name": "Pozycja rolety"
+      },
+      "unread_message_count": {
+        "name": "Nieprzeczytane wiadomości"
+      },
+      "last_message_title": {
+        "name": "Ostatnia wiadomość"
+      },
+      "last_message_time": {
+        "name": "Czas ostatniej wiadomości"
       }
     },
     "binary_sensor": {
@@ -123,6 +150,12 @@
       },
       "charging_planned_enabled": {
         "name": "Planowane ladowanie"
+      },
+      "is_plugged": {
+        "name": "Podłączony"
+      },
+      "is_regening": {
+        "name": "Rekuperacja"
       }
     },
     "image": {

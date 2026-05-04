@@ -7,7 +7,7 @@ from typing import Any
 
 def build_vehicle_display_name(vehicle: dict[str, Any]) -> str:
     """Return a stable, user-friendly vehicle device name."""
-    nickname = vehicle.get("nickname")
+    nickname = vehicle.get("vehicle_nickname") or vehicle.get("nickname")
     car_type = vehicle.get("car_type") or "Vehicle"
     year = vehicle.get("year")
     is_shared = vehicle.get("is_shared")

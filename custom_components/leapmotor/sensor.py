@@ -401,6 +401,84 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("tire_pressure_rear_right_bar"),
     ),
+    LeapmotorSensorEntityDescription(
+        key="total_energy_kwh",
+        translation_key="total_energy_kwh",
+        native_unit_of_measurement=ENERGY_KWH,
+        state_class=SensorStateClass.TOTAL_INCREASING,
+        suggested_display_precision=1,
+        icon="mdi:lightning-bolt",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["history"].get("total_energy_kwh"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="window_left_front_percent",
+        translation_key="window_left_front_percent",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:car-door",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("windows") or {}).get("left_front_percent"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="window_right_front_percent",
+        translation_key="window_right_front_percent",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:car-door",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("windows") or {}).get("right_front_percent"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="window_left_rear_percent",
+        translation_key="window_left_rear_percent",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:car-door",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("windows") or {}).get("left_rear_percent"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="window_right_rear_percent",
+        translation_key="window_right_rear_percent",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:car-door",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("windows") or {}).get("right_rear_percent"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="sunshade_position",
+        translation_key="sunshade_position",
+        state_class=SensorStateClass.MEASUREMENT,
+        icon="mdi:blinds-horizontal",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (data.get("windows") or {}).get("sun_shade"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="unread_message_count",
+        translation_key="unread_message_count",
+        icon="mdi:message-badge",
+        state_class=SensorStateClass.MEASUREMENT,
+        value_fn=lambda data: (data.get("messages") or {}).get("unread_count"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="last_message_title",
+        translation_key="last_message_title",
+        icon="mdi:message-text",
+        value_fn=lambda data: (data.get("messages") or {}).get("last_title"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="last_message_time",
+        translation_key="last_message_time",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: (
+            datetime.fromtimestamp(ts / 1000, UTC)
+            if (ts := (data.get("messages") or {}).get("last_send_time")) is not None
+            else None
+        ),
+    ),
 )
 
 

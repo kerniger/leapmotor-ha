@@ -121,6 +121,33 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Tire pressure rear right"
+      },
+      "total_energy_kwh": {
+        "name": "Total energy"
+      },
+      "window_left_front_percent": {
+        "name": "Window front left"
+      },
+      "window_right_front_percent": {
+        "name": "Window front right"
+      },
+      "window_left_rear_percent": {
+        "name": "Window rear left"
+      },
+      "window_right_rear_percent": {
+        "name": "Window rear right"
+      },
+      "sunshade_position": {
+        "name": "Sunshade position"
+      },
+      "unread_message_count": {
+        "name": "Unread messages"
+      },
+      "last_message_title": {
+        "name": "Last message"
+      },
+      "last_message_time": {
+        "name": "Last message time"
       }
     },
     "binary_sensor": {
@@ -132,6 +159,12 @@
       },
       "charging_planned_enabled": {
         "name": "Scheduled charging"
+      },
+      "is_plugged": {
+        "name": "Plugged in"
+      },
+      "is_regening": {
+        "name": "Regenerating"
       }
     },
     "image": {

@@ -23,18 +23,23 @@ It intentionally does not contain:
 - Mileage/energy-history summary sensors
 - Native Home Assistant lock entity for remote lock/unlock actions
 - Charge-cable plugged-in state and active-charging state
+- Regenerative braking state
 - Door and trunk open states
+- Climate, heating, and seat state sensors
+- Window and sunshade position sensors
+- Vehicle notification message sensors (unread count, last message title and time)
 - Device tracker from vehicle GPS position
 - Remote-control buttons for supported actions
+- Partial window and sunshade positioning via service `value` parameter
 - Native Home Assistant services for supported remote actions
 - Send destination to vehicle navigation via Home Assistant service
 - Optional ABRP Generic Telemetry live-data push
 - Setup/options flow for vehicle PIN, update interval, and optional ABRP token
 - Redacted diagnostics export
-- Multi-language translations
+- Multi-language translations (EN, DE, NL, FR, ES, IT, PL)
 - Multi-vehicle support for main-account and shared-car vehicles
 - HACS and Home Assistant brand/icon assets
-- Single Custom Component package with entity layer and backend/auth layer
+- Uses [`leapmotor-api`](https://github.com/markoceri/leapmotor-api) as the backend library
 
 ## Important
 
@@ -55,13 +60,14 @@ The public install target is one Home Assistant Custom Component:
 Internal architecture:
 
 - the Home Assistant integration manages entities, config flow, and UI
-- the backend/auth layer manages login, session, certificate, vehicle data, and command calls
+- the backend/auth layer is provided by [`leapmotor-api`](https://github.com/markoceri/leapmotor-api), an extracted standalone library, wrapped by a thin shim inside the integration
+- the shim adds extra read calls (weekly consumption, last-week energy breakdown, notifications) that are not yet in the base library
 
 Current reality:
 
-- the integration code still supports direct login with local certificate files
-- the internal backend path covers login, vehicle list, status, and remote commands
-- additional read-only calls cover total mileage and charging-plan details
+- the integration uses `leapmotor-api` as a pip dependency for login, session management, certificate handling, vehicle data, and remote commands
+- additional read-only calls cover total mileage, consumption rankings, energy breakdown, and the notification message list
+- token refresh uses the `/acct/v1/token/refresh` endpoint before falling back to a full re-login
 
 Expected local files for persistent storage:
 
@@ -127,11 +133,11 @@ The integration exposes these Home Assistant services under `leapmotor.*`:
 - `trunk_open`
 - `trunk_close`
 - `find_car`
-- `sunshade_open`
-- `sunshade_close`
+- `sunshade_open` — accepts optional `value` (0–10, 10 = fully open)
+- `sunshade_close` — accepts optional `value` (0–10, 0 = fully closed)
 - `battery_preheat`
-- `windows_open`
-- `windows_close`
+- `windows_open` — accepts optional `value` (0–100, 100 = fully open)
+- `windows_close` — accepts optional `value` (0–100, 0 = fully closed)
 - `ac_switch` (climate off)
 - `quick_cool`
 - `quick_heat`
@@ -145,6 +151,9 @@ Each service accepts:
 
 `send_destination` additionally requires `name`, `latitude`, and `longitude`.
 `address` is optional and defaults to `name`.
+
+Omitting `value` on `windows_open` / `sunshade_open` sends the default fully-open command.
+Omitting `value` on `windows_close` / `sunshade_close` sends the default fully-closed command.
 
 ## ABRP Live Data
 
@@ -209,6 +218,7 @@ Whole kilometer values are exposed as integers so Home Assistant displays
 
 - Keep improving status mapping across more Leapmotor models.
 - Keep investigating a future login path that does not need local app certificate material.
+- Upstream window/sunshade consumption endpoints and notification API into `leapmotor-api` so the integration shim can shrink.
 - Add more write features only after the exact app request, safety model, and permission behavior are verified.
 
 ## Legal

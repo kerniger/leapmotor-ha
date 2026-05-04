@@ -6,6 +6,6 @@
   "documentation": "https://github.com/kerniger/leapmotor-ha",
   "issue_tracker": "https://github.com/kerniger/leapmotor-ha/issues",
   "iot_class": "cloud_polling",
-  "requirements": ["cryptography>=42.0.0", "requests>=2.31.0"],
-  "version": "0.5.20"
+  "requirements": ["leapmotor-api>=0.1.4"],
+  "version": "0.5.18"
 }

@@ -51,7 +51,7 @@ async def async_get_config_entry_diagnostics(
                     "vin": _redact_vin(vin),
                     "car_id": vehicle.get("car_id"),
                     "car_type": vehicle.get("car_type"),
-                    "nickname": vehicle.get("nickname"),
+                    "nickname": vehicle.get("vehicle_nickname") or vehicle.get("nickname"),
                     "is_shared": vehicle.get("is_shared"),
                     "year": vehicle.get("year"),
                     "rights": vehicle.get("rights"),

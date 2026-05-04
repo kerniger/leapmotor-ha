@@ -112,6 +112,33 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Bandenspanning rechtsachter"
+      },
+      "total_energy_kwh": {
+        "name": "Totale energie"
+      },
+      "window_left_front_percent": {
+        "name": "Raam voor links"
+      },
+      "window_right_front_percent": {
+        "name": "Raam voor rechts"
+      },
+      "window_left_rear_percent": {
+        "name": "Raam achter links"
+      },
+      "window_right_rear_percent": {
+        "name": "Raam achter rechts"
+      },
+      "sunshade_position": {
+        "name": "Zonnescherm positie"
+      },
+      "unread_message_count": {
+        "name": "Ongelezen berichten"
+      },
+      "last_message_title": {
+        "name": "Laatste bericht"
+      },
+      "last_message_time": {
+        "name": "Tijd laatste bericht"
       }
     },
     "binary_sensor": {
@@ -123,6 +150,12 @@
       },
       "charging_planned_enabled": {
         "name": "Gepland laden"
+      },
+      "is_plugged": {
+        "name": "Ingeplugd"
+      },
+      "is_regening": {
+        "name": "Recupereert"
       }
     },
     "image": {

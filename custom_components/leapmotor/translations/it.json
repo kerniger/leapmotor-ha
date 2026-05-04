@@ -112,6 +112,33 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Pressione pneumatico posteriore destro"
+      },
+      "total_energy_kwh": {
+        "name": "Energia totale"
+      },
+      "window_left_front_percent": {
+        "name": "Finestrino anteriore sinistro"
+      },
+      "window_right_front_percent": {
+        "name": "Finestrino anteriore destro"
+      },
+      "window_left_rear_percent": {
+        "name": "Finestrino posteriore sinistro"
+      },
+      "window_right_rear_percent": {
+        "name": "Finestrino posteriore destro"
+      },
+      "sunshade_position": {
+        "name": "Posizione tendina"
+      },
+      "unread_message_count": {
+        "name": "Messaggi non letti"
+      },
+      "last_message_title": {
+        "name": "Ultimo messaggio"
+      },
+      "last_message_time": {
+        "name": "Ora ultimo messaggio"
       }
     },
     "binary_sensor": {
@@ -123,6 +150,12 @@
       },
       "charging_planned_enabled": {
         "name": "Ricarica programmata"
+      },
+      "is_plugged": {
+        "name": "Collegato"
+      },
+      "is_regening": {
+        "name": "In recupero"
       }
     },
     "image": {

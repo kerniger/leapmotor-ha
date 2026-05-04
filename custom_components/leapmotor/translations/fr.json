@@ -112,6 +112,33 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Pression pneu arriere droit"
+      },
+      "total_energy_kwh": {
+        "name": "Énergie totale"
+      },
+      "window_left_front_percent": {
+        "name": "Vitre avant gauche"
+      },
+      "window_right_front_percent": {
+        "name": "Vitre avant droite"
+      },
+      "window_left_rear_percent": {
+        "name": "Vitre arrière gauche"
+      },
+      "window_right_rear_percent": {
+        "name": "Vitre arrière droite"
+      },
+      "sunshade_position": {
+        "name": "Position du pare-soleil"
+      },
+      "unread_message_count": {
+        "name": "Messages non lus"
+      },
+      "last_message_title": {
+        "name": "Dernier message"
+      },
+      "last_message_time": {
+        "name": "Heure du dernier message"
       }
     },
     "binary_sensor": {
@@ -123,6 +150,12 @@
       },
       "charging_planned_enabled": {
         "name": "Charge programmee"
+      },
+      "is_plugged": {
+        "name": "Branché"
+      },
+      "is_regening": {
+        "name": "En récupération"
       }
     },
     "image": {
