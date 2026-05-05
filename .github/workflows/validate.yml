@@ -35,6 +35,22 @@ jobs:
               print(f"ok {path}")
           PY
 
+      - name: Validate release ZIP layout
+        run: |
+          bash scripts/build_release_zip.sh /tmp/leapmotor-ha.zip
+          python - <<'PY'
+          import zipfile
+
+          with zipfile.ZipFile("/tmp/leapmotor-ha.zip") as archive:
+              names = set(archive.namelist())
+          assert "manifest.json" in names
+          assert "__init__.py" in names
+          assert "custom_components/leapmotor/manifest.json" not in names
+          assert "app_cert.pem" not in names
+          assert "app_key.pem" not in names
+          print("ok release ZIP layout")
+          PY
+
       - name: Check forbidden files
         run: |
           test ! -e custom_components/leapmotor/app_cert.pem

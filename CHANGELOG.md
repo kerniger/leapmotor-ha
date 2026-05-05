@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.33 - 2026-05-05
+
+- Fix the HACS release archive layout. The release ZIP now contains the
+  integration files directly at the archive root, so HACS installs
+  `manifest.json` to `/config/custom_components/leapmotor/manifest.json`
+  instead of nesting the repository inside the integration directory.
+
 ## 0.5.32 - 2026-05-05
 
 - Improve low-current AC charging detection for B10 vehicles that charge around
