@@ -104,7 +104,11 @@
         "name": "Piano carica aggiornato"
       },
       "vehicle_state": {
-        "name": "Stato veicolo"
+        "name": "Stato veicolo",
+        "state": {
+          "parked": "Parcheggiato",
+          "driving": "In guida"
+        }
       },
       "total_mileage_km": {
         "name": "Chilometraggio totale"
@@ -164,7 +168,13 @@
         "name": "Tensione di carica"
       },
       "charging_connection_state": {
-        "name": "Connessione di carica"
+        "name": "Connessione di carica",
+        "state": {
+          "unplugged": "Scollegato",
+          "plugged_in": "Collegato",
+          "charging": "In carica",
+          "finished": "Carica completata"
+        }
       },
       "battery_min_temp_c": {
         "name": "Temperatura minima batteria"

@@ -104,7 +104,11 @@
         "name": "Plan ładowania zaktualizowany"
       },
       "vehicle_state": {
-        "name": "Stan pojazdu"
+        "name": "Stan pojazdu",
+        "state": {
+          "parked": "Zaparkowany",
+          "driving": "Jazda"
+        }
       },
       "total_mileage_km": {
         "name": "Całkowity przebieg"
@@ -164,7 +168,13 @@
         "name": "Napięcie ładowania"
       },
       "charging_connection_state": {
-        "name": "Połączenie ładowania"
+        "name": "Połączenie ładowania",
+        "state": {
+          "unplugged": "Odłączony",
+          "plugged_in": "Podłączony",
+          "charging": "Ładowanie",
+          "finished": "Ładowanie zakończone"
+        }
       },
       "battery_min_temp_c": {
         "name": "Minimalna temperatura baterii"

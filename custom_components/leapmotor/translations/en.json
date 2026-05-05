@@ -104,7 +104,11 @@
         "name": "Charging schedule updated"
       },
       "vehicle_state": {
-        "name": "Vehicle state"
+        "name": "Vehicle state",
+        "state": {
+          "parked": "Parked",
+          "driving": "Driving"
+        }
       },
       "last_successful_refresh": {
         "name": "Last refresh"
@@ -155,7 +159,13 @@
         "name": "Charging voltage"
       },
       "charging_connection_state": {
-        "name": "Charging connection"
+        "name": "Charging connection",
+        "state": {
+          "unplugged": "Unplugged",
+          "plugged_in": "Plugged in",
+          "charging": "Charging",
+          "finished": "Charge complete"
+        }
       },
       "battery_min_temp_c": {
         "name": "Battery minimum temperature"

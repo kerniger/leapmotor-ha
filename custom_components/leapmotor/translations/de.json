@@ -104,7 +104,11 @@
         "name": "Ladeplanung aktualisiert"
       },
       "vehicle_state": {
-        "name": "Fahrzeugstatus"
+        "name": "Fahrzeugstatus",
+        "state": {
+          "parked": "Geparkt",
+          "driving": "Fahrt"
+        }
       },
       "last_successful_refresh": {
         "name": "Zuletzt aktualisiert"
@@ -155,7 +159,13 @@
         "name": "Ladespannung"
       },
       "charging_connection_state": {
-        "name": "Ladeverbindung"
+        "name": "Ladeverbindung",
+        "state": {
+          "unplugged": "Nicht verbunden",
+          "plugged_in": "Verbunden",
+          "charging": "Lädt",
+          "finished": "Geladen"
+        }
       },
       "battery_min_temp_c": {
         "name": "Batterie-Minimaltemperatur"

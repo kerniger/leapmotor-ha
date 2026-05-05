@@ -215,6 +215,8 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
     LeapmotorSensorEntityDescription(
         key="charging_connection_state",
         translation_key="charging_connection_state",
+        device_class=SensorDeviceClass.ENUM,
+        options=["unplugged", "plugged_in", "charging", "finished"],
         icon="mdi:ev-plug-type2",
         value_fn=lambda data: data["charging"].get("connection_state"),
     ),
@@ -284,6 +286,8 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
     LeapmotorSensorEntityDescription(
         key="vehicle_state",
         translation_key="vehicle_state",
+        device_class=SensorDeviceClass.ENUM,
+        options=["parked", "driving"],
         icon="mdi:car-info",
         value_fn=lambda data: data["status"].get("vehicle_state"),
     ),

@@ -104,7 +104,11 @@
         "name": "Laadplanning bijgewerkt"
       },
       "vehicle_state": {
-        "name": "Voertuigstatus"
+        "name": "Voertuigstatus",
+        "state": {
+          "parked": "Geparkeerd",
+          "driving": "Rijden"
+        }
       },
       "total_mileage_km": {
         "name": "Totale kilometerstand"
@@ -164,7 +168,13 @@
         "name": "Laadspanning"
       },
       "charging_connection_state": {
-        "name": "Laadverbinding"
+        "name": "Laadverbinding",
+        "state": {
+          "unplugged": "Niet aangesloten",
+          "plugged_in": "Aangesloten",
+          "charging": "Aan het laden",
+          "finished": "Opladen voltooid"
+        }
       },
       "battery_min_temp_c": {
         "name": "Minimale accutemperatuur"
