@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.29 - 2026-05-05
+
+- Restore localized sensor and binary-sensor display names while keeping the
+  English entity IDs introduced in `0.5.25`.
+- Fix the previous translation-key regression by assigning localized entity
+  names from the bundled translation files with English fallback.
+- Complete translation entries for all current sensor and binary-sensor keys so
+  missing translations no longer collapse to the vehicle name only.
+
 ## 0.5.28 - 2026-05-04
 
 - Add account notification sensors from PR #5: unread message count, latest

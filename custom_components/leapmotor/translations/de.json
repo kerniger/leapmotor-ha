@@ -156,10 +156,10 @@
         "name": "Ladeverbindung"
       },
       "battery_min_temp_c": {
-        "name": "Batterie Minimaltemperatur"
+        "name": "Batterie-Minimaltemperatur"
       },
       "battery_thermal_request": {
-        "name": "Batterie Thermomanagement"
+        "name": "Batterie-Thermomanagement"
       },
       "ptc_power_w": {
         "name": "PTC-Leistung"
@@ -220,6 +220,15 @@
       },
       "last_week_other_energy_percent": {
         "name": "Sonstige Energie letzte Woche"
+      },
+      "unread_message_count": {
+        "name": "Ungelesene Nachrichten"
+      },
+      "last_message_title": {
+        "name": "Letzte Nachricht"
+      },
+      "last_message_time": {
+        "name": "Zeitpunkt letzte Nachricht"
       }
     },
     "binary_sensor": {

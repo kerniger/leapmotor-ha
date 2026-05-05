@@ -20,7 +20,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_helpers import build_vehicle_display_name
+from .entity_helpers import build_vehicle_display_name, load_localized_entity_names
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -33,28 +33,28 @@ class LeapmotorBinarySensorEntityDescription(BinarySensorEntityDescription):
 BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] = (
     LeapmotorBinarySensorEntityDescription(
         key="is_charging",
-        name='Lädt',
+        translation_key="is_charging",
         icon="mdi:ev-station",
         device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
         value_fn=lambda data: data["charging"].get("is_charging"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="is_plugged_in",
-        name='Ladekabel eingesteckt',
+        translation_key="is_plugged_in",
         icon="mdi:ev-plug-type2",
         device_class=BinarySensorDeviceClass.PLUG,
         value_fn=lambda data: data["charging"].get("is_plugged_in"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="is_regening",
-        name='Rekuperation',
+        translation_key="is_regening",
         icon="mdi:car-electric",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["charging"].get("is_regening"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="dc_cable_connected",
-        name='DC-Ladekabel eingesteckt',
+        translation_key="dc_cable_connected",
         icon="mdi:ev-plug-ccs2",
         device_class=BinarySensorDeviceClass.PLUG,
         entity_category=EntityCategory.DIAGNOSTIC,
@@ -62,191 +62,191 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
     ),
     LeapmotorBinarySensorEntityDescription(
         key="charging_planned_enabled",
-        name='Geplantes Laden',
+        translation_key="charging_planned_enabled",
         icon="mdi:calendar-clock",
         value_fn=lambda data: data["charging"].get("charging_planned_enabled"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="charging_planned_weekly",
-        name='Ladeplanung wöchentlich',
+        translation_key="charging_planned_weekly",
         icon="mdi:calendar-week",
         value_fn=lambda data: (data["charging"].get("charging_planned_cycles") or "") == "1,1,1,1,1,1,1",
     ),
     LeapmotorBinarySensorEntityDescription(
         key="remote_session_active",
-        name='Remote-Session aktiv',
+        translation_key="remote_session_active",
         icon="mdi:remote",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("remote_session_active"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="vehicle_security_active",
-        name='Fahrzeugsicherung aktiv',
+        translation_key="vehicle_security_active",
         icon="mdi:shield-car",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("vehicle_security_active"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="battery_heating",
-        name='Batterieheizung',
+        translation_key="battery_heating",
         icon="mdi:battery-heart",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("battery_heating"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="driver_door_open",
-        name='Fahrertür',
+        translation_key="driver_door_open",
         device_class=BinarySensorDeviceClass.DOOR,
         value_fn=lambda data: data["diagnostics"].get("driver_door_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="passenger_door_open",
-        name='Beifahrertür',
+        translation_key="passenger_door_open",
         device_class=BinarySensorDeviceClass.DOOR,
         value_fn=lambda data: data["diagnostics"].get("passenger_door_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="rear_left_door_open",
-        name='Fondtür Fahrerseite',
+        translation_key="rear_left_door_open",
         device_class=BinarySensorDeviceClass.DOOR,
         value_fn=lambda data: data["diagnostics"].get("rear_left_door_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="rear_right_door_open",
-        name='Fondtür Beifahrerseite',
+        translation_key="rear_right_door_open",
         device_class=BinarySensorDeviceClass.DOOR,
         value_fn=lambda data: data["diagnostics"].get("rear_right_door_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="trunk_open",
-        name='Kofferraum',
+        translation_key="trunk_open",
         device_class=BinarySensorDeviceClass.OPENING,
         value_fn=lambda data: data["diagnostics"].get("trunk_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="front_left_window_open",
-        name='Fenster vorne links',
+        translation_key="front_left_window_open",
         device_class=BinarySensorDeviceClass.WINDOW,
         value_fn=lambda data: data["diagnostics"].get("front_left_window_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="front_right_window_open",
-        name='Fenster vorne rechts',
+        translation_key="front_right_window_open",
         device_class=BinarySensorDeviceClass.WINDOW,
         value_fn=lambda data: data["diagnostics"].get("front_right_window_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="rear_left_window_open",
-        name='Fenster hinten links',
+        translation_key="rear_left_window_open",
         device_class=BinarySensorDeviceClass.WINDOW,
         value_fn=lambda data: data["diagnostics"].get("rear_left_window_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="rear_right_window_open",
-        name='Fenster hinten rechts',
+        translation_key="rear_right_window_open",
         device_class=BinarySensorDeviceClass.WINDOW,
         value_fn=lambda data: data["diagnostics"].get("rear_right_window_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="skylight_open",
-        name='Panoramadach geöffnet',
+        translation_key="skylight_open",
         icon="mdi:window-open",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("skylight_open"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="climate_on",
-        name='Klima',
+        translation_key="climate_on",
         icon="mdi:air-conditioner",
         value_fn=lambda data: data["diagnostics"].get("climate_on"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="fast_cooling_active",
-        name='Schnelles Kühlen aktiv',
+        translation_key="fast_cooling_active",
         icon="mdi:snowflake",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("fast_cooling_active"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="fast_heating_active",
-        name='Schnelles Heizen aktiv',
+        translation_key="fast_heating_active",
         icon="mdi:heat-wave",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("fast_heating_active"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="windshield_defrosting",
-        name='Frontscheibenheizung',
+        translation_key="windshield_defrosting",
         icon="mdi:car-defrost-front",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("windshield_defrosting"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="rear_window_heating",
-        name='Heckscheibenheizung',
+        translation_key="rear_window_heating",
         icon="mdi:car-defrost-rear",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("rear_window_heating"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="air_recirculation",
-        name='Umluft',
+        translation_key="air_recirculation",
         icon="mdi:air-filter",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("air_recirculation"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="steering_wheel_heating",
-        name='Lenkradheizung',
+        translation_key="steering_wheel_heating",
         icon="mdi:steering",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("steering_wheel_heating"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="left_mirror_heating",
-        name='Spiegelheizung links',
+        translation_key="left_mirror_heating",
         icon="mdi:car-side",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("left_mirror_heating"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="right_mirror_heating",
-        name='Spiegelheizung rechts',
+        translation_key="right_mirror_heating",
         icon="mdi:car-side",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("right_mirror_heating"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="speed_limit_enabled",
-        name='Geschwindigkeitslimit aktiv',
+        translation_key="speed_limit_enabled",
         icon="mdi:speedometer",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("speed_limit_enabled"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="park_assist_enabled",
-        name='Parkassistent aktiv',
+        translation_key="park_assist_enabled",
         icon="mdi:car-brake-parking",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("park_assist_enabled"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="sentinel_mode",
-        name='Sentinel-Modus',
+        translation_key="sentinel_mode",
         icon="mdi:shield-car",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("sentinel_mode"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="parking_photo",
-        name='Parking Photo',
+        translation_key="parking_photo",
         icon="mdi:camera",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("parking_photo"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="fully_charged",
-        name='Voll geladen',
+        translation_key="fully_charged",
         icon="mdi:battery-check",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("fully_charged"),
@@ -261,10 +261,15 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor binary sensors."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
+    localized_names = await hass.async_add_executor_job(
+        load_localized_entity_names,
+        hass.config.language,
+        "binary_sensor",
+    )
     entities: list[LeapmotorBinarySensor] = []
     for vin in coordinator.data.get("vehicles", {}):
         entities.extend(
-            LeapmotorBinarySensor(coordinator, vin, description)
+            LeapmotorBinarySensor(coordinator, vin, description, localized_names)
             for description in BINARY_SENSOR_DESCRIPTIONS
         )
     async_add_entities(entities)
@@ -283,15 +288,18 @@ class LeapmotorBinarySensor(
         coordinator: LeapmotorDataUpdateCoordinator,
         vin: str,
         description: LeapmotorBinarySensorEntityDescription,
+        localized_names: dict[str, str],
     ) -> None:
         super().__init__(coordinator)
         self.vin = vin
         self.entity_description = description
         self._attr_unique_id = f"{vin}_{description.key}"
         vehicle = self.vehicle_data["vehicle"]
-        sensor_name = description.name or description.key
         self._attr_has_entity_name = True
-        self._attr_name = sensor_name
+        self._attr_name = localized_names.get(
+            description.translation_key or description.key,
+            description.key.replace("_", " ").capitalize(),
+        )
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, vin)},
             manufacturer="Leapmotor",
@@ -304,6 +312,11 @@ class LeapmotorBinarySensor(
     def vehicle_data(self) -> dict[str, Any]:
         """Return current data for this vehicle."""
         return self.coordinator.data["vehicles"][self.vin]
+
+    @property
+    def translation_key(self) -> str | None:
+        """Disable frontend-only name translations; names are localized in setup."""
+        return None
 
     @property
     def is_on(self) -> bool | None:

@@ -69,34 +69,34 @@
         "name": "Autonomie"
       },
       "odometer_km": {
-        "name": "Compteur kilometrique"
+        "name": "Compteur kilométrique"
       },
       "interior_temp_c": {
-        "name": "Temperature interieure"
+        "name": "Température intérieure"
       },
       "climate_set_temp_left_c": {
-        "name": "Temperature cible gauche"
+        "name": "Température cible gauche"
       },
       "climate_set_temp_right_c": {
-        "name": "Temperature cible droite"
+        "name": "Température cible droite"
       },
       "charge_limit_percent": {
         "name": "Limite de charge"
       },
       "charging_planned_start": {
-        "name": "Debut charge programmee"
+        "name": "Début charge programmée"
       },
       "charging_planned_end": {
-        "name": "Fin charge programmee"
+        "name": "Fin charge programmée"
       },
       "charging_planned_circulation": {
-        "name": "Recurrence charge programmee"
+        "name": "Récurrence charge programmée"
       },
       "charging_plan_updated_at": {
-        "name": "Charge programmee mise a jour"
+        "name": "Programme de charge mis à jour"
       },
       "vehicle_state": {
-        "name": "Etat du vehicule"
+        "name": "État du véhicule"
       },
       "total_mileage_km": {
         "name": "Kilométrage total"
@@ -108,10 +108,121 @@
         "name": "Pression pneu avant droit"
       },
       "tire_pressure_rear_left_bar": {
-        "name": "Pression pneu arriere gauche"
+        "name": "Pression pneu arrière gauche"
       },
       "tire_pressure_rear_right_bar": {
-        "name": "Pression pneu arriere droit"
+        "name": "Pression pneu arrière droit"
+      },
+      "unread_message_count": {
+        "name": "Messages non lus"
+      },
+      "last_message_title": {
+        "name": "Dernier message"
+      },
+      "last_message_time": {
+        "name": "Heure du dernier message"
+      },
+      "last_successful_refresh": {
+        "name": "Dernière actualisation"
+      },
+      "battery_percent_precise": {
+        "name": "Batterie précise"
+      },
+      "wltp_max_range_km": {
+        "name": "Autonomie restante CLTC"
+      },
+      "live_remaining_range_km": {
+        "name": "Autonomie en direct"
+      },
+      "range_mode": {
+        "name": "Mode autonomie"
+      },
+      "speed_kmh": {
+        "name": "Vitesse"
+      },
+      "gear": {
+        "name": "Rapport"
+      },
+      "remaining_charge_minutes": {
+        "name": "Temps de charge restant"
+      },
+      "charging_power_kw": {
+        "name": "Puissance de charge"
+      },
+      "charging_current_a": {
+        "name": "Courant de charge"
+      },
+      "charging_voltage_v": {
+        "name": "Tension de charge"
+      },
+      "charging_connection_state": {
+        "name": "Connexion de charge"
+      },
+      "battery_min_temp_c": {
+        "name": "Température minimale batterie"
+      },
+      "battery_thermal_request": {
+        "name": "Gestion thermique batterie"
+      },
+      "ptc_power_w": {
+        "name": "Puissance PTC"
+      },
+      "parking_camera_state": {
+        "name": "État caméra de stationnement"
+      },
+      "climate_mode": {
+        "name": "Mode climatisation"
+      },
+      "steering_wheel_heating_remaining_minutes": {
+        "name": "Temps restant chauffage volant"
+      },
+      "driver_seat_heating_level": {
+        "name": "Niveau chauffage siège conducteur"
+      },
+      "passenger_seat_heating_level": {
+        "name": "Niveau chauffage siège passager"
+      },
+      "driver_seat_ventilation_level": {
+        "name": "Niveau ventilation siège conducteur"
+      },
+      "passenger_seat_ventilation_level": {
+        "name": "Niveau ventilation siège passager"
+      },
+      "speed_limit_kmh": {
+        "name": "Limite de vitesse"
+      },
+      "front_left_window_position_percent": {
+        "name": "Position vitre avant gauche"
+      },
+      "front_right_window_position_percent": {
+        "name": "Position vitre avant droite"
+      },
+      "rear_left_window_position_percent": {
+        "name": "Position vitre arrière gauche"
+      },
+      "rear_right_window_position_percent": {
+        "name": "Position vitre arrière droite"
+      },
+      "total_energy_kwh": {
+        "name": "Consommation totale d’énergie"
+      },
+      "last_7_days_mileage_km": {
+        "name": "Kilométrage des 7 derniers jours"
+      },
+      "last_7_days_energy_kwh": {
+        "name": "Énergie des 7 derniers jours"
+      },
+      "average_consumption_6w_kwh_100km": {
+        "name": "Consommation moyenne 6 semaines"
+      },
+      "last_week_driving_energy_percent": {
+        "name": "Énergie conduite semaine dernière"
+      },
+      "last_week_climate_energy_percent": {
+        "name": "Énergie climatisation semaine dernière"
+      },
+      "last_week_other_energy_percent": {
+        "name": "Autre énergie semaine dernière"
       }
     },
     "binary_sensor": {
@@ -119,10 +230,100 @@
         "name": "En charge"
       },
       "charging_planned_weekly": {
-        "name": "Charge programmee hebdomadaire"
+        "name": "Programme de charge hebdomadaire"
       },
       "charging_planned_enabled": {
-        "name": "Charge programmee"
+        "name": "Charge programmée"
+      },
+      "is_plugged_in": {
+        "name": "Câble de charge branché"
+      },
+      "is_regening": {
+        "name": "Freinage régénératif"
+      },
+      "dc_cable_connected": {
+        "name": "Câble de charge DC branché"
+      },
+      "remote_session_active": {
+        "name": "Session distante active"
+      },
+      "vehicle_security_active": {
+        "name": "Sécurité véhicule active"
+      },
+      "battery_heating": {
+        "name": "Chauffage batterie"
+      },
+      "driver_door_open": {
+        "name": "Porte conducteur"
+      },
+      "passenger_door_open": {
+        "name": "Porte passager"
+      },
+      "rear_left_door_open": {
+        "name": "Porte arrière gauche"
+      },
+      "rear_right_door_open": {
+        "name": "Porte arrière droite"
+      },
+      "trunk_open": {
+        "name": "Coffre"
+      },
+      "front_left_window_open": {
+        "name": "Vitre avant gauche"
+      },
+      "front_right_window_open": {
+        "name": "Vitre avant droite"
+      },
+      "rear_left_window_open": {
+        "name": "Vitre arrière gauche"
+      },
+      "rear_right_window_open": {
+        "name": "Vitre arrière droite"
+      },
+      "skylight_open": {
+        "name": "Toit panoramique ouvert"
+      },
+      "climate_on": {
+        "name": "Climatisation"
+      },
+      "fast_cooling_active": {
+        "name": "Refroidissement rapide actif"
+      },
+      "fast_heating_active": {
+        "name": "Chauffage rapide actif"
+      },
+      "windshield_defrosting": {
+        "name": "Dégivrage pare-brise"
+      },
+      "rear_window_heating": {
+        "name": "Dégivrage lunette arrière"
+      },
+      "air_recirculation": {
+        "name": "Recyclage d’air"
+      },
+      "steering_wheel_heating": {
+        "name": "Chauffage volant"
+      },
+      "left_mirror_heating": {
+        "name": "Chauffage rétroviseur gauche"
+      },
+      "right_mirror_heating": {
+        "name": "Chauffage rétroviseur droit"
+      },
+      "speed_limit_enabled": {
+        "name": "Limite de vitesse active"
+      },
+      "park_assist_enabled": {
+        "name": "Aide au stationnement active"
+      },
+      "sentinel_mode": {
+        "name": "Mode sentinelle"
+      },
+      "parking_photo": {
+        "name": "Photo de stationnement"
+      },
+      "fully_charged": {
+        "name": "Charge complète"
       }
     },
     "image": {

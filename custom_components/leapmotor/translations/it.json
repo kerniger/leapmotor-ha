@@ -84,16 +84,16 @@
         "name": "Limite di carica"
       },
       "charging_planned_start": {
-        "name": "Inizio ricarica programmata"
+        "name": "Inizio carica programmata"
       },
       "charging_planned_end": {
-        "name": "Fine ricarica programmata"
+        "name": "Fine carica programmata"
       },
       "charging_planned_circulation": {
-        "name": "Ricorrenza ricarica programmata"
+        "name": "Ripetizione carica programmata"
       },
       "charging_plan_updated_at": {
-        "name": "Piano ricarica aggiornato"
+        "name": "Piano carica aggiornato"
       },
       "vehicle_state": {
         "name": "Stato veicolo"
@@ -112,6 +112,117 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Pressione pneumatico posteriore destro"
+      },
+      "unread_message_count": {
+        "name": "Messaggi non letti"
+      },
+      "last_message_title": {
+        "name": "Ultimo messaggio"
+      },
+      "last_message_time": {
+        "name": "Ora ultimo messaggio"
+      },
+      "last_successful_refresh": {
+        "name": "Ultimo aggiornamento"
+      },
+      "battery_percent_precise": {
+        "name": "Batteria precisa"
+      },
+      "wltp_max_range_km": {
+        "name": "Autonomia residua CLTC"
+      },
+      "live_remaining_range_km": {
+        "name": "Autonomia live"
+      },
+      "range_mode": {
+        "name": "Modalità autonomia"
+      },
+      "speed_kmh": {
+        "name": "Velocità"
+      },
+      "gear": {
+        "name": "Marcia"
+      },
+      "remaining_charge_minutes": {
+        "name": "Tempo di carica rimanente"
+      },
+      "charging_power_kw": {
+        "name": "Potenza di carica"
+      },
+      "charging_current_a": {
+        "name": "Corrente di carica"
+      },
+      "charging_voltage_v": {
+        "name": "Tensione di carica"
+      },
+      "charging_connection_state": {
+        "name": "Connessione di carica"
+      },
+      "battery_min_temp_c": {
+        "name": "Temperatura minima batteria"
+      },
+      "battery_thermal_request": {
+        "name": "Gestione termica batteria"
+      },
+      "ptc_power_w": {
+        "name": "Potenza PTC"
+      },
+      "parking_camera_state": {
+        "name": "Stato telecamera parcheggio"
+      },
+      "climate_mode": {
+        "name": "Modalità clima"
+      },
+      "steering_wheel_heating_remaining_minutes": {
+        "name": "Tempo rimanente riscaldamento volante"
+      },
+      "driver_seat_heating_level": {
+        "name": "Livello riscaldamento sedile conducente"
+      },
+      "passenger_seat_heating_level": {
+        "name": "Livello riscaldamento sedile passeggero"
+      },
+      "driver_seat_ventilation_level": {
+        "name": "Livello ventilazione sedile conducente"
+      },
+      "passenger_seat_ventilation_level": {
+        "name": "Livello ventilazione sedile passeggero"
+      },
+      "speed_limit_kmh": {
+        "name": "Limite velocità"
+      },
+      "front_left_window_position_percent": {
+        "name": "Posizione finestrino anteriore sinistro"
+      },
+      "front_right_window_position_percent": {
+        "name": "Posizione finestrino anteriore destro"
+      },
+      "rear_left_window_position_percent": {
+        "name": "Posizione finestrino posteriore sinistro"
+      },
+      "rear_right_window_position_percent": {
+        "name": "Posizione finestrino posteriore destro"
+      },
+      "total_energy_kwh": {
+        "name": "Consumo energia totale"
+      },
+      "last_7_days_mileage_km": {
+        "name": "Chilometri ultimi 7 giorni"
+      },
+      "last_7_days_energy_kwh": {
+        "name": "Energia ultimi 7 giorni"
+      },
+      "average_consumption_6w_kwh_100km": {
+        "name": "Consumo medio 6 settimane"
+      },
+      "last_week_driving_energy_percent": {
+        "name": "Energia guida settimana scorsa"
+      },
+      "last_week_climate_energy_percent": {
+        "name": "Energia clima settimana scorsa"
+      },
+      "last_week_other_energy_percent": {
+        "name": "Altra energia settimana scorsa"
       }
     },
     "binary_sensor": {
@@ -119,10 +230,100 @@
         "name": "In carica"
       },
       "charging_planned_weekly": {
-        "name": "Ricarica programmata settimanale"
+        "name": "Programma carica settimanale"
       },
       "charging_planned_enabled": {
-        "name": "Ricarica programmata"
+        "name": "Carica programmata"
+      },
+      "is_plugged_in": {
+        "name": "Cavo di carica collegato"
+      },
+      "is_regening": {
+        "name": "Frenata rigenerativa"
+      },
+      "dc_cable_connected": {
+        "name": "Cavo di carica DC collegato"
+      },
+      "remote_session_active": {
+        "name": "Sessione remota attiva"
+      },
+      "vehicle_security_active": {
+        "name": "Sicurezza veicolo attiva"
+      },
+      "battery_heating": {
+        "name": "Riscaldamento batteria"
+      },
+      "driver_door_open": {
+        "name": "Porta conducente"
+      },
+      "passenger_door_open": {
+        "name": "Porta passeggero"
+      },
+      "rear_left_door_open": {
+        "name": "Porta posteriore sinistra"
+      },
+      "rear_right_door_open": {
+        "name": "Porta posteriore destra"
+      },
+      "trunk_open": {
+        "name": "Bagagliaio"
+      },
+      "front_left_window_open": {
+        "name": "Finestrino anteriore sinistro"
+      },
+      "front_right_window_open": {
+        "name": "Finestrino anteriore destro"
+      },
+      "rear_left_window_open": {
+        "name": "Finestrino posteriore sinistro"
+      },
+      "rear_right_window_open": {
+        "name": "Finestrino posteriore destro"
+      },
+      "skylight_open": {
+        "name": "Tetto panoramico aperto"
+      },
+      "climate_on": {
+        "name": "Climatizzazione"
+      },
+      "fast_cooling_active": {
+        "name": "Raffreddamento rapido attivo"
+      },
+      "fast_heating_active": {
+        "name": "Riscaldamento rapido attivo"
+      },
+      "windshield_defrosting": {
+        "name": "Sbrinamento parabrezza"
+      },
+      "rear_window_heating": {
+        "name": "Lunotto termico"
+      },
+      "air_recirculation": {
+        "name": "Ricircolo aria"
+      },
+      "steering_wheel_heating": {
+        "name": "Riscaldamento volante"
+      },
+      "left_mirror_heating": {
+        "name": "Riscaldamento specchio sinistro"
+      },
+      "right_mirror_heating": {
+        "name": "Riscaldamento specchio destro"
+      },
+      "speed_limit_enabled": {
+        "name": "Limite velocità attivo"
+      },
+      "park_assist_enabled": {
+        "name": "Assistente parcheggio attivo"
+      },
+      "sentinel_mode": {
+        "name": "Modalità sentinella"
+      },
+      "parking_photo": {
+        "name": "Foto parcheggio"
+      },
+      "fully_charged": {
+        "name": "Carica completa"
       }
     },
     "image": {

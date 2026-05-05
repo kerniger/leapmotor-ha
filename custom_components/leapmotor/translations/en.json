@@ -159,7 +159,7 @@
         "name": "Battery minimum temperature"
       },
       "battery_thermal_request": {
-        "name": "Battery thermal request"
+        "name": "Battery thermal management"
       },
       "ptc_power_w": {
         "name": "PTC power"
@@ -207,10 +207,10 @@
         "name": "Last 7 days mileage"
       },
       "last_7_days_energy_kwh": {
-        "name": "Last 7 days energy"
+        "name": "Last 7 days energy consumption"
       },
       "average_consumption_6w_kwh_100km": {
-        "name": "6-week average consumption"
+        "name": "6 week average consumption"
       },
       "last_week_driving_energy_percent": {
         "name": "Last week driving energy"
@@ -220,6 +220,15 @@
       },
       "last_week_other_energy_percent": {
         "name": "Last week other energy"
+      },
+      "unread_message_count": {
+        "name": "Unread messages"
+      },
+      "last_message_title": {
+        "name": "Last message"
+      },
+      "last_message_time": {
+        "name": "Last message time"
       }
     },
     "binary_sensor": {
@@ -278,10 +287,10 @@
         "name": "Rear right window"
       },
       "skylight_open": {
-        "name": "Skylight open"
+        "name": "Panoramic roof open"
       },
       "climate_on": {
-        "name": "Climate"
+        "name": "Climate control"
       },
       "fast_cooling_active": {
         "name": "Fast cooling active"
@@ -290,7 +299,7 @@
         "name": "Fast heating active"
       },
       "windshield_defrosting": {
-        "name": "Windshield defrost"
+        "name": "Windshield defrosting"
       },
       "rear_window_heating": {
         "name": "Rear window heating"
@@ -308,16 +317,16 @@
         "name": "Right mirror heating"
       },
       "speed_limit_enabled": {
-        "name": "Speed limit active"
+        "name": "Speed limit enabled"
       },
       "park_assist_enabled": {
-        "name": "Park assist active"
+        "name": "Park assist enabled"
       },
       "sentinel_mode": {
         "name": "Sentinel mode"
       },
       "parking_photo": {
-        "name": "Parking Photo"
+        "name": "Parking photo"
       },
       "fully_charged": {
         "name": "Fully charged"

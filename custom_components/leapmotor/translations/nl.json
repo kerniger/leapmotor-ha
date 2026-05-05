@@ -93,7 +93,7 @@
         "name": "Gepland laden herhaling"
       },
       "charging_plan_updated_at": {
-        "name": "Laadplan bijgewerkt"
+        "name": "Laadplanning bijgewerkt"
       },
       "vehicle_state": {
         "name": "Voertuigstatus"
@@ -112,6 +112,117 @@
       },
       "tire_pressure_rear_right_bar": {
         "name": "Bandenspanning rechtsachter"
+      },
+      "unread_message_count": {
+        "name": "Ongelezen berichten"
+      },
+      "last_message_title": {
+        "name": "Laatste bericht"
+      },
+      "last_message_time": {
+        "name": "Tijd laatste bericht"
+      },
+      "last_successful_refresh": {
+        "name": "Laatst vernieuwd"
+      },
+      "battery_percent_precise": {
+        "name": "Accu nauwkeurig"
+      },
+      "wltp_max_range_km": {
+        "name": "CLTC resterend bereik"
+      },
+      "live_remaining_range_km": {
+        "name": "Live bereik"
+      },
+      "range_mode": {
+        "name": "Bereikmodus"
+      },
+      "speed_kmh": {
+        "name": "Snelheid"
+      },
+      "gear": {
+        "name": "Versnelling"
+      },
+      "remaining_charge_minutes": {
+        "name": "Resterende laadtijd"
+      },
+      "charging_power_kw": {
+        "name": "Laadvermogen"
+      },
+      "charging_current_a": {
+        "name": "Laadstroom"
+      },
+      "charging_voltage_v": {
+        "name": "Laadspanning"
+      },
+      "charging_connection_state": {
+        "name": "Laadverbinding"
+      },
+      "battery_min_temp_c": {
+        "name": "Minimale accutemperatuur"
+      },
+      "battery_thermal_request": {
+        "name": "Accu thermisch beheer"
+      },
+      "ptc_power_w": {
+        "name": "PTC-vermogen"
+      },
+      "parking_camera_state": {
+        "name": "Parkeercamerastatus"
+      },
+      "climate_mode": {
+        "name": "Klimaatmodus"
+      },
+      "steering_wheel_heating_remaining_minutes": {
+        "name": "Resterende tijd stuurverwarming"
+      },
+      "driver_seat_heating_level": {
+        "name": "Stoelverwarming bestuurder niveau"
+      },
+      "passenger_seat_heating_level": {
+        "name": "Stoelverwarming passagier niveau"
+      },
+      "driver_seat_ventilation_level": {
+        "name": "Stoelventilatie bestuurder niveau"
+      },
+      "passenger_seat_ventilation_level": {
+        "name": "Stoelventilatie passagier niveau"
+      },
+      "speed_limit_kmh": {
+        "name": "Snelheidslimiet"
+      },
+      "front_left_window_position_percent": {
+        "name": "Raam linksvoor positie"
+      },
+      "front_right_window_position_percent": {
+        "name": "Raam rechtsvoor positie"
+      },
+      "rear_left_window_position_percent": {
+        "name": "Raam linksachter positie"
+      },
+      "rear_right_window_position_percent": {
+        "name": "Raam rechtsachter positie"
+      },
+      "total_energy_kwh": {
+        "name": "Totaal energieverbruik"
+      },
+      "last_7_days_mileage_km": {
+        "name": "Kilometers laatste 7 dagen"
+      },
+      "last_7_days_energy_kwh": {
+        "name": "Energieverbruik laatste 7 dagen"
+      },
+      "average_consumption_6w_kwh_100km": {
+        "name": "Gemiddeld verbruik 6 weken"
+      },
+      "last_week_driving_energy_percent": {
+        "name": "Rij-energie vorige week"
+      },
+      "last_week_climate_energy_percent": {
+        "name": "Klimaatenergie vorige week"
+      },
+      "last_week_other_energy_percent": {
+        "name": "Overige energie vorige week"
       }
     },
     "binary_sensor": {
@@ -119,10 +230,100 @@
         "name": "Laden"
       },
       "charging_planned_weekly": {
-        "name": "Gepland laden wekelijks"
+        "name": "Wekelijks laadschema"
       },
       "charging_planned_enabled": {
         "name": "Gepland laden"
+      },
+      "is_plugged_in": {
+        "name": "Laadkabel aangesloten"
+      },
+      "is_regening": {
+        "name": "Regeneratief remmen"
+      },
+      "dc_cable_connected": {
+        "name": "DC-laadkabel aangesloten"
+      },
+      "remote_session_active": {
+        "name": "Remote-sessie actief"
+      },
+      "vehicle_security_active": {
+        "name": "Voertuigbeveiliging actief"
+      },
+      "battery_heating": {
+        "name": "Accuverwarming"
+      },
+      "driver_door_open": {
+        "name": "Bestuurdersdeur"
+      },
+      "passenger_door_open": {
+        "name": "Passagiersdeur"
+      },
+      "rear_left_door_open": {
+        "name": "Achterdeur links"
+      },
+      "rear_right_door_open": {
+        "name": "Achterdeur rechts"
+      },
+      "trunk_open": {
+        "name": "Kofferbak"
+      },
+      "front_left_window_open": {
+        "name": "Raam linksvoor"
+      },
+      "front_right_window_open": {
+        "name": "Raam rechtsvoor"
+      },
+      "rear_left_window_open": {
+        "name": "Raam linksachter"
+      },
+      "rear_right_window_open": {
+        "name": "Raam rechtsachter"
+      },
+      "skylight_open": {
+        "name": "Panoramadak open"
+      },
+      "climate_on": {
+        "name": "Klimaatregeling"
+      },
+      "fast_cooling_active": {
+        "name": "Snel koelen actief"
+      },
+      "fast_heating_active": {
+        "name": "Snel verwarmen actief"
+      },
+      "windshield_defrosting": {
+        "name": "Voorruitontdooiing"
+      },
+      "rear_window_heating": {
+        "name": "Achterruitverwarming"
+      },
+      "air_recirculation": {
+        "name": "Luchtrecirculatie"
+      },
+      "steering_wheel_heating": {
+        "name": "Stuurverwarming"
+      },
+      "left_mirror_heating": {
+        "name": "Linkerspiegelverwarming"
+      },
+      "right_mirror_heating": {
+        "name": "Rechterspiegelverwarming"
+      },
+      "speed_limit_enabled": {
+        "name": "Snelheidslimiet actief"
+      },
+      "park_assist_enabled": {
+        "name": "Parkeerassistent actief"
+      },
+      "sentinel_mode": {
+        "name": "Sentinel-modus"
+      },
+      "parking_photo": {
+        "name": "Parkeerfoto"
+      },
+      "fully_charged": {
+        "name": "Volledig opgeladen"
       }
     },
     "image": {

@@ -66,13 +66,13 @@
         "name": "Bateria"
       },
       "remaining_range_km": {
-        "name": "Zasieg"
+        "name": "Zasięg"
       },
       "odometer_km": {
-        "name": "Przebieg"
+        "name": "Licznik przebiegu"
       },
       "interior_temp_c": {
-        "name": "Temperatura wnetrza"
+        "name": "Temperatura wnętrza"
       },
       "climate_set_temp_left_c": {
         "name": "Temperatura docelowa lewa"
@@ -81,19 +81,19 @@
         "name": "Temperatura docelowa prawa"
       },
       "charge_limit_percent": {
-        "name": "Limit ladowania"
+        "name": "Limit ładowania"
       },
       "charging_planned_start": {
-        "name": "Start planowanego ladowania"
+        "name": "Start zaplanowanego ładowania"
       },
       "charging_planned_end": {
-        "name": "Koniec planowanego ladowania"
+        "name": "Koniec zaplanowanego ładowania"
       },
       "charging_planned_circulation": {
-        "name": "Powtarzanie planowanego ladowania"
+        "name": "Powtarzanie zaplanowanego ładowania"
       },
       "charging_plan_updated_at": {
-        "name": "Plan ladowania zaktualizowany"
+        "name": "Plan ładowania zaktualizowany"
       },
       "vehicle_state": {
         "name": "Stan pojazdu"
@@ -102,27 +102,228 @@
         "name": "Całkowity przebieg"
       },
       "tire_pressure_front_left_bar": {
-        "name": "Cisnienie opony przedniej lewej"
+        "name": "Ciśnienie opony przedniej lewej"
       },
       "tire_pressure_front_right_bar": {
-        "name": "Cisnienie opony przedniej prawej"
+        "name": "Ciśnienie opony przedniej prawej"
       },
       "tire_pressure_rear_left_bar": {
-        "name": "Cisnienie opony tylnej lewej"
+        "name": "Ciśnienie opony tylnej lewej"
       },
       "tire_pressure_rear_right_bar": {
-        "name": "Cisnienie opony tylnej prawej"
+        "name": "Ciśnienie opony tylnej prawej"
+      },
+      "unread_message_count": {
+        "name": "Nieprzeczytane wiadomości"
+      },
+      "last_message_title": {
+        "name": "Ostatnia wiadomość"
+      },
+      "last_message_time": {
+        "name": "Czas ostatniej wiadomości"
+      },
+      "last_successful_refresh": {
+        "name": "Ostatnie odświeżenie"
+      },
+      "battery_percent_precise": {
+        "name": "Bateria dokładna"
+      },
+      "wltp_max_range_km": {
+        "name": "Pozostały zasięg CLTC"
+      },
+      "live_remaining_range_km": {
+        "name": "Zasięg na żywo"
+      },
+      "range_mode": {
+        "name": "Tryb zasięgu"
+      },
+      "speed_kmh": {
+        "name": "Prędkość"
+      },
+      "gear": {
+        "name": "Bieg"
+      },
+      "remaining_charge_minutes": {
+        "name": "Pozostały czas ładowania"
+      },
+      "charging_power_kw": {
+        "name": "Moc ładowania"
+      },
+      "charging_current_a": {
+        "name": "Prąd ładowania"
+      },
+      "charging_voltage_v": {
+        "name": "Napięcie ładowania"
+      },
+      "charging_connection_state": {
+        "name": "Połączenie ładowania"
+      },
+      "battery_min_temp_c": {
+        "name": "Minimalna temperatura baterii"
+      },
+      "battery_thermal_request": {
+        "name": "Zarządzanie termiczne baterii"
+      },
+      "ptc_power_w": {
+        "name": "Moc PTC"
+      },
+      "parking_camera_state": {
+        "name": "Stan kamery parkowania"
+      },
+      "climate_mode": {
+        "name": "Tryb klimatyzacji"
+      },
+      "steering_wheel_heating_remaining_minutes": {
+        "name": "Pozostały czas ogrzewania kierownicy"
+      },
+      "driver_seat_heating_level": {
+        "name": "Poziom ogrzewania fotela kierowcy"
+      },
+      "passenger_seat_heating_level": {
+        "name": "Poziom ogrzewania fotela pasażera"
+      },
+      "driver_seat_ventilation_level": {
+        "name": "Poziom wentylacji fotela kierowcy"
+      },
+      "passenger_seat_ventilation_level": {
+        "name": "Poziom wentylacji fotela pasażera"
+      },
+      "speed_limit_kmh": {
+        "name": "Limit prędkości"
+      },
+      "front_left_window_position_percent": {
+        "name": "Pozycja szyby przedniej lewej"
+      },
+      "front_right_window_position_percent": {
+        "name": "Pozycja szyby przedniej prawej"
+      },
+      "rear_left_window_position_percent": {
+        "name": "Pozycja szyby tylnej lewej"
+      },
+      "rear_right_window_position_percent": {
+        "name": "Pozycja szyby tylnej prawej"
+      },
+      "total_energy_kwh": {
+        "name": "Całkowite zużycie energii"
+      },
+      "last_7_days_mileage_km": {
+        "name": "Przebieg z ostatnich 7 dni"
+      },
+      "last_7_days_energy_kwh": {
+        "name": "Energia z ostatnich 7 dni"
+      },
+      "average_consumption_6w_kwh_100km": {
+        "name": "Średnie zużycie 6 tygodni"
+      },
+      "last_week_driving_energy_percent": {
+        "name": "Energia jazdy w zeszłym tygodniu"
+      },
+      "last_week_climate_energy_percent": {
+        "name": "Energia klimatyzacji w zeszłym tygodniu"
+      },
+      "last_week_other_energy_percent": {
+        "name": "Inna energia w zeszłym tygodniu"
       }
     },
     "binary_sensor": {
       "is_charging": {
-        "name": "Ladowanie"
+        "name": "Ładowanie"
       },
       "charging_planned_weekly": {
-        "name": "Planowane ladowanie tygodniowe"
+        "name": "Tygodniowy harmonogram ładowania"
       },
       "charging_planned_enabled": {
-        "name": "Planowane ladowanie"
+        "name": "Zaplanowane ładowanie"
+      },
+      "is_plugged_in": {
+        "name": "Kabel ładowania podłączony"
+      },
+      "is_regening": {
+        "name": "Hamowanie rekuperacyjne"
+      },
+      "dc_cable_connected": {
+        "name": "Kabel ładowania DC podłączony"
+      },
+      "remote_session_active": {
+        "name": "Sesja zdalna aktywna"
+      },
+      "vehicle_security_active": {
+        "name": "Zabezpieczenie pojazdu aktywne"
+      },
+      "battery_heating": {
+        "name": "Ogrzewanie baterii"
+      },
+      "driver_door_open": {
+        "name": "Drzwi kierowcy"
+      },
+      "passenger_door_open": {
+        "name": "Drzwi pasażera"
+      },
+      "rear_left_door_open": {
+        "name": "Tylne lewe drzwi"
+      },
+      "rear_right_door_open": {
+        "name": "Tylne prawe drzwi"
+      },
+      "trunk_open": {
+        "name": "Bagażnik"
+      },
+      "front_left_window_open": {
+        "name": "Przednia lewa szyba"
+      },
+      "front_right_window_open": {
+        "name": "Przednia prawa szyba"
+      },
+      "rear_left_window_open": {
+        "name": "Tylna lewa szyba"
+      },
+      "rear_right_window_open": {
+        "name": "Tylna prawa szyba"
+      },
+      "skylight_open": {
+        "name": "Dach panoramiczny otwarty"
+      },
+      "climate_on": {
+        "name": "Klimatyzacja"
+      },
+      "fast_cooling_active": {
+        "name": "Szybkie chłodzenie aktywne"
+      },
+      "fast_heating_active": {
+        "name": "Szybkie ogrzewanie aktywne"
+      },
+      "windshield_defrosting": {
+        "name": "Odmrażanie przedniej szyby"
+      },
+      "rear_window_heating": {
+        "name": "Ogrzewanie tylnej szyby"
+      },
+      "air_recirculation": {
+        "name": "Recyrkulacja powietrza"
+      },
+      "steering_wheel_heating": {
+        "name": "Ogrzewanie kierownicy"
+      },
+      "left_mirror_heating": {
+        "name": "Ogrzewanie lewego lusterka"
+      },
+      "right_mirror_heating": {
+        "name": "Ogrzewanie prawego lusterka"
+      },
+      "speed_limit_enabled": {
+        "name": "Limit prędkości aktywny"
+      },
+      "park_assist_enabled": {
+        "name": "Asystent parkowania aktywny"
+      },
+      "sentinel_mode": {
+        "name": "Tryb Sentinel"
+      },
+      "parking_photo": {
+        "name": "Zdjęcie parkowania"
+      },
+      "fully_charged": {
+        "name": "W pełni naładowany"
       }
     },
     "image": {
