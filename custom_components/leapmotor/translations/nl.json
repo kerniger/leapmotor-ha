@@ -166,6 +166,9 @@
       "charging_connection_state": {
         "name": "Laadverbinding"
       },
+      "charging_finish_time": {
+        "name": "Geschatte laadtijd eindetijd"
+      },
       "evcc_status": {
         "name": "EVCC laadstatus",
         "state": {

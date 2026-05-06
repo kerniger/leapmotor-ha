@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import datetime, UTC
+from datetime import datetime, timedelta, UTC
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -181,6 +181,15 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         icon="mdi:timer-outline",
         value_fn=lambda data: data["charging"].get("remaining_charge_minutes"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="charging_finish_time",
+        translation_key="charging_finish_time",
+        device_class=SensorDeviceClass.TIMESTAMP,
+        icon="mdi:battery-clock",
+        value_fn=lambda data: _charging_finish_time(
+            data["charging"].get("remaining_charge_minutes")
+        ),
     ),
     LeapmotorSensorEntityDescription(
         key="charging_power_kw",
@@ -866,3 +875,14 @@ def _message_timestamp(value: Any) -> datetime | None:
         return datetime.fromtimestamp(numeric, tz=UTC)
     except (OSError, ValueError):
         return None
+
+
+def _charging_finish_time(remaining_minutes: Any) -> datetime | None:
+    """Return estimated charging finish time based on remaining minutes."""
+    try:
+        minutes = int(remaining_minutes)
+    except (TypeError, ValueError):
+        return None
+    if minutes <= 0:
+        return None
+    return datetime.now(tz=UTC) + timedelta(minutes=minutes)

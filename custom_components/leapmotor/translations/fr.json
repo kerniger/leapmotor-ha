@@ -166,6 +166,9 @@
       "charging_connection_state": {
         "name": "Connexion de charge"
       },
+      "charging_finish_time": {
+        "name": "Heure de fin de charge estimée"
+      },
       "evcc_status": {
         "name": "Statut de charge EVCC",
         "state": {

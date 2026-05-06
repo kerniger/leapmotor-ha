@@ -157,6 +157,9 @@
       "charging_connection_state": {
         "name": "Charging connection"
       },
+      "charging_finish_time": {
+        "name": "Estimated charging finish time"
+      },
       "evcc_status": {
         "name": "EVCC charging status",
         "state": {
