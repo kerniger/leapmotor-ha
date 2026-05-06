@@ -81,12 +81,15 @@ class LeapmotorChargeLimitNumber(
         return super().available and bool(self.coordinator.client.operation_password)
 
     @property
-    def native_value(self) -> float | None:
+    def native_value(self) -> int | None:
         """Return the current charge limit."""
         value = self.vehicle_data["charging"].get("charge_limit_percent")
         if value is None:
             return None
-        return float(value)
+        try:
+            return int(round(float(value)))
+        except (TypeError, ValueError):
+            return None
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
