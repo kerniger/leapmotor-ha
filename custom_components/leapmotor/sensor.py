@@ -219,6 +219,18 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         value_fn=lambda data: data["charging"].get("connection_state"),
     ),
     LeapmotorSensorEntityDescription(
+        key="evcc_status",
+        translation_key="evcc_status",
+        icon="mdi:ev-station",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: {
+            "unplugged": "A",
+            "plugged_in": "B",
+            "charging": "C",
+            "finished": "B",
+        }.get(data["charging"].get("connection_state")),
+    ),
+    LeapmotorSensorEntityDescription(
         key="battery_min_temp_c",
         translation_key="battery_min_temp_c",
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,

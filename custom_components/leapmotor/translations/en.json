@@ -157,6 +157,14 @@
       "charging_connection_state": {
         "name": "Charging connection"
       },
+      "evcc_status": {
+        "name": "EVCC charging status",
+        "state": {
+          "A": "Disconnected",
+          "B": "Connected",
+          "C": "Charging"
+        }
+      },
       "battery_min_temp_c": {
         "name": "Battery minimum temperature"
       },
