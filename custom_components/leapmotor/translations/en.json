@@ -469,6 +469,39 @@
       },
       "refresh_data": {
         "name": "Refresh data"
+      },
+      "steering_wheel_heat_on": {
+        "name": "Steering wheel heat on"
+      },
+      "steering_wheel_heat_off": {
+        "name": "Steering wheel heat off"
+      },
+      "fuel_heating_on": {
+        "name": "Fuel heating on"
+      },
+      "fuel_heating_off": {
+        "name": "Fuel heating off"
+      },
+      "rearview_mirror_heat_on": {
+        "name": "Mirror heat on"
+      },
+      "rearview_mirror_heat_off": {
+        "name": "Mirror heat off"
+      },
+      "open_sunroof": {
+        "name": "Open sunroof"
+      },
+      "close_sunroof": {
+        "name": "Close sunroof"
+      },
+      "ac_on": {
+        "name": "Climate on"
+      },
+      "ac_off": {
+        "name": "Climate off"
+      },
+      "prepare_car": {
+        "name": "Prepare car"
       }
     },
     "lock": {
