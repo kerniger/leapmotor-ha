@@ -469,6 +469,33 @@
       },
       "refresh_data": {
         "name": "Refresh data"
+      },
+      "sentry_mode_on": {
+        "name": "Sentry mode on"
+      },
+      "sentry_mode_off": {
+        "name": "Sentry mode off"
+      },
+      "start_charging": {
+        "name": "Start charging"
+      },
+      "stop_charging": {
+        "name": "Stop charging"
+      },
+      "healthy_charging_on": {
+        "name": "Healthy charging on"
+      },
+      "healthy_charging_off": {
+        "name": "Healthy charging off"
+      },
+      "ble_key_restart": {
+        "name": "Restart BLE key"
+      },
+      "fota_download": {
+        "name": "Download firmware"
+      },
+      "fota_install": {
+        "name": "Install firmware"
       }
     },
     "lock": {
