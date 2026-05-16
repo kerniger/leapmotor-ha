@@ -120,6 +120,15 @@ SET_CHARGE_SCHEDULE_FIELDS = vol.Schema(
     }
 )
 
+FOTA_SCHEDULE_FIELDS = vol.Schema(
+    {
+        vol.Required("task_id"): vol.Coerce(int),
+        vol.Required("schedule_time"): str,
+        vol.Optional("vin"): str,
+        vol.Optional("entity_id"): str,
+    }
+)
+
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
@@ -523,6 +532,48 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         coordinator.record_remote_action(target_vin, "set_charge_schedule", success=True, result=result)
         await coordinator.async_request_refresh()
 
+    async def handle_fota_schedule(call: ServiceCall) -> None:
+        domain_data = hass.data.get(DOMAIN) or {}
+        if not domain_data:
+            raise HomeAssistantError("No Leapmotor config entry is loaded.")
+        coordinator = None
+        target_vin = call.data.get("vin")
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            state = hass.states.get(entity_id)
+            if state:
+                target_vin = state.attributes.get("vin") or target_vin
+        for candidate in domain_data.values():
+            if target_vin and target_vin not in (candidate.data.get("vehicles") or {}):
+                continue
+            try:
+                resolved_vin = resolve_target_vin(candidate, target_vin)
+            except Exception:
+                continue
+            coordinator = candidate
+            target_vin = resolved_vin
+            break
+        if coordinator is None or not target_vin:
+            raise HomeAssistantError(
+                "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
+            )
+        try:
+            from functools import partial as _partial
+            result = await hass.async_add_executor_job(
+                _partial(
+                    coordinator.client.fota_schedule,
+                    target_vin,
+                    task_id=call.data["task_id"],
+                    schedule_time=call.data["schedule_time"],
+                )
+            )
+        except Exception as exc:
+            message = format_remote_error(exc)
+            coordinator.record_remote_action(target_vin, "fota_schedule", success=False, error=message)
+            raise HomeAssistantError(message) from exc
+        coordinator.record_remote_action(target_vin, "fota_schedule", success=True, result=result)
+        await coordinator.async_request_refresh()
+
     def make_handler(service_action: str):
         async def _handler(call: ServiceCall) -> None:
             await handle_remote(service_action, call)
@@ -579,6 +630,13 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         schema=SET_CHARGE_SCHEDULE_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_charge_schedule")
+    hass.services.async_register(
+        DOMAIN,
+        "fota_schedule",
+        handle_fota_schedule,
+        schema=FOTA_SCHEDULE_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "fota_schedule")
 
 
 def _async_unregister_services(hass: HomeAssistant) -> None:
@@ -592,7 +650,7 @@ def _async_unregister_services(hass: HomeAssistant) -> None:
         hass.services.async_remove(DOMAIN, "send_destination")
     if hass.services.has_service(DOMAIN, "export_diagnostics"):
         hass.services.async_remove(DOMAIN, "export_diagnostics")
-    for svc in ("set_climate_schedule", "cancel_climate_schedule", "set_charge_schedule"):
+    for svc in ("set_climate_schedule", "cancel_climate_schedule", "set_charge_schedule", "fota_schedule"):
         if hass.services.has_service(DOMAIN, svc):
             hass.services.async_remove(DOMAIN, svc)
 
