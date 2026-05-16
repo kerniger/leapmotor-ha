@@ -1457,6 +1457,7 @@ def normalize_vehicle(
             "odometer_km": signal.get("1318"),
             "speed_kmh": _safe_float(signal.get("1319")),
             "gear": _gear_state(signal),
+            "is_driving": _is_driving(signal),
             "battery_percent_precise": _safe_float(signal.get("100003")),
             "cltc_range_km": _safe_int(signal.get("3257")),
             "wltp_max_range_km": _safe_int(signal.get("3257")),
@@ -1496,6 +1497,7 @@ def normalize_vehicle(
             "charging_current_a": _safe_float(signal.get("1178")),
             "charging_voltage_v": _safe_float(signal.get("1177")),
             "dc_cable_connected": _not_zero(signal.get("1197")),
+            "ac_input_slow_charge": _safe_int(signal.get("47")) == 1,
             "charging_planned_enabled": charge_plan.get("isEnable"),
             "charging_planned_start": charge_plan.get("beginTime"),
             "charging_planned_end": charge_plan.get("endTime"),
@@ -2032,6 +2034,15 @@ def _is_regening(signal: dict[str, Any]) -> bool | None:
     if plugged_in:
         return False
     return _is_charging(signal)
+
+
+def _is_driving(signal: dict[str, Any]) -> bool | None:
+    """Return True when ignition ON3 is active and gear is DRIVE or REVERSE."""
+    on3 = _one_is_on(signal.get("1258"))
+    gear = _safe_int(signal.get("1010"))
+    if on3 is None or gear is None:
+        return None
+    return on3 and gear in (1, 3)
 
 
 def _charging_connection_state(signal: dict[str, Any]) -> str | None:
