@@ -33,10 +33,20 @@ from .const import (
     KNOWN_ACCOUNT_P12_PASSWORDS,
     REMOTE_CTL_AC_SWITCH,
     REMOTE_CTL_BATTERY_PREHEAT,
+    REMOTE_CTL_BLE_KEY_RESTART,
+    REMOTE_CTL_CHARGE_START,
+    REMOTE_CTL_CHARGE_STOP,
     REMOTE_CTL_FIND_CAR,
+    REMOTE_CTL_FOTA_DOWNLOAD,
+    REMOTE_CTL_FOTA_INSTALL,
+    REMOTE_CTL_HEALTHY_CHARGING_OFF,
+    REMOTE_CTL_HEALTHY_CHARGING_ON,
     REMOTE_CTL_LOCK,
     REMOTE_CTL_QUICK_COOL,
     REMOTE_CTL_QUICK_HEAT,
+    REMOTE_CTL_SENTRY_MODE_OFF,
+    REMOTE_CTL_SENTRY_MODE_ON,
+    REMOTE_CTL_SPEED_LIMIT,
     REMOTE_CTL_SUNSHADE,
     REMOTE_CTL_SUNSHADE_CLOSE,
     REMOTE_CTL_SUNSHADE_OPEN,
@@ -260,6 +270,76 @@ class LeapmotorApiClient:
     def windshield_defrost(self, vin: str) -> dict[str, Any]:
         """Trigger the verified windshield-defrost profile."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDSHIELD_DEFROST)
+
+    def sentry_mode_on(self, vin: str) -> dict[str, Any]:
+        """Activate sentry / sentinel mode."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_SENTRY_MODE_ON)
+
+    def sentry_mode_off(self, vin: str) -> dict[str, Any]:
+        """Deactivate sentry / sentinel mode."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_SENTRY_MODE_OFF)
+
+    def start_charging(self, vin: str) -> dict[str, Any]:
+        """Start charging remotely."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_CHARGE_START)
+
+    def stop_charging(self, vin: str) -> dict[str, Any]:
+        """Stop charging remotely."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_CHARGE_STOP)
+
+    def healthy_charging_on(self, vin: str) -> dict[str, Any]:
+        """Enable healthy charging mode (80% SOC limit)."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_HEALTHY_CHARGING_ON)
+
+    def healthy_charging_off(self, vin: str) -> dict[str, Any]:
+        """Disable healthy charging mode."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_HEALTHY_CHARGING_OFF)
+
+    def ble_key_restart(self, vin: str) -> dict[str, Any]:
+        """Restart the BLE digital key module (no PIN required)."""
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_without_pin_raw(
+            vin=vehicle.vin,
+            cmd_id="430",
+            cmd_content='{"value":"restart"}',
+            action_label=REMOTE_CTL_BLE_KEY_RESTART,
+        )
+
+    def set_speed_limit(self, vin: str, speed: int) -> dict[str, Any]:
+        """Set the vehicle speed limit in km/h."""
+        cmd_content = json.dumps({"value": str(speed)}, separators=(",", ":"))
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="510",
+            cmd_content=cmd_content,
+            action_label=REMOTE_CTL_SPEED_LIMIT,
+            vehicle=vehicle,
+        )
+
+    def fota_download(self, vin: str, task_id: int = 0) -> dict[str, Any]:
+        """Trigger a FOTA firmware download."""
+        cmd_content = json.dumps({"taskId": task_id}, separators=(",", ":"))
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="390",
+            cmd_content=cmd_content,
+            action_label=REMOTE_CTL_FOTA_DOWNLOAD,
+            vehicle=vehicle,
+        )
+
+    def fota_install(self, vin: str, task_id: int = 0) -> dict[str, Any]:
+        """Trigger a FOTA firmware installation."""
+        cmd_content = json.dumps({"taskId": task_id}, separators=(",", ":"))
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="391",
+            cmd_content=cmd_content,
+            action_label=REMOTE_CTL_FOTA_INSTALL,
+            vehicle=vehicle,
+        )
 
     def set_charge_limit(self, vin: str, charge_limit_percent: int) -> dict[str, Any]:
         """Set the charge limit while preserving the current charging plan values."""

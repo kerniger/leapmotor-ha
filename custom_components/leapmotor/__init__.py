@@ -91,6 +91,22 @@ EXPORT_DIAGNOSTICS_FIELDS = vol.Schema(
     }
 )
 
+SET_SPEED_LIMIT_FIELDS = vol.Schema(
+    {
+        vol.Required("speed"): vol.All(vol.Coerce(int), vol.Range(min=0, max=250)),
+        vol.Optional("vin"): str,
+        vol.Optional("entity_id"): str,
+    }
+)
+
+FOTA_TASK_FIELDS = vol.Schema(
+    {
+        vol.Optional("task_id", default=0): vol.Coerce(int),
+        vol.Optional("vin"): str,
+        vol.Optional("entity_id"): str,
+    }
+)
+
 PLATFORMS: list[Platform] = [
     Platform.BINARY_SENSOR,
     Platform.BUTTON,
@@ -370,6 +386,114 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         )
         _LOGGER.info("Exported redacted Leapmotor diagnostics to %s", export_path)
 
+    async def handle_set_speed_limit(call: ServiceCall) -> None:
+        domain_data = hass.data.get(DOMAIN) or {}
+        if not domain_data:
+            raise HomeAssistantError("No Leapmotor config entry is loaded.")
+        coordinator = None
+        target_vin = call.data.get("vin")
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            state = hass.states.get(entity_id)
+            if state:
+                target_vin = state.attributes.get("vin") or target_vin
+        for candidate in domain_data.values():
+            if target_vin and target_vin not in (candidate.data.get("vehicles") or {}):
+                continue
+            try:
+                resolved_vin = resolve_target_vin(candidate, target_vin)
+            except Exception:
+                continue
+            coordinator = candidate
+            target_vin = resolved_vin
+            break
+        if coordinator is None or not target_vin:
+            raise HomeAssistantError(
+                "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
+            )
+        try:
+            result = await hass.async_add_executor_job(
+                coordinator.client.set_speed_limit, target_vin, call.data["speed"]
+            )
+        except Exception as exc:
+            message = format_remote_error(exc)
+            coordinator.record_remote_action(target_vin, "set_speed_limit", success=False, error=message)
+            raise HomeAssistantError(message) from exc
+        coordinator.record_remote_action(target_vin, "set_speed_limit", success=True, result=result)
+        await coordinator.async_request_refresh()
+
+    async def handle_fota_download(call: ServiceCall) -> None:
+        domain_data = hass.data.get(DOMAIN) or {}
+        if not domain_data:
+            raise HomeAssistantError("No Leapmotor config entry is loaded.")
+        coordinator = None
+        target_vin = call.data.get("vin")
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            state = hass.states.get(entity_id)
+            if state:
+                target_vin = state.attributes.get("vin") or target_vin
+        for candidate in domain_data.values():
+            if target_vin and target_vin not in (candidate.data.get("vehicles") or {}):
+                continue
+            try:
+                resolved_vin = resolve_target_vin(candidate, target_vin)
+            except Exception:
+                continue
+            coordinator = candidate
+            target_vin = resolved_vin
+            break
+        if coordinator is None or not target_vin:
+            raise HomeAssistantError(
+                "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
+            )
+        try:
+            result = await hass.async_add_executor_job(
+                coordinator.client.fota_download, target_vin, call.data.get("task_id", 0)
+            )
+        except Exception as exc:
+            message = format_remote_error(exc)
+            coordinator.record_remote_action(target_vin, "fota_download", success=False, error=message)
+            raise HomeAssistantError(message) from exc
+        coordinator.record_remote_action(target_vin, "fota_download", success=True, result=result)
+        await coordinator.async_request_refresh()
+
+    async def handle_fota_install(call: ServiceCall) -> None:
+        domain_data = hass.data.get(DOMAIN) or {}
+        if not domain_data:
+            raise HomeAssistantError("No Leapmotor config entry is loaded.")
+        coordinator = None
+        target_vin = call.data.get("vin")
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            state = hass.states.get(entity_id)
+            if state:
+                target_vin = state.attributes.get("vin") or target_vin
+        for candidate in domain_data.values():
+            if target_vin and target_vin not in (candidate.data.get("vehicles") or {}):
+                continue
+            try:
+                resolved_vin = resolve_target_vin(candidate, target_vin)
+            except Exception:
+                continue
+            coordinator = candidate
+            target_vin = resolved_vin
+            break
+        if coordinator is None or not target_vin:
+            raise HomeAssistantError(
+                "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
+            )
+        try:
+            result = await hass.async_add_executor_job(
+                coordinator.client.fota_install, target_vin, call.data.get("task_id", 0)
+            )
+        except Exception as exc:
+            message = format_remote_error(exc)
+            coordinator.record_remote_action(target_vin, "fota_install", success=False, error=message)
+            raise HomeAssistantError(message) from exc
+        coordinator.record_remote_action(target_vin, "fota_install", success=True, result=result)
+        await coordinator.async_request_refresh()
+
     def make_handler(service_action: str):
         async def _handler(call: ServiceCall) -> None:
             await handle_remote(service_action, call)
@@ -405,6 +529,27 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         schema=EXPORT_DIAGNOSTICS_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "export_diagnostics")
+    hass.services.async_register(
+        DOMAIN,
+        "set_speed_limit",
+        handle_set_speed_limit,
+        schema=SET_SPEED_LIMIT_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_speed_limit")
+    hass.services.async_register(
+        DOMAIN,
+        "fota_download",
+        handle_fota_download,
+        schema=FOTA_TASK_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "fota_download")
+    hass.services.async_register(
+        DOMAIN,
+        "fota_install",
+        handle_fota_install,
+        schema=FOTA_TASK_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "fota_install")
 
 
 def _async_unregister_services(hass: HomeAssistant) -> None:
