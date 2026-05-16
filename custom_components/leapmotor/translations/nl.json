@@ -414,6 +414,15 @@
       },
       "door_control_allowed": {
         "name": "Door control allowed"
+      },
+      "is_driving": {
+        "name": "Rijden"
+      },
+      "ac_input_slow_charge": {
+        "name": "AC laadkabel aangesloten"
+      },
+      "charge_completed": {
+        "name": "Laden voltooid"
       }
     },
     "image": {

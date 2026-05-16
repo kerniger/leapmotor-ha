@@ -414,6 +414,15 @@
       },
       "door_control_allowed": {
         "name": "Door control allowed"
+      },
+      "is_driving": {
+        "name": "Conduciendo"
+      },
+      "ac_input_slow_charge": {
+        "name": "Cable de carga AC conectado"
+      },
+      "charge_completed": {
+        "name": "Carga completada"
       }
     },
     "image": {

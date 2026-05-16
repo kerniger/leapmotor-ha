@@ -414,6 +414,15 @@
       },
       "door_control_allowed": {
         "name": "Tuersteuerung erlaubt"
+      },
+      "is_driving": {
+        "name": "Faehrt"
+      },
+      "ac_input_slow_charge": {
+        "name": "AC-Ladekabel eingesteckt"
+      },
+      "charge_completed": {
+        "name": "Laden abgeschlossen"
       }
     },
     "image": {
