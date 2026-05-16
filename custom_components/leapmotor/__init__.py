@@ -563,6 +563,9 @@ def _async_unregister_services(hass: HomeAssistant) -> None:
         hass.services.async_remove(DOMAIN, "send_destination")
     if hass.services.has_service(DOMAIN, "export_diagnostics"):
         hass.services.async_remove(DOMAIN, "export_diagnostics")
+    for svc in ("set_speed_limit", "fota_download", "fota_install"):
+        if hass.services.has_service(DOMAIN, svc):
+            hass.services.async_remove(DOMAIN, svc)
 
 
 def _write_json_export(path: Path, payload: object) -> None:
