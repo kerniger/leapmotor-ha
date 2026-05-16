@@ -31,12 +31,25 @@ from .const import (
     DEFAULT_P12_ENC_ALG,
     DEFAULT_SOURCE,
     KNOWN_ACCOUNT_P12_PASSWORDS,
+    REMOTE_CTL_AC_OFF,
+    REMOTE_CTL_AC_ON,
     REMOTE_CTL_AC_SWITCH,
     REMOTE_CTL_BATTERY_PREHEAT,
     REMOTE_CTL_FIND_CAR,
+    REMOTE_CTL_FUEL_HEATING_OFF,
+    REMOTE_CTL_FUEL_HEATING_ON,
     REMOTE_CTL_LOCK,
+    REMOTE_CTL_PREPARE_CAR,
     REMOTE_CTL_QUICK_COOL,
     REMOTE_CTL_QUICK_HEAT,
+    REMOTE_CTL_REARVIEW_MIRROR_HEAT_OFF,
+    REMOTE_CTL_REARVIEW_MIRROR_HEAT_ON,
+    REMOTE_CTL_SEAT_HEAT,
+    REMOTE_CTL_SEAT_VENTILATION,
+    REMOTE_CTL_STEERING_WHEEL_HEAT_OFF,
+    REMOTE_CTL_STEERING_WHEEL_HEAT_ON,
+    REMOTE_CTL_SUNROOF_CLOSE,
+    REMOTE_CTL_SUNROOF_OPEN,
     REMOTE_CTL_SUNSHADE,
     REMOTE_CTL_SUNSHADE_CLOSE,
     REMOTE_CTL_SUNSHADE_OPEN,
@@ -260,6 +273,74 @@ class LeapmotorApiClient:
     def windshield_defrost(self, vin: str) -> dict[str, Any]:
         """Trigger the verified windshield-defrost profile."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDSHIELD_DEFROST)
+
+    def steering_wheel_heat_on(self, vin: str) -> dict[str, Any]:
+        """Turn on steering wheel heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_STEERING_WHEEL_HEAT_ON)
+
+    def steering_wheel_heat_off(self, vin: str) -> dict[str, Any]:
+        """Turn off steering wheel heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_STEERING_WHEEL_HEAT_OFF)
+
+    def fuel_heating_on(self, vin: str) -> dict[str, Any]:
+        """Turn on fuel/PTC heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_FUEL_HEATING_ON)
+
+    def fuel_heating_off(self, vin: str) -> dict[str, Any]:
+        """Turn off fuel/PTC heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_FUEL_HEATING_OFF)
+
+    def rearview_mirror_heat_on(self, vin: str) -> dict[str, Any]:
+        """Turn on rearview mirror heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_REARVIEW_MIRROR_HEAT_ON)
+
+    def rearview_mirror_heat_off(self, vin: str) -> dict[str, Any]:
+        """Turn off rearview mirror heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_REARVIEW_MIRROR_HEAT_OFF)
+
+    def open_sunroof(self, vin: str) -> dict[str, Any]:
+        """Open the sunroof."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_SUNROOF_OPEN)
+
+    def close_sunroof(self, vin: str) -> dict[str, Any]:
+        """Close the sunroof."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_SUNROOF_CLOSE)
+
+    def ac_on(self, vin: str) -> dict[str, Any]:
+        """Explicitly turn on climate control."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_AC_ON)
+
+    def ac_off(self, vin: str) -> dict[str, Any]:
+        """Explicitly turn off climate control."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_AC_OFF)
+
+    def prepare_car(self, vin: str) -> dict[str, Any]:
+        """Trigger pre-conditioning (climate + seat heat) on C10/B10 models."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_PREPARE_CAR)
+
+    def seat_heat(self, vin: str, position: int, level: int) -> dict[str, Any]:
+        """Set seat heating. Position: 1=driver, 2=passenger. Level: 0=off, 1-3=intensity."""
+        cmd_content = json.dumps({"value": f"{position},{level}"}, separators=(",", ":"))
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="301",
+            cmd_content=cmd_content,
+            action_label=REMOTE_CTL_SEAT_HEAT,
+            vehicle=vehicle,
+        )
+
+    def seat_ventilation(self, vin: str, position: int, level: int) -> dict[str, Any]:
+        """Set seat ventilation. Position: 1=driver, 2=passenger. Level: 0=off, 1-3=intensity."""
+        cmd_content = json.dumps({"value": f"{position},{level}"}, separators=(",", ":"))
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="370",
+            cmd_content=cmd_content,
+            action_label=REMOTE_CTL_SEAT_VENTILATION,
+            vehicle=vehicle,
+        )
 
     def set_charge_limit(self, vin: str, charge_limit_percent: int) -> dict[str, Any]:
         """Set the charge limit while preserving the current charging plan values."""
