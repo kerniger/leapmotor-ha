@@ -515,5 +515,37 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Set climate",
+      "description": "Send a fully parameterised climate command to the vehicle. Requires PIN.",
+      "fields": {
+        "mode": {
+          "name": "Mode",
+          "description": "Climate mode: cold (cooling), hot (heating), or wind (ventilation only)."
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Target temperature in °C (16–32, default 22)."
+        },
+        "fan_speed": {
+          "name": "Fan speed",
+          "description": "Fan speed level (1–7, default 4)."
+        },
+        "recirculate": {
+          "name": "Recirculate",
+          "description": "True = recirculate cabin air, False = outside air (default)."
+        },
+        "windshield_defrost": {
+          "name": "Windshield defrost",
+          "description": "Enable front windshield defrost (default false)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Vehicle identification number. Required when multiple vehicles are configured."
+        }
+      }
+    }
   }
 }

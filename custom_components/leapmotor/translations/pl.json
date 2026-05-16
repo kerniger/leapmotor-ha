@@ -515,5 +515,37 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Ustaw klimatyzację",
+      "description": "Wyślij sparametryzowane polecenie klimatyzacji. Wymagany PIN.",
+      "fields": {
+        "mode": {
+          "name": "Tryb",
+          "description": "Tryb: cold (chłodzenie), hot (ogrzewanie) lub wind (tylko wentylacja)."
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Docelowa temperatura w °C (16–32, domyślnie 22)."
+        },
+        "fan_speed": {
+          "name": "Prędkość wentylatora",
+          "description": "Poziom prędkości wentylatora (1–7, domyślnie 4)."
+        },
+        "recirculate": {
+          "name": "Recyrkulacja",
+          "description": "True = recyrkulacja powietrza kabiny, False = powietrze zewnętrzne (domyślnie)."
+        },
+        "windshield_defrost": {
+          "name": "Odmrażanie przedniej szyby",
+          "description": "Włącz odmrażanie przedniej szyby (domyślnie: nie)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numer identyfikacyjny pojazdu. Wymagany przy wielu pojazdach."
+        }
+      }
+    }
   }
 }

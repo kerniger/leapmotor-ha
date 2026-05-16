@@ -515,5 +515,37 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Klimaat instellen",
+      "description": "Stuur een klimaatopdracht met aangepaste parameters. PIN vereist.",
+      "fields": {
+        "mode": {
+          "name": "Modus",
+          "description": "Klimaatmodus: cold (koelen), hot (verwarmen) of wind (alleen ventileren)."
+        },
+        "temperature": {
+          "name": "Temperatuur",
+          "description": "Doeltemperatuur in °C (16–32, standaard 22)."
+        },
+        "fan_speed": {
+          "name": "Ventilatorsnelheid",
+          "description": "Ventilatorsnelheidsniveau (1–7, standaard 4)."
+        },
+        "recirculate": {
+          "name": "Recirculeren",
+          "description": "True = binnenlucht recirculeren, False = buitenlucht (standaard)."
+        },
+        "windshield_defrost": {
+          "name": "Voorruit ontdooien",
+          "description": "Voorruit ontdooien inschakelen (standaard: nee)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Voertuigidentificatienummer. Verplicht bij meerdere voertuigen."
+        }
+      }
+    }
   }
 }

@@ -515,5 +515,37 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Configurar climatización",
+      "description": "Envía un comando de climatización con parámetros personalizados. Requiere PIN.",
+      "fields": {
+        "mode": {
+          "name": "Modo",
+          "description": "Modo: cold (refrigeración), hot (calefacción) o wind (solo ventilación)."
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Temperatura objetivo en °C (16–32, predeterminado 22)."
+        },
+        "fan_speed": {
+          "name": "Velocidad del ventilador",
+          "description": "Nivel de velocidad del ventilador (1–7, predeterminado 4)."
+        },
+        "recirculate": {
+          "name": "Recircular",
+          "description": "True = recircular aire interior, False = aire exterior (predeterminado)."
+        },
+        "windshield_defrost": {
+          "name": "Descongelación del parabrisas",
+          "description": "Activar descongelación del parabrisas delantero (predeterminado: no)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Número de identificación del vehículo. Obligatorio con varios vehículos."
+        }
+      }
+    }
   }
 }

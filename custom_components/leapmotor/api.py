@@ -261,6 +261,44 @@ class LeapmotorApiClient:
         """Trigger the verified windshield-defrost profile."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDSHIELD_DEFROST)
 
+    def set_climate(
+        self,
+        vin: str,
+        *,
+        mode: str,
+        temperature: int = 22,
+        fan_speed: int = 4,
+        recirculate: bool = False,
+        windshield_defrost: bool = False,
+    ) -> dict[str, Any]:
+        """Send a fully parameterised climate command (cmd_id 170)."""
+        if not self.token:
+            self.login()
+        if not self.operation_password:
+            raise LeapmotorAuthError(
+                "No vehicle PIN configured. Climate control requires it."
+            )
+        vehicle = self._find_vehicle_by_vin(vin)
+        cmd_content = json.dumps(
+            {
+                "circle": "in" if recirculate else "out",
+                "mode": mode,
+                "operate": "manual",
+                "position": "all",
+                "temperature": str(temperature),
+                "windlevel": str(fan_speed),
+                "wshld": "1" if windshield_defrost else "0",
+            },
+            separators=(",", ":"),
+        )
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="170",
+            cmd_content=cmd_content,
+            action_label="set_climate",
+            vehicle=vehicle,
+        )
+
     def set_charge_limit(self, vin: str, charge_limit_percent: int) -> dict[str, Any]:
         """Set the charge limit while preserving the current charging plan values."""
         return self._set_charging_plan(vin, charge_limit_percent=charge_limit_percent)

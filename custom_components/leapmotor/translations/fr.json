@@ -515,5 +515,37 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Régler la climatisation",
+      "description": "Envoie une commande de climatisation avec des paramètres personnalisés. PIN requis.",
+      "fields": {
+        "mode": {
+          "name": "Mode",
+          "description": "Mode : cold (refroidissement), hot (chauffage) ou wind (ventilation seule)."
+        },
+        "temperature": {
+          "name": "Température",
+          "description": "Température cible en °C (16–32, défaut 22)."
+        },
+        "fan_speed": {
+          "name": "Vitesse du ventilateur",
+          "description": "Niveau de vitesse du ventilateur (1–7, défaut 4)."
+        },
+        "recirculate": {
+          "name": "Recirculation",
+          "description": "True = recycler l'air intérieur, False = air extérieur (défaut)."
+        },
+        "windshield_defrost": {
+          "name": "Dégivrage pare-brise",
+          "description": "Activer le dégivrage du pare-brise avant (défaut : non)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numéro d'identification du véhicule. Obligatoire si plusieurs véhicules."
+        }
+      }
+    }
   }
 }

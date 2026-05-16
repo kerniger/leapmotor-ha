@@ -66,6 +66,18 @@ _SERVICE_SCHEMAS = {
     "sunshade_close": SUNSHADE_POSITION_SERVICE_FIELDS,
 }
 
+SET_CLIMATE_FIELDS = vol.Schema(
+    {
+        vol.Required("mode"): vol.In(["cold", "hot", "wind"]),
+        vol.Optional("temperature", default=22): vol.All(vol.Coerce(int), vol.Range(min=16, max=32)),
+        vol.Optional("fan_speed", default=4): vol.All(vol.Coerce(int), vol.Range(min=1, max=7)),
+        vol.Optional("recirculate", default=False): bool,
+        vol.Optional("windshield_defrost", default=False): bool,
+        vol.Optional("vin"): str,
+        vol.Optional("entity_id"): str,
+    }
+)
+
 SET_CHARGE_LIMIT_FIELDS = vol.Schema(
     {
         vol.Required("charge_limit_percent"): vol.All(vol.Coerce(int), vol.Range(min=1, max=100)),
@@ -275,6 +287,54 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         )
         await coordinator.async_request_refresh()
 
+    async def handle_set_climate(call: ServiceCall) -> None:
+        domain_data = hass.data.get(DOMAIN) or {}
+        if not domain_data:
+            raise HomeAssistantError("No Leapmotor config entry is loaded.")
+
+        coordinator = None
+        target_vin = call.data.get("vin")
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            state = hass.states.get(entity_id)
+            if state:
+                target_vin = state.attributes.get("vin") or target_vin
+        for candidate in domain_data.values():
+            if target_vin and target_vin not in (candidate.data.get("vehicles") or {}):
+                continue
+            try:
+                resolved_vin = resolve_target_vin(candidate, target_vin)
+            except Exception:
+                continue
+            coordinator = candidate
+            target_vin = resolved_vin
+            break
+
+        if coordinator is None or not target_vin:
+            raise HomeAssistantError(
+                "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
+            )
+
+        try:
+            result = await hass.async_add_executor_job(
+                partial(
+                    coordinator.client.set_climate,
+                    target_vin,
+                    mode=call.data["mode"],
+                    temperature=call.data.get("temperature", 22),
+                    fan_speed=call.data.get("fan_speed", 4),
+                    recirculate=call.data.get("recirculate", False),
+                    windshield_defrost=call.data.get("windshield_defrost", False),
+                )
+            )
+        except Exception as exc:
+            message = format_remote_error(exc)
+            coordinator.record_remote_action(target_vin, "set_climate", success=False, error=message)
+            raise HomeAssistantError(message) from exc
+
+        coordinator.record_remote_action(target_vin, "set_climate", success=True, result=result)
+        await coordinator.async_request_refresh()
+
     async def handle_send_destination(call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}
         if not domain_data:
@@ -386,6 +446,13 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, service_name)
     hass.services.async_register(
         DOMAIN,
+        "set_climate",
+        handle_set_climate,
+        schema=SET_CLIMATE_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_climate")
+    hass.services.async_register(
+        DOMAIN,
         "set_charge_limit",
         handle_set_charge_limit,
         schema=SET_CHARGE_LIMIT_FIELDS,
@@ -412,6 +479,8 @@ def _async_unregister_services(hass: HomeAssistant) -> None:
     for service_name in ("lock", "unlock", *(spec.service_name for spec in BUTTON_SPECS)):
         if hass.services.has_service(DOMAIN, service_name):
             hass.services.async_remove(DOMAIN, service_name)
+    if hass.services.has_service(DOMAIN, "set_climate"):
+        hass.services.async_remove(DOMAIN, "set_climate")
     if hass.services.has_service(DOMAIN, "set_charge_limit"):
         hass.services.async_remove(DOMAIN, "set_charge_limit")
     if hass.services.has_service(DOMAIN, "send_destination"):

@@ -515,5 +515,37 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Klimaanlage steuern",
+      "description": "Klimabefehl mit individuellen Parametern senden. PIN erforderlich.",
+      "fields": {
+        "mode": {
+          "name": "Modus",
+          "description": "Klimamodus: cold (Kühlen), hot (Heizen) oder wind (nur Lüften)."
+        },
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Zieltemperatur in °C (16–32, Standard 22)."
+        },
+        "fan_speed": {
+          "name": "Lüfterstufe",
+          "description": "Lüftergeschwindigkeit (1–7, Standard 4)."
+        },
+        "recirculate": {
+          "name": "Umluft",
+          "description": "True = Umluft, False = Frischluft (Standard)."
+        },
+        "windshield_defrost": {
+          "name": "Frontscheibenheizung",
+          "description": "Frontscheibenheizung aktivieren (Standard: aus)."
+        },
+        "vin": {
+          "name": "FIN",
+          "description": "Fahrzeugidentifikationsnummer. Erforderlich bei mehreren Fahrzeugen."
+        }
+      }
+    }
   }
 }

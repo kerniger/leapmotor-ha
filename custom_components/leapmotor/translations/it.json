@@ -515,5 +515,37 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Imposta climatizzazione",
+      "description": "Invia un comando clima con parametri personalizzati. Richiede PIN.",
+      "fields": {
+        "mode": {
+          "name": "Modalità",
+          "description": "Modalità: cold (raffreddamento), hot (riscaldamento) o wind (solo ventilazione)."
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Temperatura target in °C (16–32, predefinito 22)."
+        },
+        "fan_speed": {
+          "name": "Velocità ventilatore",
+          "description": "Livello velocità ventilatore (1–7, predefinito 4)."
+        },
+        "recirculate": {
+          "name": "Ricircolo",
+          "description": "True = ricircolo aria interna, False = aria esterna (predefinito)."
+        },
+        "windshield_defrost": {
+          "name": "Sbrinamento parabrezza",
+          "description": "Attiva sbrinamento parabrezza anteriore (predefinito: no)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numero identificazione veicolo. Obbligatorio con più veicoli."
+        }
+      }
+    }
   }
 }
