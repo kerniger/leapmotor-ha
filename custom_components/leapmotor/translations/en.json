@@ -420,6 +420,9 @@
       },
       "ac_input_slow_charge": {
         "name": "AC slow charge plugged in"
+      },
+      "charge_completed": {
+        "name": "Charge completed"
       }
     },
     "image": {

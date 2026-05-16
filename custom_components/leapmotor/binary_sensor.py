@@ -26,6 +26,7 @@ from .entity_migration import english_entity_slug
 OPTIONAL_BINARY_SENSOR_PATHS = {
     "is_driving": "status.is_driving",
     "ac_input_slow_charge": "charging.ac_input_slow_charge",
+    "charge_completed": "diagnostics.charge_completed",
     "charging_planned_enabled": "charging.charging_planned_enabled",
     "charging_planned_weekly": "charging.charging_planned_cycles",
     "remote_session_active": "diagnostics.remote_session_active",
@@ -330,6 +331,14 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
         icon="mdi:car-door",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("door_control_allowed"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="charge_completed",
+        translation_key="charge_completed",
+        icon="mdi:battery-check-outline",
+        device_class=BinarySensorDeviceClass.BATTERY_CHARGING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("charge_completed"),
     ),
 )
 

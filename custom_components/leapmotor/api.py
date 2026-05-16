@@ -1571,7 +1571,9 @@ def normalize_vehicle(
             "climate_on": _one_is_on(signal.get("1938")),
             "climate_mode": _climate_mode(signal),
             "outdoor_temp_c": _safe_float(status_data.get("outdoorTemp")),
-            "climate_fan_volume": _safe_int(status_data.get("acAirVolume")),
+            "climate_fan_volume": _safe_int(status_data.get("acAirVolume"))
+            if status_data.get("acAirVolume") is not None
+            else _safe_int(signal.get("1941")),
             "climate_fan_volume_setting": _safe_int(status_data.get("acAirVolumeSetting")),
             "climate_air_direction": _safe_int(status_data.get("acWindDirection")),
             "climate_temp_mode": _safe_bool(status_data.get("acTempMode")),
@@ -1599,6 +1601,7 @@ def normalize_vehicle(
             "sentinel_mode": _one_is_on(signal.get("3636")),
             "parking_photo": _one_is_on(signal.get("3638")),
             "fully_charged": _one_is_on(signal.get("3736")),
+            "charge_completed": _safe_bool(status_data.get("chargeCompleted")),
             "speed_limit_enabled": _one_is_on(signal.get("12054")),
             "speed_limit_kmh": _safe_int(signal.get("6048")),
             "speed_limit_unit": signal.get("6047"),
