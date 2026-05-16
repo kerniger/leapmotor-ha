@@ -469,6 +469,39 @@
       },
       "refresh_data": {
         "name": "Odswiez dane"
+      },
+      "steering_wheel_heat_on": {
+        "name": "Ogrzewanie kierownicy wl."
+      },
+      "steering_wheel_heat_off": {
+        "name": "Ogrzewanie kierownicy wyl."
+      },
+      "fuel_heating_on": {
+        "name": "Ogrzewanie paliwa wl."
+      },
+      "fuel_heating_off": {
+        "name": "Ogrzewanie paliwa wyl."
+      },
+      "rearview_mirror_heat_on": {
+        "name": "Ogrzewanie lusterek wl."
+      },
+      "rearview_mirror_heat_off": {
+        "name": "Ogrzewanie lusterek wyl."
+      },
+      "open_sunroof": {
+        "name": "Otworz szyberdach"
+      },
+      "close_sunroof": {
+        "name": "Zamknij szyberdach"
+      },
+      "ac_on": {
+        "name": "Klimatyzacja wl."
+      },
+      "ac_off": {
+        "name": "Klimatyzacja wyl."
+      },
+      "prepare_car": {
+        "name": "Przygotuj samochod"
       }
     },
     "lock": {

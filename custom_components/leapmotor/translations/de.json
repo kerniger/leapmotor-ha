@@ -469,6 +469,39 @@
       },
       "refresh_data": {
         "name": "Daten aktualisieren"
+      },
+      "steering_wheel_heat_on": {
+        "name": "Lenkradheizung an"
+      },
+      "steering_wheel_heat_off": {
+        "name": "Lenkradheizung aus"
+      },
+      "fuel_heating_on": {
+        "name": "Kraftstoffheizung an"
+      },
+      "fuel_heating_off": {
+        "name": "Kraftstoffheizung aus"
+      },
+      "rearview_mirror_heat_on": {
+        "name": "Spiegelheizung an"
+      },
+      "rearview_mirror_heat_off": {
+        "name": "Spiegelheizung aus"
+      },
+      "open_sunroof": {
+        "name": "Schiebedach oeffnen"
+      },
+      "close_sunroof": {
+        "name": "Schiebedach schliessen"
+      },
+      "ac_on": {
+        "name": "Klimaanlage an"
+      },
+      "ac_off": {
+        "name": "Klimaanlage aus"
+      },
+      "prepare_car": {
+        "name": "Fahrzeug vorbereiten"
       }
     },
     "lock": {

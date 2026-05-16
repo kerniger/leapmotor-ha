@@ -469,6 +469,39 @@
       },
       "refresh_data": {
         "name": "Actualiser les donnees"
+      },
+      "steering_wheel_heat_on": {
+        "name": "Chauffage volant allume"
+      },
+      "steering_wheel_heat_off": {
+        "name": "Chauffage volant eteint"
+      },
+      "fuel_heating_on": {
+        "name": "Chauffage carburant allume"
+      },
+      "fuel_heating_off": {
+        "name": "Chauffage carburant eteint"
+      },
+      "rearview_mirror_heat_on": {
+        "name": "Chauffage retroviseurs allume"
+      },
+      "rearview_mirror_heat_off": {
+        "name": "Chauffage retroviseurs eteint"
+      },
+      "open_sunroof": {
+        "name": "Ouvrir le toit ouvrant"
+      },
+      "close_sunroof": {
+        "name": "Fermer le toit ouvrant"
+      },
+      "ac_on": {
+        "name": "Climatisation allumee"
+      },
+      "ac_off": {
+        "name": "Climatisation eteinte"
+      },
+      "prepare_car": {
+        "name": "Preparer le vehicule"
       }
     },
     "lock": {

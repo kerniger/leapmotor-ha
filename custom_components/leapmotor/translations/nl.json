@@ -469,6 +469,39 @@
       },
       "refresh_data": {
         "name": "Gegevens vernieuwen"
+      },
+      "steering_wheel_heat_on": {
+        "name": "Stuurwielverwarming aan"
+      },
+      "steering_wheel_heat_off": {
+        "name": "Stuurwielverwarming uit"
+      },
+      "fuel_heating_on": {
+        "name": "Brandstofverwarming aan"
+      },
+      "fuel_heating_off": {
+        "name": "Brandstofverwarming uit"
+      },
+      "rearview_mirror_heat_on": {
+        "name": "Spiegelverwarming aan"
+      },
+      "rearview_mirror_heat_off": {
+        "name": "Spiegelverwarming uit"
+      },
+      "open_sunroof": {
+        "name": "Schuifdak openen"
+      },
+      "close_sunroof": {
+        "name": "Schuifdak sluiten"
+      },
+      "ac_on": {
+        "name": "Airco aan"
+      },
+      "ac_off": {
+        "name": "Airco uit"
+      },
+      "prepare_car": {
+        "name": "Auto voorbereiden"
       }
     },
     "lock": {

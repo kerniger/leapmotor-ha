@@ -469,6 +469,39 @@
       },
       "refresh_data": {
         "name": "Actualizar datos"
+      },
+      "steering_wheel_heat_on": {
+        "name": "Calefaccion volante encendida"
+      },
+      "steering_wheel_heat_off": {
+        "name": "Calefaccion volante apagada"
+      },
+      "fuel_heating_on": {
+        "name": "Calefaccion combustible encendida"
+      },
+      "fuel_heating_off": {
+        "name": "Calefaccion combustible apagada"
+      },
+      "rearview_mirror_heat_on": {
+        "name": "Calefaccion espejo encendida"
+      },
+      "rearview_mirror_heat_off": {
+        "name": "Calefaccion espejo apagada"
+      },
+      "open_sunroof": {
+        "name": "Abrir techo solar"
+      },
+      "close_sunroof": {
+        "name": "Cerrar techo solar"
+      },
+      "ac_on": {
+        "name": "Climatizacion encendida"
+      },
+      "ac_off": {
+        "name": "Climatizacion apagada"
+      },
+      "prepare_car": {
+        "name": "Preparar vehiculo"
       }
     },
     "lock": {
