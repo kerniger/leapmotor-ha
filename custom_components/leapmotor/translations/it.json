@@ -515,5 +515,87 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate_schedule": {
+      "name": "Imposta programma climatizzazione",
+      "description": "Imposta uno o più programmi di precondizionamento. Ogni chiamata sostituisce tutti i programmi esistenti; invia una lista vuota per annullare tutto.",
+      "fields": {
+        "controls": {
+          "name": "Controlli",
+          "description": "Lista di voci del programma (mode, on, operate, set_id, start_time, windlevel, days, circle, position, wshld)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numero di identificazione del veicolo. Obbligatorio con più veicoli configurati."
+        }
+      }
+    },
+    "cancel_climate_schedule": {
+      "name": "Annulla programma climatizzazione",
+      "description": "Annulla tutti i programmi di precondizionamento attivi.",
+      "fields": {
+        "vin": {
+          "name": "VIN",
+          "description": "Numero di identificazione del veicolo. Obbligatorio con più veicoli configurati."
+        }
+      }
+    },
+    "set_charge_schedule": {
+      "name": "Imposta programma di ricarica",
+      "description": "Imposta il programma di ricarica del veicolo (ora inizio, fine, SOC target e giorni di ripetizione).",
+      "fields": {
+        "enabled": {
+          "name": "Attivo",
+          "description": "Se il programma di ricarica è attivo."
+        },
+        "soc_limit": {
+          "name": "Limite SOC",
+          "description": "Percentuale di carica target (1–100, predefinito 80)."
+        },
+        "start_time": {
+          "name": "Ora inizio",
+          "description": "Ora di inizio del programma, es. \"23:00\"."
+        },
+        "end_time": {
+          "name": "Ora fine",
+          "description": "Ora di fine del programma, es. \"07:00\"."
+        },
+        "cycles": {
+          "name": "Cicli",
+          "description": "Numeri di giorni separati da virgola, es. \"1,2,3,4,5\". Vuoto = una volta."
+        },
+        "circulation": {
+          "name": "Circolazione",
+          "description": "Modalità ripetizione: 0 = una volta, 1 = ripeti."
+        },
+        "recharge": {
+          "name": "Ricarica automatica",
+          "description": "Ricarica automatica: 0 = disattivata, 1 = attivata."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numero di identificazione del veicolo. Obbligatorio con più veicoli configurati."
+        }
+      }
+    },
+    "fota_schedule": {
+      "name": "Pianifica aggiornamento firmware",
+      "description": "Pianifica l'installazione di un aggiornamento FOTA in coda a un orario specifico.",
+      "fields": {
+        "task_id": {
+          "name": "ID attività",
+          "description": "Identificatore dell'attività FOTA dal passaggio di download."
+        },
+        "schedule_time": {
+          "name": "Orario pianificato",
+          "description": "Data e ora di installazione, es. \"2026-06-01 03:00:00\"."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numero di identificazione del veicolo. Obbligatorio con più veicoli configurati."
+        }
+      }
+    }
   }
 }

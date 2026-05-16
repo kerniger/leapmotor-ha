@@ -515,5 +515,87 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate_schedule": {
+      "name": "Ustaw harmonogram klimatyzacji",
+      "description": "Ustaw jeden lub więcej zaplanowanych programów wstępnego kondycjonowania. Każde wywołanie zastępuje wszystkie istniejące harmonogramy; wyślij pustą listę, aby anulować wszystkie.",
+      "fields": {
+        "controls": {
+          "name": "Sterowania",
+          "description": "Lista wpisów harmonogramu (mode, on, operate, set_id, start_time, windlevel, days, circle, position, wshld)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numer identyfikacyjny pojazdu. Wymagany przy wielu skonfigurowanych pojazdach."
+        }
+      }
+    },
+    "cancel_climate_schedule": {
+      "name": "Anuluj harmonogram klimatyzacji",
+      "description": "Anuluje wszystkie aktywne harmonogramy wstępnego kondycjonowania.",
+      "fields": {
+        "vin": {
+          "name": "VIN",
+          "description": "Numer identyfikacyjny pojazdu. Wymagany przy wielu skonfigurowanych pojazdach."
+        }
+      }
+    },
+    "set_charge_schedule": {
+      "name": "Ustaw harmonogram ładowania",
+      "description": "Ustaw harmonogram ładowania pojazdu (czas rozpoczęcia, zakończenia, docelowy SOC i dni powtarzania).",
+      "fields": {
+        "enabled": {
+          "name": "Aktywny",
+          "description": "Czy harmonogram ładowania jest aktywny."
+        },
+        "soc_limit": {
+          "name": "Limit SOC",
+          "description": "Docelowy poziom naładowania w procentach (1–100, domyślnie 80)."
+        },
+        "start_time": {
+          "name": "Czas rozpoczęcia",
+          "description": "Czas rozpoczęcia harmonogramu, np. \"23:00\"."
+        },
+        "end_time": {
+          "name": "Czas zakończenia",
+          "description": "Czas zakończenia harmonogramu, np. \"07:00\"."
+        },
+        "cycles": {
+          "name": "Cykle",
+          "description": "Numery dni oddzielone przecinkami, np. \"1,2,3,4,5\". Puste = jednorazowo."
+        },
+        "circulation": {
+          "name": "Cyrkulacja",
+          "description": "Tryb powtarzania: 0 = jednorazowo, 1 = powtarzaj."
+        },
+        "recharge": {
+          "name": "Auto-doładowanie",
+          "description": "Automatyczne doładowanie: 0 = wyłączone, 1 = włączone."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numer identyfikacyjny pojazdu. Wymagany przy wielu skonfigurowanych pojazdach."
+        }
+      }
+    },
+    "fota_schedule": {
+      "name": "Zaplanuj aktualizację oprogramowania",
+      "description": "Zaplanuj instalację oczekującej aktualizacji FOTA na określony czas.",
+      "fields": {
+        "task_id": {
+          "name": "ID zadania",
+          "description": "Identyfikator zadania FOTA z kroku pobierania."
+        },
+        "schedule_time": {
+          "name": "Zaplanowany czas",
+          "description": "Data i czas instalacji, np. \"2026-06-01 03:00:00\"."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numer identyfikacyjny pojazdu. Wymagany przy wielu skonfigurowanych pojazdach."
+        }
+      }
+    }
   }
 }

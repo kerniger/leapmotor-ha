@@ -515,5 +515,87 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate_schedule": {
+      "name": "Set climate schedule",
+      "description": "Set one or more timed climate pre-conditioning schedules. Each call replaces all existing schedules; send an empty controls list to cancel all.",
+      "fields": {
+        "controls": {
+          "name": "Controls",
+          "description": "List of schedule entries (mode, on, operate, set_id, start_time, windlevel, days, circle, position, wshld)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Vehicle identification number. Required when multiple vehicles are configured."
+        }
+      }
+    },
+    "cancel_climate_schedule": {
+      "name": "Cancel climate schedule",
+      "description": "Cancel all active climate pre-conditioning schedules.",
+      "fields": {
+        "vin": {
+          "name": "VIN",
+          "description": "Vehicle identification number. Required when multiple vehicles are configured."
+        }
+      }
+    },
+    "set_charge_schedule": {
+      "name": "Set charge schedule",
+      "description": "Set the vehicle charge schedule (start time, end time, target SOC, and repeat days).",
+      "fields": {
+        "enabled": {
+          "name": "Enabled",
+          "description": "Whether the charge schedule is active."
+        },
+        "soc_limit": {
+          "name": "SOC limit",
+          "description": "Target state-of-charge percentage (1–100, default 80)."
+        },
+        "start_time": {
+          "name": "Start time",
+          "description": "Schedule start time, e.g. \"23:00\"."
+        },
+        "end_time": {
+          "name": "End time",
+          "description": "Schedule end time, e.g. \"07:00\"."
+        },
+        "cycles": {
+          "name": "Cycles",
+          "description": "Comma-separated day numbers, e.g. \"1,2,3,4,5\". Empty = once."
+        },
+        "circulation": {
+          "name": "Circulation",
+          "description": "Repeat mode: 0 = once, 1 = repeat."
+        },
+        "recharge": {
+          "name": "Auto-recharge",
+          "description": "Auto-recharge flag: 0 = off, 1 = on."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Vehicle identification number. Required when multiple vehicles are configured."
+        }
+      }
+    },
+    "fota_schedule": {
+      "name": "Schedule firmware update",
+      "description": "Schedule a queued FOTA firmware update for installation at a specific time.",
+      "fields": {
+        "task_id": {
+          "name": "Task ID",
+          "description": "FOTA task identifier returned by the firmware download step."
+        },
+        "schedule_time": {
+          "name": "Schedule time",
+          "description": "Installation date and time, e.g. \"2026-06-01 03:00:00\"."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Vehicle identification number. Required when multiple vehicles are configured."
+        }
+      }
+    }
   }
 }

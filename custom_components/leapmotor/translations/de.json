@@ -515,5 +515,87 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate_schedule": {
+      "name": "Klimazeitplan setzen",
+      "description": "Einen oder mehrere zeitgesteuerte Klimavorkonditionierungspläne setzen. Jeder Aufruf ersetzt alle vorhandenen Pläne; leere controls-Liste zum Löschen aller Pläne.",
+      "fields": {
+        "controls": {
+          "name": "Steuerungen",
+          "description": "Liste der Zeitplaneinträge (mode, on, operate, set_id, start_time, windlevel, days, circle, position, wshld)."
+        },
+        "vin": {
+          "name": "FIN",
+          "description": "Fahrzeugidentifikationsnummer. Erforderlich bei mehreren konfigurierten Fahrzeugen."
+        }
+      }
+    },
+    "cancel_climate_schedule": {
+      "name": "Klimazeitplan abbrechen",
+      "description": "Alle aktiven Klimavorkonditionierungspläne abbrechen.",
+      "fields": {
+        "vin": {
+          "name": "FIN",
+          "description": "Fahrzeugidentifikationsnummer. Erforderlich bei mehreren konfigurierten Fahrzeugen."
+        }
+      }
+    },
+    "set_charge_schedule": {
+      "name": "Ladezeitplan setzen",
+      "description": "Den Fahrzeug-Ladezeitplan setzen (Startzeit, Endzeit, Ziel-SOC und Wiederholungstage).",
+      "fields": {
+        "enabled": {
+          "name": "Aktiv",
+          "description": "Ob der Ladezeitplan aktiv ist."
+        },
+        "soc_limit": {
+          "name": "SOC-Limit",
+          "description": "Ziel-Ladestand in Prozent (1–100, Standard 80)."
+        },
+        "start_time": {
+          "name": "Startzeit",
+          "description": "Startzeit des Zeitplans, z. B. \"23:00\"."
+        },
+        "end_time": {
+          "name": "Endzeit",
+          "description": "Endzeit des Zeitplans, z. B. \"07:00\"."
+        },
+        "cycles": {
+          "name": "Zyklen",
+          "description": "Kommagetrennte Tagesnummern, z. B. \"1,2,3,4,5\". Leer = einmalig."
+        },
+        "circulation": {
+          "name": "Zirkulation",
+          "description": "Wiederholungsmodus: 0 = einmalig, 1 = wiederholen."
+        },
+        "recharge": {
+          "name": "Auto-Nachladen",
+          "description": "Auto-Nachladen: 0 = aus, 1 = ein."
+        },
+        "vin": {
+          "name": "FIN",
+          "description": "Fahrzeugidentifikationsnummer. Erforderlich bei mehreren konfigurierten Fahrzeugen."
+        }
+      }
+    },
+    "fota_schedule": {
+      "name": "Firmware-Update planen",
+      "description": "Ein in der Warteschlange befindliches FOTA-Firmware-Update für einen bestimmten Zeitpunkt planen.",
+      "fields": {
+        "task_id": {
+          "name": "Aufgaben-ID",
+          "description": "FOTA-Aufgaben-ID aus dem Download-Schritt."
+        },
+        "schedule_time": {
+          "name": "Zeitpunkt",
+          "description": "Installations-Datum und -Uhrzeit, z. B. \"2026-06-01 03:00:00\"."
+        },
+        "vin": {
+          "name": "FIN",
+          "description": "Fahrzeugidentifikationsnummer. Erforderlich bei mehreren konfigurierten Fahrzeugen."
+        }
+      }
+    }
   }
 }

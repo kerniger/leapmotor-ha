@@ -515,5 +515,87 @@
         }
       }
     }
+  },
+  "services": {
+    "set_climate_schedule": {
+      "name": "Klimaatschema instellen",
+      "description": "Stel een of meer geplande klimaatvoorconditioneringsprogramma's in. Elke aanroep vervangt alle bestaande schema's; stuur een lege lijst om alle te annuleren.",
+      "fields": {
+        "controls": {
+          "name": "Besturingen",
+          "description": "Lijst met schema-invoeren (mode, on, operate, set_id, start_time, windlevel, days, circle, position, wshld)."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Voertuigidentificatienummer. Verplicht bij meerdere geconfigureerde voertuigen."
+        }
+      }
+    },
+    "cancel_climate_schedule": {
+      "name": "Klimaatschema annuleren",
+      "description": "Annuleer alle actieve klimaatvoorconditioneringsprogramma's.",
+      "fields": {
+        "vin": {
+          "name": "VIN",
+          "description": "Voertuigidentificatienummer. Verplicht bij meerdere geconfigureerde voertuigen."
+        }
+      }
+    },
+    "set_charge_schedule": {
+      "name": "Laadschema instellen",
+      "description": "Stel het laadschema van het voertuig in (starttijd, eindtijd, doel-SOC en herhaaldag).",
+      "fields": {
+        "enabled": {
+          "name": "Actief",
+          "description": "Of het laadschema actief is."
+        },
+        "soc_limit": {
+          "name": "SOC-limiet",
+          "description": "Doel laadpercentage (1–100, standaard 80)."
+        },
+        "start_time": {
+          "name": "Starttijd",
+          "description": "Starttijd van het schema, bijv. \"23:00\"."
+        },
+        "end_time": {
+          "name": "Eindtijd",
+          "description": "Eindtijd van het schema, bijv. \"07:00\"."
+        },
+        "cycles": {
+          "name": "Cycli",
+          "description": "Kommagescheiden dagnummers, bijv. \"1,2,3,4,5\". Leeg = eenmalig."
+        },
+        "circulation": {
+          "name": "Circulatie",
+          "description": "Herhalingsmodus: 0 = eenmalig, 1 = herhalen."
+        },
+        "recharge": {
+          "name": "Auto-herladen",
+          "description": "Automatisch herladen: 0 = uit, 1 = aan."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Voertuigidentificatienummer. Verplicht bij meerdere geconfigureerde voertuigen."
+        }
+      }
+    },
+    "fota_schedule": {
+      "name": "Firmware-update plannen",
+      "description": "Plan de installatie van een FOTA-firmware-update in de wachtrij op een specifiek tijdstip.",
+      "fields": {
+        "task_id": {
+          "name": "Taak-ID",
+          "description": "FOTA-taakidentificator uit de downloadstap."
+        },
+        "schedule_time": {
+          "name": "Geplande tijd",
+          "description": "Datum en tijd van installatie, bijv. \"2026-06-01 03:00:00\"."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Voertuigidentificatienummer. Verplicht bij meerdere geconfigureerde voertuigen."
+        }
+      }
+    }
   }
 }
