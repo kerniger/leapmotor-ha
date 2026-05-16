@@ -26,10 +26,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor switch entities."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities(
-        LeapmotorChargingScheduleSwitch(coordinator, vin)
-        for vin in coordinator.data.get("vehicles", {})
-    )
+    entities: list[SwitchEntity] = []
+    for vin in coordinator.data.get("vehicles", {}):
+        entities.append(LeapmotorChargingScheduleSwitch(coordinator, vin))
+        entities.append(LeapmotorBatteryPreheatSwitch(coordinator, vin))
+    async_add_entities(entities)
 
 
 class LeapmotorChargingScheduleSwitch(
@@ -137,6 +138,77 @@ class LeapmotorChargingScheduleSwitch(
             success=True,
             result=result,
         )
+        await self.coordinator.async_request_refresh()
+
+
+class LeapmotorBatteryPreheatSwitch(
+    CoordinatorEntity[LeapmotorDataUpdateCoordinator],
+    SwitchEntity,
+):
+    """Battery preheat switch."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "battery_preheat"
+    _attr_icon = "mdi:heat-wave"
+
+    def __init__(
+        self,
+        coordinator: LeapmotorDataUpdateCoordinator,
+        vin: str,
+    ) -> None:
+        super().__init__(coordinator)
+        self.vin = vin
+        self._attr_unique_id = f"{vin}_battery_preheat"
+        vehicle = self.vehicle_data["vehicle"]
+        self._attr_suggested_object_id = _suggested_object_id(
+            vehicle,
+            english_entity_slug("switch", "battery_preheat") or "battery_preheat",
+        )
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, vin)},
+            manufacturer="Leapmotor",
+            model=vehicle.get("car_type"),
+            name=build_vehicle_display_name(vehicle),
+            serial_number=vin,
+        )
+
+    @property
+    def vehicle_data(self) -> dict[str, Any]:
+        return self.coordinator.data["vehicles"][self.vin]
+
+    @property
+    def available(self) -> bool:
+        return super().available and bool(self.coordinator.client.operation_password)
+
+    @property
+    def is_on(self) -> bool | None:
+        value = self.vehicle_data["diagnostics"].get("battery_heating")
+        if value is None:
+            return None
+        return bool(value)
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        await self._async_set_preheat(on=True)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        await self._async_set_preheat(on=False)
+
+    async def _async_set_preheat(self, *, on: bool) -> None:
+        if not self.coordinator.client.operation_password:
+            raise HomeAssistantError(
+                "Vehicle PIN is not configured. Battery preheat control requires it."
+            )
+        method = "battery_preheat" if on else "battery_preheat_off"
+        try:
+            result = await self.hass.async_add_executor_job(
+                getattr(self.coordinator.client, method),
+                self.vin,
+            )
+        except Exception as exc:
+            message = format_remote_error(exc)
+            self.coordinator.record_remote_action(self.vin, method, success=False, error=message)
+            raise HomeAssistantError(message) from exc
+        self.coordinator.record_remote_action(self.vin, method, success=True, result=result)
         await self.coordinator.async_request_refresh()
 
 

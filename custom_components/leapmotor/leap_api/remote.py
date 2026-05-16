@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from ..const import (
     REMOTE_CTL_AC_SWITCH,
     REMOTE_CTL_BATTERY_PREHEAT,
+    REMOTE_CTL_BATTERY_PREHEAT_OFF,
     REMOTE_CTL_FIND_CAR,
     REMOTE_CTL_LOCK,
     REMOTE_CTL_QUICK_COOL,
@@ -49,6 +50,7 @@ REMOTE_ACTION_SPECS: dict[str, RemoteActionSpec] = {
     REMOTE_CTL_SUNSHADE_OPEN: RemoteActionSpec(cmd_id="240", cmd_content='{"value":"10"}'),
     REMOTE_CTL_SUNSHADE_CLOSE: RemoteActionSpec(cmd_id="240", cmd_content='{"value":"0"}'),
     REMOTE_CTL_BATTERY_PREHEAT: RemoteActionSpec(cmd_id="160", cmd_content='{"value":"ptcon"}'),
+    REMOTE_CTL_BATTERY_PREHEAT_OFF: RemoteActionSpec(cmd_id="160", cmd_content='{"value":"ptcoff"}'),
     REMOTE_CTL_WINDOWS: RemoteActionSpec(cmd_id="230", cmd_content='{"value":"2"}'),
     REMOTE_CTL_WINDOWS_OPEN: RemoteActionSpec(cmd_id="230", cmd_content='{"value":"2"}'),
     REMOTE_CTL_WINDOWS_CLOSE: RemoteActionSpec(cmd_id="230", cmd_content='{"value":"0"}'),

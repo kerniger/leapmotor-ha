@@ -298,6 +298,9 @@
       },
       "sunshade_position": {
         "name": "Sunshade position"
+      },
+      "last_charge_energy_kwh": {
+        "name": "Énergie dernière charge"
       }
     },
     "binary_sensor": {
@@ -489,6 +492,9 @@
     "switch": {
       "charging_schedule": {
         "name": "Programme de charge"
+      },
+      "battery_preheat": {
+        "name": "Préchauffage batterie"
       }
     }
   },

@@ -33,6 +33,7 @@ from .const import (
     KNOWN_ACCOUNT_P12_PASSWORDS,
     REMOTE_CTL_AC_SWITCH,
     REMOTE_CTL_BATTERY_PREHEAT,
+    REMOTE_CTL_BATTERY_PREHEAT_OFF,
     REMOTE_CTL_FIND_CAR,
     REMOTE_CTL_LOCK,
     REMOTE_CTL_QUICK_COOL,
@@ -233,6 +234,10 @@ class LeapmotorApiClient:
         """Trigger the verified battery-preheat action."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_BATTERY_PREHEAT)
 
+    def battery_preheat_off(self, vin: str) -> dict[str, Any]:
+        """Turn off battery preheating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_BATTERY_PREHEAT_OFF)
+
     def windows(self, vin: str) -> dict[str, Any]:
         """Trigger the verified window action."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS)
@@ -385,6 +390,11 @@ class LeapmotorApiClient:
                 self.get_car_picture,
                 vehicle,
             )
+            charging_daily = self._fetch_optional_read(
+                "charging daily detail",
+                self.get_charging_daily_detail,
+                vehicle,
+            )
             vehicle_data = normalize_vehicle(
                 vehicle,
                 status,
@@ -393,6 +403,7 @@ class LeapmotorApiClient:
                 consumption_rank_json=consumption_rank,
                 consumption_breakdown_json=consumption_breakdown,
                 picture_json=picture,
+                charging_daily_json=charging_daily,
             )
             vehicle_data["notifications"] = notifications
             result["vehicles"][vehicle.vin] = vehicle_data
@@ -641,6 +652,44 @@ class LeapmotorApiClient:
             cert=self.account_cert,
         )
         return self._parse_api_body(response["status_code"], response["body"], "consumption last week breakdown")
+
+    def get_charging_daily_detail(self, vehicle: Vehicle) -> dict[str, Any]:
+        """Fetch last 7 days of per-session charging detail (page 1, up to 10 records)."""
+        from datetime import date, timedelta
+        end_date = date.today()
+        start_date = end_date - timedelta(days=7)
+        start_time = start_date.isoformat()
+        end_time = end_date.isoformat()
+        timezone = "GMT+00:00"
+        page_num = 1
+        page_size = 10
+        headers = self._build_charging_daily_detail_headers(
+            vin=vehicle.vin,
+            start_time=start_time,
+            end_time=end_time,
+            timezone=timezone,
+            page_num=page_num,
+            page_size=page_size,
+        )
+        headers.update(self._auth_headers(content_type="application/json"))
+        body = json.dumps(
+            {
+                "vin": vehicle.vin,
+                "timeZone": timezone,
+                "startTime": start_time,
+                "endTime": end_time,
+                "pageNum": page_num,
+                "pageSize": page_size,
+            },
+            separators=(",", ":"),
+        )
+        response = self._post_with_curl(
+            path="/carownerservice/charge/daily/detail/page",
+            headers=headers,
+            data=body,
+            cert=self.account_cert,
+        )
+        return self._parse_api_body(response["status_code"], response["body"], "charging daily detail")
 
     def get_car_picture(self, vehicle: Vehicle) -> dict[str, Any]:
         """Fetch read-only car picture metadata."""
@@ -1108,6 +1157,42 @@ class LeapmotorApiClient:
         )
         return self._signed_header_dict(nonce=nonce, timestamp=timestamp, sign_input=sign_input)
 
+    def _build_charging_daily_detail_headers(
+        self,
+        *,
+        vin: str,
+        start_time: str,
+        end_time: str,
+        timezone: str,
+        page_num: int,
+        page_size: int,
+    ) -> dict[str, str]:
+        """Build signed headers for the charge/daily/detail/page endpoint.
+
+        All body params are merged with standard header fields and sorted
+        alphabetically by key (matching build_signed_headers in leapmotor-api).
+        """
+        nonce = str(random.randint(100000, 9999999))
+        timestamp = str(int(time.time() * 1000))
+        sign_fields = {
+            "acceptLanguage": self.language,
+            "channel": DEFAULT_CHANNEL,
+            "deviceId": self.device_id,
+            "deviceType": DEFAULT_DEVICE_TYPE,
+            "endTime": end_time,
+            "nonce": nonce,
+            "pageNum": str(page_num),
+            "pageSize": str(page_size),
+            "source": DEFAULT_SOURCE,
+            "startTime": start_time,
+            "timeZone": timezone,
+            "timestamp": timestamp,
+            "version": DEFAULT_APP_VERSION,
+            "vin": vin,
+        }
+        sign_input = "".join(v for _, v in sorted(sign_fields.items()))
+        return self._signed_header_dict(nonce=nonce, timestamp=timestamp, sign_input=sign_input)
+
     def _signed_header_dict(
         self,
         *,
@@ -1419,6 +1504,7 @@ def normalize_vehicle(
     consumption_rank_json: dict[str, Any] | None = None,
     consumption_breakdown_json: dict[str, Any] | None = None,
     picture_json: dict[str, Any] | None = None,
+    charging_daily_json: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Normalize Leapmotor status payload into Home Assistant-friendly values."""
     status_data = status_json.get("data") or {}
@@ -1431,6 +1517,8 @@ def normalize_vehicle(
     weekly_ec = rank_data.get("weeklyEC") or []
     breakdown_data = (consumption_breakdown_json or {}).get("data") or {}
     picture_data = (picture_json or {}).get("data") or {}
+    charge_records = ((charging_daily_json or {}).get("data") or {}).get("list") or []
+    last_charge = charge_records[0] if charge_records else None
     vehicle_state = _derive_vehicle_state(signal)
     tire_pressures = _tire_pressures_bar(vehicle.car_type, signal)
     last_7_days_energy = _sum_detail_field(mileage_data.get("detail"), "accumulatedEnergyConsume")
@@ -1521,6 +1609,12 @@ def normalize_vehicle(
             "last_week_driving_energy_percent": last_week_split.get("driving"),
             "last_week_climate_energy_percent": last_week_split.get("climate"),
             "last_week_other_energy_percent": last_week_split.get("other"),
+        },
+        "charging_history": {
+            "last_charge_energy_kwh": _safe_float(last_charge.get("chargeInEnergy")) if last_charge else None,
+            "last_charge_type": last_charge.get("chargeType") if last_charge else None,
+            "last_charge_start_ts": last_charge.get("chargeGunStartTs") if last_charge else None,
+            "last_charge_end_ts": last_charge.get("chargeGunEndTs") if last_charge else None,
         },
         "media": {
             "car_picture_status": "available" if picture_data.get("key") else "unavailable",
