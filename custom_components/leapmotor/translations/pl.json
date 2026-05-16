@@ -469,6 +469,33 @@
       },
       "refresh_data": {
         "name": "Odswiez dane"
+      },
+      "sentry_mode_on": {
+        "name": "Tryb czuwania wl."
+      },
+      "sentry_mode_off": {
+        "name": "Tryb czuwania wyl."
+      },
+      "start_charging": {
+        "name": "Rozpocznij ladowanie"
+      },
+      "stop_charging": {
+        "name": "Zatrzymaj ladowanie"
+      },
+      "healthy_charging_on": {
+        "name": "Ladowanie ochronne wl."
+      },
+      "healthy_charging_off": {
+        "name": "Ladowanie ochronne wyl."
+      },
+      "ble_key_restart": {
+        "name": "Restart klucza BLE"
+      },
+      "fota_download": {
+        "name": "Pobierz oprogramowanie"
+      },
+      "fota_install": {
+        "name": "Zainstaluj oprogramowanie"
       }
     },
     "lock": {

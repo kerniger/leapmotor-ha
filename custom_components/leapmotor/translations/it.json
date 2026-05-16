@@ -469,6 +469,33 @@
       },
       "refresh_data": {
         "name": "Aggiorna dati"
+      },
+      "sentry_mode_on": {
+        "name": "Modalita sentinella on"
+      },
+      "sentry_mode_off": {
+        "name": "Modalita sentinella off"
+      },
+      "start_charging": {
+        "name": "Avvia ricarica"
+      },
+      "stop_charging": {
+        "name": "Ferma ricarica"
+      },
+      "healthy_charging_on": {
+        "name": "Ricarica intelligente on"
+      },
+      "healthy_charging_off": {
+        "name": "Ricarica intelligente off"
+      },
+      "ble_key_restart": {
+        "name": "Riavvia chiave BLE"
+      },
+      "fota_download": {
+        "name": "Scarica firmware"
+      },
+      "fota_install": {
+        "name": "Installa firmware"
       }
     },
     "lock": {

@@ -469,6 +469,33 @@
       },
       "refresh_data": {
         "name": "Daten aktualisieren"
+      },
+      "sentry_mode_on": {
+        "name": "Wachmodus an"
+      },
+      "sentry_mode_off": {
+        "name": "Wachmodus aus"
+      },
+      "start_charging": {
+        "name": "Laden starten"
+      },
+      "stop_charging": {
+        "name": "Laden stoppen"
+      },
+      "healthy_charging_on": {
+        "name": "Schonendes Laden an"
+      },
+      "healthy_charging_off": {
+        "name": "Schonendes Laden aus"
+      },
+      "ble_key_restart": {
+        "name": "BLE-Schluessel neu starten"
+      },
+      "fota_download": {
+        "name": "Firmware herunterladen"
+      },
+      "fota_install": {
+        "name": "Firmware installieren"
       }
     },
     "lock": {

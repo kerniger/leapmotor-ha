@@ -469,6 +469,33 @@
       },
       "refresh_data": {
         "name": "Actualizar datos"
+      },
+      "sentry_mode_on": {
+        "name": "Modo centinela activado"
+      },
+      "sentry_mode_off": {
+        "name": "Modo centinela desactivado"
+      },
+      "start_charging": {
+        "name": "Iniciar carga"
+      },
+      "stop_charging": {
+        "name": "Detener carga"
+      },
+      "healthy_charging_on": {
+        "name": "Carga saludable activada"
+      },
+      "healthy_charging_off": {
+        "name": "Carga saludable desactivada"
+      },
+      "ble_key_restart": {
+        "name": "Reiniciar llave BLE"
+      },
+      "fota_download": {
+        "name": "Descargar firmware"
+      },
+      "fota_install": {
+        "name": "Instalar firmware"
       }
     },
     "lock": {
