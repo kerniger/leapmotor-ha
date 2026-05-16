@@ -31,9 +31,12 @@ from .const import (
     DEFAULT_P12_ENC_ALG,
     DEFAULT_SOURCE,
     KNOWN_ACCOUNT_P12_PASSWORDS,
+    REMOTE_CTL_AC_SCHEDULE,
     REMOTE_CTL_AC_SWITCH,
     REMOTE_CTL_BATTERY_PREHEAT,
+    REMOTE_CTL_CHARGE_SCHEDULE,
     REMOTE_CTL_FIND_CAR,
+    REMOTE_CTL_FOTA_SCHEDULE,
     REMOTE_CTL_LOCK,
     REMOTE_CTL_QUICK_COOL,
     REMOTE_CTL_QUICK_HEAT,
@@ -353,6 +356,149 @@ class LeapmotorApiClient:
             cmd_content=cmd_content,
             action_label="send_destination",
         )
+
+    def set_climate_schedule(self, vin: str, *, controls: list[dict[str, Any]]) -> dict[str, Any]:
+        """Set climate schedule (cmd_id=171). Full-state replacement — pass empty list to cancel all."""
+        cmd_content = json.dumps({"controls": controls}, separators=(",", ":"))
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="171",
+            cmd_content=cmd_content,
+            action_label=REMOTE_CTL_AC_SCHEDULE,
+            vehicle=vehicle,
+        )
+
+    def cancel_climate_schedule(self, vin: str) -> dict[str, Any]:
+        """Cancel all active climate schedules."""
+        return self.set_climate_schedule(vin, controls=[])
+
+    def set_charge_schedule(
+        self,
+        vin: str,
+        *,
+        enabled: bool,
+        soc_limit: int = 80,
+        start_time: str,
+        end_time: str,
+        cycles: str,
+        circulation: int = 0,
+        recharge: int = 0,
+    ) -> dict[str, Any]:
+        """Set the full charging schedule (cmd_id=190).
+
+        Args:
+            enabled: Whether the schedule is active.
+            soc_limit: Target SOC percentage (default 80).
+            start_time: Start time e.g. "23:00".
+            end_time: End time e.g. "07:00".
+            cycles: Days as comma-separated string e.g. "1,2,3,4,5,6,7".
+            circulation: Repeat mode — 0=once, 1=repeat.
+            recharge: Auto-recharge flag — 0=off, 1=on.
+        """
+        cmd_content = json.dumps(
+            {
+                "chargeEnable": 1 if enabled else 0,
+                "chargesoc": soc_limit,
+                "circulation": circulation,
+                "cycles": str(cycles),
+                "endtime": str(end_time),
+                "recharge": recharge,
+                "starttime": str(start_time),
+            },
+            separators=(",", ":"),
+        )
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="190",
+            cmd_content=cmd_content,
+            action_label=REMOTE_CTL_CHARGE_SCHEDULE,
+            vehicle=vehicle,
+        )
+
+    def fota_schedule(self, vin: str, *, task_id: int, schedule_time: str) -> dict[str, Any]:
+        """Schedule a FOTA firmware install (cmd_id=392)."""
+        cmd_content = json.dumps(
+            {"taskId": task_id, "scheduleTime": schedule_time},
+            separators=(",", ":"),
+        )
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="392",
+            cmd_content=cmd_content,
+            action_label=REMOTE_CTL_FOTA_SCHEDULE,
+            vehicle=vehicle,
+        )
+
+    def get_climate_schedule(self, vin: str) -> list[dict[str, Any]]:
+        """Retrieve active climate schedules (cmdId=171). Returns controls list."""
+        return self._get_appointment_controls(vin, "171")
+
+    def get_ptc_heating_schedule(self, vin: str) -> list[dict[str, Any]]:
+        """Retrieve active PTC battery heating schedules (cmdId=161). Returns controls list."""
+        return self._get_appointment_controls(vin, "161")
+
+    def get_charge_schedule(self, vin: str) -> dict[str, Any]:
+        """Retrieve charge schedule (cmdId=190). Returns flat dict (not controls-wrapped)."""
+        parsed = self._fetch_appointment(vin, "190")
+        if not parsed or not isinstance(parsed, dict):
+            return {}
+        return parsed
+
+    def get_prepare_car_schedule(self, vin: str) -> list[dict[str, Any]]:
+        """Retrieve active prepare-car schedules (cmdId=361). Returns controls list."""
+        return self._get_appointment_controls(vin, "361")
+
+    def get_fota_schedule(self, vin: str) -> list[dict[str, Any]]:
+        """Retrieve active FOTA install schedules (cmdId=392). Returns controls list."""
+        return self._get_appointment_controls(vin, "392")
+
+    def _get_appointment_controls(self, vin: str, cmd_id: str) -> list[dict[str, Any]]:
+        """Fetch appointment and extract controls array. Returns [] on permission error or empty."""
+        parsed = self._fetch_appointment(vin, cmd_id)
+        if not parsed:
+            return []
+        return parsed.get("controls", []) if isinstance(parsed, dict) else []
+
+    def _fetch_appointment(self, vin: str, cmd_id: str) -> dict[str, Any] | None:
+        """Call getAppointment endpoint. Returns parsed data dict or None on permission/empty."""
+        if not self.token:
+            self.login()
+        headers = self._build_signed_headers(vin=vin)
+        headers.update(self._auth_headers(content_type="application/x-www-form-urlencoded"))
+        data = (
+            f"vin={requests.utils.quote(vin, safe='')}"
+            f"&cmdId={requests.utils.quote(cmd_id, safe='')}"
+        )
+        response = self._post_with_curl(
+            path="/carownerservice/oversea/vehicle/v1/app/remote/ctl/getAppointment",
+            headers=headers,
+            data=data,
+            cert=self.account_cert,
+        )
+        try:
+            resp_body: dict[str, Any] = json.loads(response["body"])
+        except ValueError:
+            return None
+        result_code = resp_body.get("result", resp_body.get("code"))
+        if response["status_code"] != 200 or result_code != 0:
+            msg = resp_body.get("message") or ""
+            if "permission" in msg.lower():
+                _LOGGER.debug("getAppointment(cmdId=%s): vehicle lacks permission", cmd_id)
+                return None
+            _LOGGER.debug("getAppointment(cmdId=%s) failed: %s", cmd_id, msg)
+            return None
+        raw_data = resp_body.get("data")
+        if not raw_data:
+            return None
+        if isinstance(raw_data, str):
+            try:
+                return json.loads(raw_data)
+            except ValueError:
+                return None
+        return dict(raw_data)
 
     def _fetch_authenticated_data(self) -> dict[str, Any]:
         """Fetch all read-only vehicle data with a current session."""
