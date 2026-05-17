@@ -298,6 +298,9 @@
       },
       "sunshade_position": {
         "name": "Sunshade position"
+      },
+      "last_charge_energy_kwh": {
+        "name": "Energie derniere charge"
       }
     },
     "binary_sensor": {
@@ -414,6 +417,9 @@
       },
       "door_control_allowed": {
         "name": "Door control allowed"
+      },
+      "is_driving": {
+        "name": "En conduite"
       }
     },
     "image": {
@@ -434,14 +440,8 @@
       "sunshade_action": {
         "name": "Pare-soleil"
       },
-      "battery_preheat": {
-        "name": "Prechauffage batterie"
-      },
       "windows": {
         "name": "Action vitres"
-      },
-      "ac_switch": {
-        "name": "Couper climatisation"
       },
       "quick_cool": {
         "name": "Refroidissement rapide"
@@ -469,6 +469,9 @@
       },
       "refresh_data": {
         "name": "Actualiser les donnees"
+      },
+      "ac_off": {
+        "name": "Desactiver climatisation"
       }
     },
     "lock": {
@@ -489,6 +492,9 @@
     "switch": {
       "charging_schedule": {
         "name": "Programme de charge"
+      },
+      "battery_preheat": {
+        "name": "Prechauffage batterie"
       }
     }
   },
@@ -512,6 +518,42 @@
         "data_description": {
           "eco_polling_enabled": "Utilise l intervalle eco plus lent uniquement lorsque tous les vehicules sont clairement verrouilles, gares et non branches.",
           "eco_scan_interval": "Intervalle de polling en mode eco. Il est automatiquement limite au minimum a l intervalle normal de mise a jour."
+        }
+      }
+    }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Regler la climatisation",
+      "description": "Envoie une commande de climatisation parametree au vehicule. PIN requis.",
+      "fields": {
+        "mode": {
+          "name": "Mode",
+          "description": "Mode de climatisation: cold, hot ou wind."
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Temperature cible en degres C, de 18 a 32. Defaut 26."
+        },
+        "fan_speed": {
+          "name": "Vitesse ventilation",
+          "description": "Niveau de ventilation de 1 a 7. Defaut 3."
+        },
+        "recirculate": {
+          "name": "Recirculation",
+          "description": "Utiliser la recirculation au lieu de l air exterieur. Defaut false."
+        },
+        "windshield_defrost": {
+          "name": "Degivrage pare-brise",
+          "description": "Activer le degivrage du pare-brise avant. Defaut false."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numero d identification du vehicule. Obligatoire si plusieurs vehicules sont configures."
+        },
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entite Leapmotor optionnelle pour determiner le vehicule cible."
         }
       }
     }

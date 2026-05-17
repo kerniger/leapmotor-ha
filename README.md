@@ -125,16 +125,21 @@ permissions.
 | `leapmotor.find_car` | yes | Find vehicle |
 | `leapmotor.windows_open` / `leapmotor.windows_close` | yes | Open or close windows |
 | `leapmotor.sunshade_open` / `leapmotor.sunshade_close` | yes | Open or close sunshade |
-| `leapmotor.ac_switch` | yes | Climate off |
+| `leapmotor.ac_off` | yes | Climate off |
+| `leapmotor.set_climate` | yes | Parameterised climate command |
 | `leapmotor.quick_cool` / `leapmotor.quick_heat` | yes | Climate quick profiles |
 | `leapmotor.windshield_defrost` | yes | Windshield defrost |
-| `leapmotor.battery_preheat` | yes | Battery preheat |
 | `leapmotor.set_charge_limit` | yes | Set charge limit |
 | `leapmotor.send_destination` | no | Send destination to navigation |
 | `leapmotor.export_diagnostics` | no | Write redacted support JSON |
 
 `windows_open` / `windows_close` accept optional `value` from `0` to `100`.
 `sunshade_open` / `sunshade_close` accept optional `value` from `0` to `10`.
+`set_climate` requires `mode` (`cold`, `hot`, or `wind`) and accepts optional
+`temperature` (`18` to `32`), `fan_speed` (`1` to `7`), `recirculate`, and
+`windshield_defrost`.
+Battery preheating is exposed as a stateful `switch` instead of a one-shot
+service/button, so it can be turned on and off from Home Assistant.
 `set_charge_limit` requires `charge_limit_percent`. `send_destination` requires
 `name`, `latitude`, and `longitude`; `address` is optional.
 
@@ -152,6 +157,18 @@ Unlock the charging connector:
 action: leapmotor.unlock_charger
 data:
   entity_id: sensor.c10_battery
+```
+
+Heat the cabin to 26°C:
+
+```yaml
+action: leapmotor.set_climate
+data:
+  entity_id: sensor.c10_battery
+  mode: hot
+  temperature: 26
+  fan_speed: 4
+  recirculate: true
 ```
 
 Send a destination:

@@ -298,6 +298,9 @@
       },
       "sunshade_position": {
         "name": "Sunshade position"
+      },
+      "last_charge_energy_kwh": {
+        "name": "Energia ostatniego ladowania"
       }
     },
     "binary_sensor": {
@@ -414,6 +417,9 @@
       },
       "door_control_allowed": {
         "name": "Door control allowed"
+      },
+      "is_driving": {
+        "name": "W ruchu"
       }
     },
     "image": {
@@ -434,14 +440,8 @@
       "sunshade_action": {
         "name": "Roleta przeciwsloneczna"
       },
-      "battery_preheat": {
-        "name": "Podgrzewanie baterii"
-      },
       "windows": {
         "name": "Akcja szyb"
-      },
-      "ac_switch": {
-        "name": "Wylacz klimatyzacje"
       },
       "quick_cool": {
         "name": "Szybkie chlodzenie"
@@ -469,6 +469,9 @@
       },
       "refresh_data": {
         "name": "Odswiez dane"
+      },
+      "ac_off": {
+        "name": "Wylacz klimatyzacje"
       }
     },
     "lock": {
@@ -489,6 +492,9 @@
     "switch": {
       "charging_schedule": {
         "name": "Harmonogram ladowania"
+      },
+      "battery_preheat": {
+        "name": "Podgrzewanie baterii"
       }
     }
   },
@@ -512,6 +518,42 @@
         "data_description": {
           "eco_polling_enabled": "Uzywa wolniejszego interwalu eco tylko gdy wszystkie pojazdy sa jednoznacznie zamkniete, zaparkowane i odlaczone.",
           "eco_scan_interval": "Interwal odpytywania w trybie eco. Jest automatycznie ograniczany co najmniej do normalnego interwalu aktualizacji."
+        }
+      }
+    }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Ustaw klimatyzacje",
+      "description": "Wyslij parametryzowane polecenie klimatyzacji do pojazdu. Wymaga PIN.",
+      "fields": {
+        "mode": {
+          "name": "Tryb",
+          "description": "Tryb klimatyzacji: cold, hot lub wind."
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Temperatura docelowa w stopniach C, od 18 do 32. Domyslnie 26."
+        },
+        "fan_speed": {
+          "name": "Predkosc wentylatora",
+          "description": "Poziom wentylatora od 1 do 7. Domyslnie 3."
+        },
+        "recirculate": {
+          "name": "Recyrkulacja",
+          "description": "Uzyj recyrkulacji zamiast powietrza z zewnatrz. Domyslnie false."
+        },
+        "windshield_defrost": {
+          "name": "Odmrazanie przedniej szyby",
+          "description": "Wlacz odmrazanie przedniej szyby. Domyslnie false."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numer identyfikacyjny pojazdu. Wymagany przy wielu pojazdach."
+        },
+        "entity_id": {
+          "name": "ID encji",
+          "description": "Opcjonalna encja Leapmotor do ustalenia pojazdu docelowego."
         }
       }
     }

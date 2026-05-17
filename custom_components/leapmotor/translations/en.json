@@ -298,6 +298,9 @@
       },
       "sunshade_position": {
         "name": "Sunshade position"
+      },
+      "last_charge_energy_kwh": {
+        "name": "Last charge energy"
       }
     },
     "binary_sensor": {
@@ -414,6 +417,9 @@
       },
       "door_control_allowed": {
         "name": "Door control allowed"
+      },
+      "is_driving": {
+        "name": "Driving"
       }
     },
     "image": {
@@ -443,9 +449,6 @@
       "close_sunshade": {
         "name": "Close sunshade"
       },
-      "battery_preheat": {
-        "name": "Battery preheat"
-      },
       "windows": {
         "name": "Open windows"
       },
@@ -454,9 +457,6 @@
       },
       "close_windows": {
         "name": "Close windows"
-      },
-      "ac_switch": {
-        "name": "Climate off"
       },
       "quick_cool": {
         "name": "Quick cool"
@@ -469,6 +469,9 @@
       },
       "refresh_data": {
         "name": "Refresh data"
+      },
+      "ac_off": {
+        "name": "Climate off"
       }
     },
     "lock": {
@@ -489,6 +492,9 @@
     "switch": {
       "charging_schedule": {
         "name": "Charging schedule"
+      },
+      "battery_preheat": {
+        "name": "Battery preheat"
       }
     }
   },
@@ -512,6 +518,42 @@
         "data_description": {
           "eco_polling_enabled": "Use the slower eco interval only while every vehicle is clearly locked, parked, and unplugged.",
           "eco_scan_interval": "Polling interval used in eco mode. It is automatically clamped to at least the normal update interval."
+        }
+      }
+    }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Set climate",
+      "description": "Send a parameterised climate command to the vehicle. Requires PIN.",
+      "fields": {
+        "mode": {
+          "name": "Mode",
+          "description": "Climate mode: cold, hot or wind."
+        },
+        "temperature": {
+          "name": "Temperature",
+          "description": "Target temperature in degC, from 18 to 32. Default 26."
+        },
+        "fan_speed": {
+          "name": "Fan speed",
+          "description": "Fan level from 1 to 7. Default 3."
+        },
+        "recirculate": {
+          "name": "Recirculate",
+          "description": "Use cabin air recirculation instead of outside air. Default false."
+        },
+        "windshield_defrost": {
+          "name": "Windshield defrost",
+          "description": "Enable front windshield defrost. Default false."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Vehicle identification number. Required when multiple vehicles are configured."
+        },
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Optional Leapmotor entity to resolve the target vehicle."
         }
       }
     }

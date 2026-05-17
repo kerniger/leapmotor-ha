@@ -11,7 +11,7 @@ import random
 import tempfile
 import time
 import uuid
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -32,7 +32,10 @@ from .const import (
     DEFAULT_SOURCE,
     KNOWN_ACCOUNT_P12_PASSWORDS,
     REMOTE_CTL_AC_SWITCH,
+    REMOTE_CTL_AC_ON,
+    REMOTE_CTL_AC_OFF,
     REMOTE_CTL_BATTERY_PREHEAT,
+    REMOTE_CTL_BATTERY_PREHEAT_OFF,
     REMOTE_CTL_FIND_CAR,
     REMOTE_CTL_LOCK,
     REMOTE_CTL_QUICK_COOL,
@@ -233,6 +236,10 @@ class LeapmotorApiClient:
         """Trigger the verified battery-preheat action."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_BATTERY_PREHEAT)
 
+    def battery_preheat_off(self, vin: str) -> dict[str, Any]:
+        """Turn off battery preheating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_BATTERY_PREHEAT_OFF)
+
     def windows(self, vin: str) -> dict[str, Any]:
         """Trigger the verified window action."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS)
@@ -246,8 +253,52 @@ class LeapmotorApiClient:
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_CLOSE, value=value)
 
     def ac_switch(self, vin: str) -> dict[str, Any]:
-        """Trigger the verified A/C switch profile."""
-        return self._remote_control(vin=vin, action=REMOTE_CTL_AC_SWITCH)
+        """Backward-compatible alias for turning climate control off."""
+        return self.ac_off(vin)
+
+    def ac_on(
+        self,
+        vin: str,
+        *,
+        temperature: int | None = None,
+        mode: str | None = None,
+        windlevel: int | None = None,
+        circle: str | None = None,
+    ) -> dict[str, Any]:
+        """Turn climate control on with optional mode, temperature and fan settings."""
+        params = _build_climate_payload(
+            temperature=temperature,
+            mode=mode,
+            windlevel=windlevel,
+            circle=circle,
+            operate="manual",
+        )
+        return self._remote_control(vin=vin, action=REMOTE_CTL_AC_ON, cmd_content=params)
+
+    def ac_off(self, vin: str) -> dict[str, Any]:
+        """Turn climate control off using the close operation."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_AC_OFF)
+
+    def set_climate(
+        self,
+        vin: str,
+        *,
+        mode: str,
+        temperature: int = 26,
+        fan_speed: int = 3,
+        recirculate: bool = False,
+        windshield_defrost: bool = False,
+    ) -> dict[str, Any]:
+        """Send a parameterised climate command."""
+        params = _build_climate_payload(
+            temperature=temperature,
+            mode=mode,
+            windlevel=fan_speed,
+            circle="in" if recirculate else "out",
+            operate="manual",
+        )
+        params["wshld"] = "1" if windshield_defrost else "0"
+        return self._remote_control(vin=vin, action=REMOTE_CTL_AC_ON, cmd_content=params)
 
     def quick_cool(self, vin: str) -> dict[str, Any]:
         """Trigger the verified quick-cool profile."""
@@ -385,6 +436,11 @@ class LeapmotorApiClient:
                 self.get_car_picture,
                 vehicle,
             )
+            charging_daily = self._fetch_optional_read(
+                "charging daily detail",
+                self.get_charging_daily_detail,
+                vehicle,
+            )
             vehicle_data = normalize_vehicle(
                 vehicle,
                 status,
@@ -393,6 +449,7 @@ class LeapmotorApiClient:
                 consumption_rank_json=consumption_rank,
                 consumption_breakdown_json=consumption_breakdown,
                 picture_json=picture,
+                charging_daily_json=charging_daily,
             )
             vehicle_data["notifications"] = notifications
             result["vehicles"][vehicle.vin] = vehicle_data
@@ -642,6 +699,42 @@ class LeapmotorApiClient:
         )
         return self._parse_api_body(response["status_code"], response["body"], "consumption last week breakdown")
 
+    def get_charging_daily_detail(self, vehicle: Vehicle) -> dict[str, Any]:
+        """Fetch recent per-session charging details."""
+        end_date = datetime.now(UTC).date()
+        start_date = end_date - timedelta(days=7)
+        timezone = "GMT+00:00"
+        page_num = 1
+        page_size = 10
+        body_params = {
+            "vin": vehicle.vin,
+            "timeZone": timezone,
+            "startTime": start_date.isoformat(),
+            "endTime": end_date.isoformat(),
+            "pageNum": str(page_num),
+            "pageSize": str(page_size),
+        }
+        headers = self._build_charging_daily_detail_headers(body_params=body_params)
+        headers.update(self._auth_headers(content_type="application/json"))
+        body = json.dumps(
+            {
+                "vin": vehicle.vin,
+                "timeZone": timezone,
+                "startTime": start_date.isoformat(),
+                "endTime": end_date.isoformat(),
+                "pageNum": page_num,
+                "pageSize": page_size,
+            },
+            separators=(",", ":"),
+        )
+        response = self._post_with_curl(
+            path="/carownerservice/charge/daily/detail/page",
+            headers=headers,
+            data=body,
+            cert=self.account_cert,
+        )
+        return self._parse_api_body(response["status_code"], response["body"], "charging daily detail")
+
     def get_car_picture(self, vehicle: Vehicle) -> dict[str, Any]:
         """Fetch read-only car picture metadata."""
         headers = self._build_car_picture_headers(vin=vehicle.vin)
@@ -674,7 +767,14 @@ class LeapmotorApiClient:
             )
         return response["body"]
 
-    def _remote_control(self, *, vin: str, action: str, value: int | None = None) -> dict[str, Any]:
+    def _remote_control(
+        self,
+        *,
+        vin: str,
+        action: str,
+        value: int | None = None,
+        cmd_content: dict[str, Any] | str | None = None,
+    ) -> dict[str, Any]:
         """Execute a remote-control action using the verified operatePassword flow."""
         if not self.token:
             self.login()
@@ -688,13 +788,17 @@ class LeapmotorApiClient:
 
         vehicle = self._find_vehicle_by_vin(vin)
         spec = REMOTE_ACTION_SPECS[action]
-        cmd_content = spec.cmd_content
+        resolved_cmd_content = spec.cmd_content
+        if isinstance(cmd_content, dict):
+            resolved_cmd_content = json.dumps(cmd_content, separators=(",", ":"))
+        elif isinstance(cmd_content, str):
+            resolved_cmd_content = cmd_content
         if value is not None:
-            cmd_content = json.dumps({"value": str(value)}, separators=(",", ":"))
+            resolved_cmd_content = json.dumps({"value": str(value)}, separators=(",", ":"))
         return self._remote_control_raw(
             vin=vehicle.vin,
             cmd_id=spec.cmd_id,
-            cmd_content=cmd_content,
+            cmd_content=resolved_cmd_content,
             action_label=action,
             vehicle=vehicle,
         )
@@ -1108,6 +1212,24 @@ class LeapmotorApiClient:
         )
         return self._signed_header_dict(nonce=nonce, timestamp=timestamp, sign_input=sign_input)
 
+    def _build_charging_daily_detail_headers(self, *, body_params: dict[str, str]) -> dict[str, str]:
+        """Build the signature variant used by charge/daily/detail/page."""
+        nonce = str(random.randint(100000, 9999999))
+        timestamp = str(int(time.time() * 1000))
+        sign_fields = {
+            "acceptLanguage": self.language,
+            "channel": DEFAULT_CHANNEL,
+            "deviceId": self.device_id,
+            "deviceType": DEFAULT_DEVICE_TYPE,
+            "nonce": nonce,
+            "source": DEFAULT_SOURCE,
+            "timestamp": timestamp,
+            "version": DEFAULT_APP_VERSION,
+            **body_params,
+        }
+        sign_input = "".join(value for _, value in sorted(sign_fields.items()))
+        return self._signed_header_dict(nonce=nonce, timestamp=timestamp, sign_input=sign_input)
+
     def _signed_header_dict(
         self,
         *,
@@ -1419,6 +1541,7 @@ def normalize_vehicle(
     consumption_rank_json: dict[str, Any] | None = None,
     consumption_breakdown_json: dict[str, Any] | None = None,
     picture_json: dict[str, Any] | None = None,
+    charging_daily_json: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Normalize Leapmotor status payload into Home Assistant-friendly values."""
     status_data = status_json.get("data") or {}
@@ -1431,6 +1554,8 @@ def normalize_vehicle(
     weekly_ec = rank_data.get("weeklyEC") or []
     breakdown_data = (consumption_breakdown_json or {}).get("data") or {}
     picture_data = (picture_json or {}).get("data") or {}
+    charge_records = ((charging_daily_json or {}).get("data") or {}).get("list") or []
+    last_charge = charge_records[0] if charge_records else None
     vehicle_state = _derive_vehicle_state(signal)
     tire_pressures = _tire_pressures_bar(vehicle.car_type, signal)
     last_7_days_energy = _sum_detail_field(mileage_data.get("detail"), "accumulatedEnergyConsume")
@@ -1457,6 +1582,7 @@ def normalize_vehicle(
             "odometer_km": signal.get("1318"),
             "speed_kmh": _safe_float(signal.get("1319")),
             "gear": _gear_state(signal),
+            "is_driving": vehicle_state == "driving" if vehicle_state is not None else None,
             "battery_percent_precise": _safe_float(signal.get("100003")),
             "cltc_range_km": _safe_int(signal.get("3257")),
             "wltp_max_range_km": _safe_int(signal.get("3257")),
@@ -1521,6 +1647,14 @@ def normalize_vehicle(
             "last_week_driving_energy_percent": last_week_split.get("driving"),
             "last_week_climate_energy_percent": last_week_split.get("climate"),
             "last_week_other_energy_percent": last_week_split.get("other"),
+        },
+        "charging_history": {
+            "last_charge_energy_kwh": (
+                _safe_float(last_charge.get("chargeInEnergy")) if last_charge else None
+            ),
+            "last_charge_type": last_charge.get("chargeType") if last_charge else None,
+            "last_charge_start_ts": last_charge.get("chargeGunStartTs") if last_charge else None,
+            "last_charge_end_ts": last_charge.get("chargeGunEndTs") if last_charge else None,
         },
         "media": {
             "car_picture_status": "available" if picture_data.get("key") else "unavailable",
@@ -1596,7 +1730,9 @@ def normalize_vehicle(
             "park_assist_enabled": _one_is_on(signal.get("2189")),
             "sentinel_mode": _one_is_on(signal.get("3636")),
             "parking_photo": _one_is_on(signal.get("3638")),
-            "fully_charged": _one_is_on(signal.get("3736")),
+            "fully_charged": _one_is_on(signal.get("3736"))
+            if signal.get("3736") is not None
+            else _safe_bool(status_data.get("chargeCompleted")),
             "speed_limit_enabled": _one_is_on(signal.get("12054")),
             "speed_limit_kmh": _safe_int(signal.get("6048")),
             "speed_limit_unit": signal.get("6047"),
@@ -1870,6 +2006,40 @@ def _safe_float(raw: Any) -> float | None:
         return float(raw)
     except (TypeError, ValueError):
         return None
+
+
+def _build_climate_payload(
+    *,
+    temperature: int | None,
+    mode: str | None,
+    windlevel: int | None,
+    circle: str | None,
+    operate: str,
+) -> dict[str, str]:
+    """Build the cmd_id=170 climate payload used by the official app."""
+    resolved_mode = mode or "wind"
+    resolved_circle = circle or "out"
+    resolved_temperature = 26 if temperature is None else int(temperature)
+    resolved_windlevel = 3 if windlevel is None else int(windlevel)
+
+    if resolved_mode not in {"cold", "hot", "wind"}:
+        raise LeapmotorApiError("Climate mode must be one of: cold, hot, wind.")
+    if resolved_circle not in {"in", "out"}:
+        raise LeapmotorApiError("Climate circulation must be one of: in, out.")
+    if resolved_temperature < 18 or resolved_temperature > 32:
+        raise LeapmotorApiError("Climate temperature must be between 18 and 32.")
+    if resolved_windlevel < 1 or resolved_windlevel > 7:
+        raise LeapmotorApiError("Climate fan level must be between 1 and 7.")
+
+    return {
+        "circle": resolved_circle,
+        "mode": resolved_mode,
+        "operate": operate,
+        "position": "all",
+        "temperature": str(resolved_temperature),
+        "windlevel": str(resolved_windlevel),
+        "wshld": "0",
+    }
 
 
 def _to_bar(raw: Any) -> float | None:

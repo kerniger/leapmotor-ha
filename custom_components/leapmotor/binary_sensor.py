@@ -24,6 +24,7 @@ from .entity_helpers import build_vehicle_display_name, load_localized_entity_na
 from .entity_migration import english_entity_slug
 
 OPTIONAL_BINARY_SENSOR_PATHS = {
+    "is_driving": "status.is_driving",
     "charging_planned_enabled": "charging.charging_planned_enabled",
     "charging_planned_weekly": "charging.charging_planned_cycles",
     "remote_session_active": "diagnostics.remote_session_active",
@@ -59,6 +60,13 @@ class LeapmotorBinarySensorEntityDescription(BinarySensorEntityDescription):
 
 
 BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] = (
+    LeapmotorBinarySensorEntityDescription(
+        key="is_driving",
+        translation_key="is_driving",
+        icon="mdi:car-speed-limiter",
+        device_class=BinarySensorDeviceClass.MOTION,
+        value_fn=lambda data: data["status"].get("is_driving"),
+    ),
     LeapmotorBinarySensorEntityDescription(
         key="is_charging",
         translation_key="is_charging",

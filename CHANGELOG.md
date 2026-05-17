@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.8 - 2026-05-17
+
+- Add a parameterised `leapmotor.set_climate` service for cooling, heating,
+  ventilation, temperature, fan speed, recirculation, and windshield defrost.
+- Replace the one-shot battery preheat button with a stateful Home Assistant
+  switch and add the matching battery preheat off command.
+- Add an optional diagnostic sensor for the last charging-session energy from
+  the charging daily detail endpoint.
+- Add an optional `is_driving` binary sensor derived from the existing vehicle
+  state logic.
+- Reduce duplicated visible controls and range entities by keeping secondary
+  range variants disabled by default.
+
 ## 0.6.7 - 2026-05-13
 
 - Add a controllable charging schedule switch that toggles the existing

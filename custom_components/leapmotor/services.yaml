@@ -132,20 +132,6 @@ sunshade_close:
       description: Optional Leapmotor entity to resolve the target vehicle.
       selector:
         text:
-battery_preheat:
-  name: Battery preheat
-  description: Trigger the verified battery preheat action. Requires the configured Vehicle PIN.
-  fields:
-    vin:
-      name: VIN
-      description: Target VIN. Required when multiple vehicles are configured.
-      selector:
-        text:
-    entity_id:
-      name: Entity ID
-      description: Optional Leapmotor entity to resolve the target vehicle.
-      selector:
-        text:
 windows_open:
   name: Open windows
   description: Open the windows. Requires the configured Vehicle PIN. Optionally set a partial position from 0 to 100; omit for fully open.
@@ -194,10 +180,67 @@ windows_close:
       description: Optional Leapmotor entity to resolve the target vehicle.
       selector:
         text:
-ac_switch:
+ac_off:
   name: Climate off
-  description: Turn climate control off with the verified normal profile. Requires the configured Vehicle PIN.
+  description: Turn climate control off using the official close operation. Requires the configured Vehicle PIN.
   fields:
+    vin:
+      name: VIN
+      description: Target VIN. Required when multiple vehicles are configured.
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: Optional Leapmotor entity to resolve the target vehicle.
+      selector:
+        text:
+set_climate:
+  name: Set climate
+  description: Send a parameterised climate command to the vehicle. Requires the configured Vehicle PIN.
+  fields:
+    mode:
+      name: Mode
+      description: Climate mode.
+      required: true
+      example: cold
+      selector:
+        select:
+          options:
+            - cold
+            - hot
+            - wind
+    temperature:
+      name: Temperature
+      description: Target temperature in °C, from 18 to 32. Defaults to 26.
+      example: 22
+      selector:
+        number:
+          min: 18
+          max: 32
+          step: 1
+          mode: box
+    fan_speed:
+      name: Fan speed
+      description: Fan level from 1 to 7. Defaults to 3.
+      example: 4
+      selector:
+        number:
+          min: 1
+          max: 7
+          step: 1
+          mode: slider
+    recirculate:
+      name: Recirculate
+      description: Use cabin air recirculation instead of outside air. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    windshield_defrost:
+      name: Windshield defrost
+      description: Enable front windshield defrost. Defaults to false.
+      example: false
+      selector:
+        boolean:
     vin:
       name: VIN
       description: Target VIN. Required when multiple vehicles are configured.

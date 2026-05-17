@@ -298,6 +298,9 @@
       },
       "sunshade_position": {
         "name": "Sonnenrollo Position"
+      },
+      "last_charge_energy_kwh": {
+        "name": "Letzte Lademenge"
       }
     },
     "binary_sensor": {
@@ -414,6 +417,9 @@
       },
       "door_control_allowed": {
         "name": "Tuersteuerung erlaubt"
+      },
+      "is_driving": {
+        "name": "Faehrt"
       }
     },
     "image": {
@@ -443,9 +449,6 @@
       "close_sunshade": {
         "name": "Sonnenblende schließen"
       },
-      "battery_preheat": {
-        "name": "Batterie vorwärmen"
-      },
       "windows": {
         "name": "Fenster öffnen"
       },
@@ -454,9 +457,6 @@
       },
       "close_windows": {
         "name": "Fenster schließen"
-      },
-      "ac_switch": {
-        "name": "Klima ausschalten"
       },
       "quick_cool": {
         "name": "Schnelles Kühlen"
@@ -469,6 +469,9 @@
       },
       "refresh_data": {
         "name": "Daten aktualisieren"
+      },
+      "ac_off": {
+        "name": "Klima ausschalten"
       }
     },
     "lock": {
@@ -489,6 +492,9 @@
     "switch": {
       "charging_schedule": {
         "name": "Ladeplanung"
+      },
+      "battery_preheat": {
+        "name": "Batterievorwaermung"
       }
     }
   },
@@ -512,6 +518,42 @@
         "data_description": {
           "eco_polling_enabled": "Das langsamere Eco-Intervall nur verwenden, wenn alle Fahrzeuge eindeutig verriegelt, geparkt und nicht angesteckt sind.",
           "eco_scan_interval": "Polling-Intervall im Eco-Modus. Es wird automatisch mindestens auf das normale Aktualisierungsintervall begrenzt."
+        }
+      }
+    }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Klima steuern",
+      "description": "Sendet einen Klimabefehl mit Parametern an das Fahrzeug. PIN erforderlich.",
+      "fields": {
+        "mode": {
+          "name": "Modus",
+          "description": "Klimamodus: cold, hot oder wind."
+        },
+        "temperature": {
+          "name": "Temperatur",
+          "description": "Zieltemperatur in Grad C, von 18 bis 32. Standard 26."
+        },
+        "fan_speed": {
+          "name": "Luefterstufe",
+          "description": "Luefterstufe von 1 bis 7. Standard 3."
+        },
+        "recirculate": {
+          "name": "Umluft",
+          "description": "Umluft statt Frischluft verwenden. Standard false."
+        },
+        "windshield_defrost": {
+          "name": "Frontscheiben-Defrost",
+          "description": "Frontscheiben-Defrost aktivieren. Standard false."
+        },
+        "vin": {
+          "name": "FIN",
+          "description": "Fahrzeugidentifikationsnummer. Erforderlich bei mehreren Fahrzeugen."
+        },
+        "entity_id": {
+          "name": "Entitaets-ID",
+          "description": "Optionale Leapmotor-Entitaet zur Ermittlung des Zielfahrzeugs."
         }
       }
     }

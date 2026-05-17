@@ -298,6 +298,9 @@
       },
       "sunshade_position": {
         "name": "Sunshade position"
+      },
+      "last_charge_energy_kwh": {
+        "name": "Energia ultima carga"
       }
     },
     "binary_sensor": {
@@ -414,6 +417,9 @@
       },
       "door_control_allowed": {
         "name": "Door control allowed"
+      },
+      "is_driving": {
+        "name": "Conduciendo"
       }
     },
     "image": {
@@ -434,14 +440,8 @@
       "sunshade_action": {
         "name": "Persiana solar"
       },
-      "battery_preheat": {
-        "name": "Precalentar bateria"
-      },
       "windows": {
         "name": "Accion de ventanillas"
-      },
-      "ac_switch": {
-        "name": "Apagar climatizacion"
       },
       "quick_cool": {
         "name": "Enfriamiento rapido"
@@ -469,6 +469,9 @@
       },
       "refresh_data": {
         "name": "Actualizar datos"
+      },
+      "ac_off": {
+        "name": "Desactivar climatizacion"
       }
     },
     "lock": {
@@ -489,6 +492,9 @@
     "switch": {
       "charging_schedule": {
         "name": "Programa de carga"
+      },
+      "battery_preheat": {
+        "name": "Precalentamiento de bateria"
       }
     }
   },
@@ -512,6 +518,42 @@
         "data_description": {
           "eco_polling_enabled": "Usa el intervalo eco mas lento solo cuando todos los vehiculos estan claramente cerrados, aparcados y desconectados.",
           "eco_scan_interval": "Intervalo de sondeo en modo eco. Se ajusta automaticamente como minimo al intervalo normal de actualizacion."
+        }
+      }
+    }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Configurar climatizacion",
+      "description": "Envia un comando de climatizacion con parametros. Requiere PIN.",
+      "fields": {
+        "mode": {
+          "name": "Modo",
+          "description": "Modo de climatizacion: cold, hot o wind."
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Temperatura objetivo en grados C, de 18 a 32. Predeterminado 26."
+        },
+        "fan_speed": {
+          "name": "Velocidad del ventilador",
+          "description": "Nivel del ventilador de 1 a 7. Predeterminado 3."
+        },
+        "recirculate": {
+          "name": "Recircular",
+          "description": "Usar recirculacion de aire interior en vez de aire exterior. Predeterminado false."
+        },
+        "windshield_defrost": {
+          "name": "Desempañado parabrisas",
+          "description": "Activar desempañado del parabrisas delantero. Predeterminado false."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numero de identificacion del vehiculo. Obligatorio con varios vehiculos."
+        },
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entidad Leapmotor opcional para resolver el vehiculo de destino."
         }
       }
     }

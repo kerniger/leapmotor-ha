@@ -85,6 +85,7 @@ OPTIONAL_SENSOR_PATHS = {
     "passenger_seat_ventilation_level": "diagnostics.passenger_seat_ventilation_level",
     "speed_limit_kmh": "diagnostics.speed_limit_kmh",
     "average_consumption_6w_mi_kwh": "history.average_consumption_6w_mi_kwh",
+    "last_charge_energy_kwh": "charging_history.last_charge_energy_kwh",
 }
 
 
@@ -93,6 +94,7 @@ class LeapmotorSensorEntityDescription(SensorEntityDescription):
     """Describes a Leapmotor sensor."""
 
     value_fn: Callable[[dict[str, Any]], Any]
+    extra_attrs_fn: Callable[[dict[str, Any]], dict[str, Any]] | None = None
 
 
 SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
@@ -133,6 +135,7 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         suggested_display_precision=0,
         icon="mdi:map-marker-radius",
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: data["status"].get("wltp_max_range_km"),
     ),
     LeapmotorSensorEntityDescription(
@@ -144,6 +147,7 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         suggested_display_precision=0,
         icon="mdi:map-marker-distance",
         entity_category=EntityCategory.DIAGNOSTIC,
+        entity_registry_enabled_default=False,
         value_fn=lambda data: data["status"].get("live_remaining_range_km"),
     ),
     LeapmotorSensorEntityDescription(
@@ -651,6 +655,22 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         value_fn=lambda data: data["history"].get("last_week_other_energy_percent"),
     ),
     LeapmotorSensorEntityDescription(
+        key="last_charge_energy_kwh",
+        translation_key="last_charge_energy_kwh",
+        native_unit_of_measurement=ENERGY_KWH,
+        device_class=SensorDeviceClass.ENERGY,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=2,
+        icon="mdi:battery-charging-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["charging_history"].get("last_charge_energy_kwh"),
+        extra_attrs_fn=lambda data: {
+            "charge_type": data["charging_history"].get("last_charge_type"),
+            "start_ts": data["charging_history"].get("last_charge_start_ts"),
+            "end_ts": data["charging_history"].get("last_charge_end_ts"),
+        },
+    ),
+    LeapmotorSensorEntityDescription(
         key="tire_pressure_front_left_bar",
         translation_key="tire_pressure_front_left_bar",
         native_unit_of_measurement=PRESSURE_BAR,
@@ -890,6 +910,8 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
                     "other_energy_kwh": history.get("last_week_other_energy_kwh"),
                 }
             )
+        if self.entity_description.extra_attrs_fn is not None:
+            attributes.update(self.entity_description.extra_attrs_fn(self.vehicle_data))
         return attributes
 
 

@@ -13,8 +13,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     DOMAIN,
-    REMOTE_CTL_AC_SWITCH,
-    REMOTE_CTL_BATTERY_PREHEAT,
+    REMOTE_CTL_AC_OFF,
     REMOTE_CTL_FIND_CAR,
     REMOTE_CTL_QUICK_COOL,
     REMOTE_CTL_QUICK_HEAT,
@@ -77,13 +76,6 @@ BUTTON_SPECS: tuple[RemoteActionSpec, ...] = (
         service_name=REMOTE_CTL_SUNSHADE_CLOSE,
     ),
     RemoteActionSpec(
-        action=REMOTE_CTL_BATTERY_PREHEAT,
-        translation_key="battery_preheat",
-        icon="mdi:battery-charging",
-        method_name="battery_preheat",
-        service_name=REMOTE_CTL_BATTERY_PREHEAT,
-    ),
-    RemoteActionSpec(
         action=REMOTE_CTL_WINDOWS_OPEN,
         translation_key="open_windows",
         icon="mdi:window-open",
@@ -98,11 +90,11 @@ BUTTON_SPECS: tuple[RemoteActionSpec, ...] = (
         service_name=REMOTE_CTL_WINDOWS_CLOSE,
     ),
     RemoteActionSpec(
-        action=REMOTE_CTL_AC_SWITCH,
-        translation_key="ac_switch",
-        icon="mdi:air-conditioner",
-        method_name="ac_switch",
-        service_name=REMOTE_CTL_AC_SWITCH,
+        action=REMOTE_CTL_AC_OFF,
+        translation_key="ac_off",
+        icon="mdi:air-conditioner-off",
+        method_name="ac_off",
+        service_name=REMOTE_CTL_AC_OFF,
     ),
     RemoteActionSpec(
         action=REMOTE_CTL_QUICK_COOL,

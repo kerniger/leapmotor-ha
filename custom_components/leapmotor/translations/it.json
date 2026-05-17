@@ -298,6 +298,9 @@
       },
       "sunshade_position": {
         "name": "Sunshade position"
+      },
+      "last_charge_energy_kwh": {
+        "name": "Energia ultima ricarica"
       }
     },
     "binary_sensor": {
@@ -414,6 +417,9 @@
       },
       "door_control_allowed": {
         "name": "Door control allowed"
+      },
+      "is_driving": {
+        "name": "In guida"
       }
     },
     "image": {
@@ -434,14 +440,8 @@
       "sunshade_action": {
         "name": "Tendina parasole"
       },
-      "battery_preheat": {
-        "name": "Preriscaldamento batteria"
-      },
       "windows": {
         "name": "Azione finestrini"
-      },
-      "ac_switch": {
-        "name": "Spegni climatizzazione"
       },
       "quick_cool": {
         "name": "Raffreddamento rapido"
@@ -469,6 +469,9 @@
       },
       "refresh_data": {
         "name": "Aggiorna dati"
+      },
+      "ac_off": {
+        "name": "Disattiva climatizzazione"
       }
     },
     "lock": {
@@ -489,6 +492,9 @@
     "switch": {
       "charging_schedule": {
         "name": "Programma di ricarica"
+      },
+      "battery_preheat": {
+        "name": "Preriscaldamento batteria"
       }
     }
   },
@@ -512,6 +518,42 @@
         "data_description": {
           "eco_polling_enabled": "Usa l intervallo eco piu lento solo quando tutti i veicoli sono chiaramente chiusi, parcheggiati e scollegati.",
           "eco_scan_interval": "Intervallo di polling in modalita eco. Viene automaticamente limitato almeno all intervallo normale di aggiornamento."
+        }
+      }
+    }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Imposta climatizzazione",
+      "description": "Invia un comando clima parametrizzato al veicolo. Richiede PIN.",
+      "fields": {
+        "mode": {
+          "name": "Modalita",
+          "description": "Modalita clima: cold, hot o wind."
+        },
+        "temperature": {
+          "name": "Temperatura",
+          "description": "Temperatura target in gradi C, da 18 a 32. Predefinito 26."
+        },
+        "fan_speed": {
+          "name": "Velocita ventola",
+          "description": "Livello ventola da 1 a 7. Predefinito 3."
+        },
+        "recirculate": {
+          "name": "Ricircolo",
+          "description": "Usa ricircolo aria interna invece di aria esterna. Predefinito false."
+        },
+        "windshield_defrost": {
+          "name": "Sbrinamento parabrezza",
+          "description": "Attiva sbrinamento parabrezza anteriore. Predefinito false."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Numero identificativo veicolo. Obbligatorio con piu veicoli configurati."
+        },
+        "entity_id": {
+          "name": "Entity ID",
+          "description": "Entita Leapmotor opzionale per risolvere il veicolo di destinazione."
         }
       }
     }

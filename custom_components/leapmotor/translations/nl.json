@@ -298,6 +298,9 @@
       },
       "sunshade_position": {
         "name": "Sunshade position"
+      },
+      "last_charge_energy_kwh": {
+        "name": "Energie laatste laadbeurt"
       }
     },
     "binary_sensor": {
@@ -414,6 +417,9 @@
       },
       "door_control_allowed": {
         "name": "Door control allowed"
+      },
+      "is_driving": {
+        "name": "Rijden"
       }
     },
     "image": {
@@ -434,14 +440,8 @@
       "sunshade_action": {
         "name": "Zonnescherm"
       },
-      "battery_preheat": {
-        "name": "Accu voorverwarmen"
-      },
       "windows": {
         "name": "Raamactie"
-      },
-      "ac_switch": {
-        "name": "Climate uitschakelen"
       },
       "quick_cool": {
         "name": "Snel koelen"
@@ -469,6 +469,9 @@
       },
       "refresh_data": {
         "name": "Gegevens vernieuwen"
+      },
+      "ac_off": {
+        "name": "Klimaat uit"
       }
     },
     "lock": {
@@ -489,6 +492,9 @@
     "switch": {
       "charging_schedule": {
         "name": "Laadschema"
+      },
+      "battery_preheat": {
+        "name": "Accu voorverwarmen"
       }
     }
   },
@@ -512,6 +518,42 @@
         "data_description": {
           "eco_polling_enabled": "Gebruik het langzamere eco-interval alleen wanneer alle voertuigen duidelijk vergrendeld, geparkeerd en niet aangesloten zijn.",
           "eco_scan_interval": "Pollinginterval in eco-modus. Dit wordt automatisch minimaal gelijk aan het normale update-interval gezet."
+        }
+      }
+    }
+  },
+  "services": {
+    "set_climate": {
+      "name": "Klimaat instellen",
+      "description": "Stuur een klimaatopdracht met parameters naar het voertuig. PIN vereist.",
+      "fields": {
+        "mode": {
+          "name": "Modus",
+          "description": "Klimaatmodus: cold, hot of wind."
+        },
+        "temperature": {
+          "name": "Temperatuur",
+          "description": "Doeltemperatuur in graden C, van 18 tot 32. Standaard 26."
+        },
+        "fan_speed": {
+          "name": "Ventilatorsnelheid",
+          "description": "Ventilatorniveau van 1 tot 7. Standaard 3."
+        },
+        "recirculate": {
+          "name": "Recirculeren",
+          "description": "Gebruik recirculatie in plaats van buitenlucht. Standaard false."
+        },
+        "windshield_defrost": {
+          "name": "Voorruit ontdooien",
+          "description": "Voorruitontdooiing inschakelen. Standaard false."
+        },
+        "vin": {
+          "name": "VIN",
+          "description": "Voertuigidentificatienummer. Verplicht wanneer meerdere voertuigen zijn geconfigureerd."
+        },
+        "entity_id": {
+          "name": "Entiteits-ID",
+          "description": "Optionele Leapmotor-entiteit om het doelvoertuig te bepalen."
         }
       }
     }

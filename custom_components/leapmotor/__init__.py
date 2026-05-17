@@ -32,7 +32,12 @@ from .const import (
 from .coordinator import LeapmotorDataUpdateCoordinator
 from .entity_migration import async_migrate_entity_registry_to_english
 from .lock import LOCK_ACTION, UNLOCK_ACTION
-from .remote_helpers import async_execute_remote_action, format_remote_error, resolve_target_vin
+from .remote_helpers import (
+    RemoteActionSpec,
+    async_execute_remote_action,
+    format_remote_error,
+    resolve_target_vin,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,12 +64,32 @@ SUNSHADE_POSITION_SERVICE_FIELDS = vol.Schema(
     }
 )
 
+SET_CLIMATE_FIELDS = vol.Schema(
+    {
+        vol.Required("mode"): vol.In(("cold", "hot", "wind")),
+        vol.Optional("temperature", default=26): vol.All(vol.Coerce(int), vol.Range(min=18, max=32)),
+        vol.Optional("fan_speed", default=3): vol.All(vol.Coerce(int), vol.Range(min=1, max=7)),
+        vol.Optional("recirculate", default=False): bool,
+        vol.Optional("windshield_defrost", default=False): bool,
+        vol.Optional("vin"): str,
+        vol.Optional("entity_id"): str,
+    }
+)
+
 _SERVICE_SCHEMAS = {
     "windows_open": WINDOW_POSITION_SERVICE_FIELDS,
     "windows_close": WINDOW_POSITION_SERVICE_FIELDS,
     "sunshade_open": SUNSHADE_POSITION_SERVICE_FIELDS,
     "sunshade_close": SUNSHADE_POSITION_SERVICE_FIELDS,
 }
+
+SET_CLIMATE_ACTION = RemoteActionSpec(
+    action="set_climate",
+    translation_key="set_climate",
+    icon="mdi:air-conditioner",
+    method_name="set_climate",
+    service_name="set_climate",
+)
 
 SET_CHARGE_LIMIT_FIELDS = vol.Schema(
     {
@@ -219,8 +244,9 @@ async def _async_register_services(hass: HomeAssistant) -> None:
                 "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
             )
 
-        raw_value = call.data.get("value")
-        kwargs = {"value": raw_value} if raw_value is not None else None
+        kwargs = None
+        if "value" in call.data:
+            kwargs = {"value": call.data["value"]}
         await async_execute_remote_action(coordinator, target_vin, action_spec, kwargs)
 
     async def handle_set_charge_limit(call: ServiceCall) -> None:
@@ -274,6 +300,43 @@ async def _async_register_services(hass: HomeAssistant) -> None:
             result=result,
         )
         await coordinator.async_request_refresh()
+
+    async def handle_set_climate(call: ServiceCall) -> None:
+        domain_data = hass.data.get(DOMAIN) or {}
+        if not domain_data:
+            raise HomeAssistantError("No Leapmotor config entry is loaded.")
+
+        coordinator = None
+        target_vin = call.data.get("vin")
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            state = hass.states.get(entity_id)
+            if state:
+                target_vin = state.attributes.get("vin") or target_vin
+        for candidate in domain_data.values():
+            if target_vin and target_vin not in (candidate.data.get("vehicles") or {}):
+                continue
+            try:
+                resolved_vin = resolve_target_vin(candidate, target_vin)
+            except Exception:
+                continue
+            coordinator = candidate
+            target_vin = resolved_vin
+            break
+
+        if coordinator is None or not target_vin:
+            raise HomeAssistantError(
+                "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
+            )
+
+        kwargs = {
+            "mode": call.data["mode"],
+            "temperature": call.data["temperature"],
+            "fan_speed": call.data["fan_speed"],
+            "recirculate": call.data["recirculate"],
+            "windshield_defrost": call.data["windshield_defrost"],
+        }
+        await async_execute_remote_action(coordinator, target_vin, SET_CLIMATE_ACTION, kwargs)
 
     async def handle_send_destination(call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}
@@ -386,6 +449,13 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, service_name)
     hass.services.async_register(
         DOMAIN,
+        "set_climate",
+        handle_set_climate,
+        schema=SET_CLIMATE_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_climate")
+    hass.services.async_register(
+        DOMAIN,
         "set_charge_limit",
         handle_set_charge_limit,
         schema=SET_CHARGE_LIMIT_FIELDS,
@@ -412,6 +482,8 @@ def _async_unregister_services(hass: HomeAssistant) -> None:
     for service_name in ("lock", "unlock", *(spec.service_name for spec in BUTTON_SPECS)):
         if hass.services.has_service(DOMAIN, service_name):
             hass.services.async_remove(DOMAIN, service_name)
+    if hass.services.has_service(DOMAIN, "set_climate"):
+        hass.services.async_remove(DOMAIN, "set_climate")
     if hass.services.has_service(DOMAIN, "set_charge_limit"):
         hass.services.async_remove(DOMAIN, "set_charge_limit")
     if hass.services.has_service(DOMAIN, "send_destination"):
