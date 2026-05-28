@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.9 - 2026-05-28
+
+- Retry vehicle-list resolution once after a fresh login when a remote action
+  fails before command execution with `Token is invalid`.
+
 ## 0.6.8 - 2026-05-17
 
 - Add a parameterised `leapmotor.set_climate` service for cooling, heating,

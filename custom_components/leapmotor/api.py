@@ -991,7 +991,19 @@ class LeapmotorApiClient:
 
     def _find_vehicle_by_vin(self, vin: str) -> Vehicle:
         """Resolve VIN to current vehicle metadata."""
-        for vehicle in self.get_vehicle_list():
+        try:
+            vehicles = self.get_vehicle_list()
+        except LeapmotorApiError as exc:
+            if "token is invalid" not in str(exc).lower():
+                raise
+            # Resolving the vehicle happens before any remote command is sent,
+            # so retrying after a fresh login is safe and avoids stale-token failures.
+            self._clear_auth()
+            self._ensure_static_cert_files()
+            self.login()
+            vehicles = self.get_vehicle_list()
+
+        for vehicle in vehicles:
             if vehicle.vin == vin:
                 return vehicle
         raise LeapmotorApiError(f"Vehicle not found for VIN {vin}")
