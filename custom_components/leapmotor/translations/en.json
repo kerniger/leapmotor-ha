@@ -487,6 +487,18 @@
     "number": {
       "charge_limit_setting": {
         "name": "Set charge limit"
+      },
+      "driver_seat_heating": {
+        "name": "Driver seat heating"
+      },
+      "passenger_seat_heating": {
+        "name": "Passenger seat heating"
+      },
+      "driver_seat_ventilation": {
+        "name": "Driver seat ventilation"
+      },
+      "passenger_seat_ventilation": {
+        "name": "Passenger seat ventilation"
       }
     },
     "switch": {
@@ -495,6 +507,12 @@
       },
       "battery_preheat": {
         "name": "Battery preheat"
+      },
+      "steering_wheel_heat": {
+        "name": "Steering wheel heating"
+      },
+      "rearview_mirror_heat": {
+        "name": "Mirror heating"
       }
     }
   },

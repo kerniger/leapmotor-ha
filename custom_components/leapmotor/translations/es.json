@@ -487,6 +487,18 @@
     "number": {
       "charge_limit_setting": {
         "name": "Ajustar limite de carga"
+      },
+      "driver_seat_heating": {
+        "name": "Calefaccion asiento conductor"
+      },
+      "passenger_seat_heating": {
+        "name": "Calefaccion asiento pasajero"
+      },
+      "driver_seat_ventilation": {
+        "name": "Ventilacion asiento conductor"
+      },
+      "passenger_seat_ventilation": {
+        "name": "Ventilacion asiento pasajero"
       }
     },
     "switch": {
@@ -495,6 +507,12 @@
       },
       "battery_preheat": {
         "name": "Precalentamiento de bateria"
+      },
+      "steering_wheel_heat": {
+        "name": "Calefaccion volante"
+      },
+      "rearview_mirror_heat": {
+        "name": "Calefaccion espejos"
       }
     }
   },

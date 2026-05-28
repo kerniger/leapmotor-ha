@@ -487,6 +487,18 @@
     "number": {
       "charge_limit_setting": {
         "name": "Laadlimiet instellen"
+      },
+      "driver_seat_heating": {
+        "name": "Bestuurdersstoelverwarming"
+      },
+      "passenger_seat_heating": {
+        "name": "Passagiersstoelverwarming"
+      },
+      "driver_seat_ventilation": {
+        "name": "Bestuurdersstoelventilatie"
+      },
+      "passenger_seat_ventilation": {
+        "name": "Passagiersstoelventilatie"
       }
     },
     "switch": {
@@ -495,6 +507,12 @@
       },
       "battery_preheat": {
         "name": "Accu voorverwarmen"
+      },
+      "steering_wheel_heat": {
+        "name": "Stuurwielverwarming"
+      },
+      "rearview_mirror_heat": {
+        "name": "Spiegelverwarming"
       }
     }
   },

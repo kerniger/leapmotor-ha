@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.10 - 2026-05-28
+
+- Add comfort controls based on `markoceri/leapmotor-api`: steering wheel
+  heating and mirror heating switches, plus driver/passenger seat heating and
+  ventilation level controls.
+
 ## 0.6.9 - 2026-05-28
 
 - Retry vehicle-list resolution once after a fresh login when a remote action

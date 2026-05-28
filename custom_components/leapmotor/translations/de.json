@@ -487,6 +487,18 @@
     "number": {
       "charge_limit_setting": {
         "name": "Ladelimit einstellen"
+      },
+      "driver_seat_heating": {
+        "name": "Sitzheizung Fahrer"
+      },
+      "passenger_seat_heating": {
+        "name": "Sitzheizung Beifahrer"
+      },
+      "driver_seat_ventilation": {
+        "name": "Sitzlüftung Fahrer"
+      },
+      "passenger_seat_ventilation": {
+        "name": "Sitzlüftung Beifahrer"
       }
     },
     "switch": {
@@ -495,6 +507,12 @@
       },
       "battery_preheat": {
         "name": "Batterievorwaermung"
+      },
+      "steering_wheel_heat": {
+        "name": "Lenkradheizung"
+      },
+      "rearview_mirror_heat": {
+        "name": "Spiegelheizung"
       }
     }
   },

@@ -20,6 +20,9 @@ research logs, or reverse-engineering workfiles.
   to navigation.
 - Charging schedule switch for enabling/disabling the existing schedule while
   preserving start time, end time, recurrence, and charge limit.
+- Comfort controls for supported vehicles: steering wheel heating and mirror
+  heating as switches, plus driver/passenger seat heating and ventilation as
+  `0-3` level controls.
 - Optional ABRP Generic Telemetry push and EVCC helper sensors.
 - Multi-vehicle support for main-account and shared vehicles.
 - Redacted diagnostics export for support.

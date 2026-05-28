@@ -487,6 +487,18 @@
     "number": {
       "charge_limit_setting": {
         "name": "Ustaw limit ladowania"
+      },
+      "driver_seat_heating": {
+        "name": "Ogrzewanie fotela kierowcy"
+      },
+      "passenger_seat_heating": {
+        "name": "Ogrzewanie fotela pasazera"
+      },
+      "driver_seat_ventilation": {
+        "name": "Wentylacja fotela kierowcy"
+      },
+      "passenger_seat_ventilation": {
+        "name": "Wentylacja fotela pasazera"
       }
     },
     "switch": {
@@ -495,6 +507,12 @@
       },
       "battery_preheat": {
         "name": "Podgrzewanie baterii"
+      },
+      "steering_wheel_heat": {
+        "name": "Ogrzewanie kierownicy"
+      },
+      "rearview_mirror_heat": {
+        "name": "Ogrzewanie lusterek"
       }
     }
   },

@@ -69,6 +69,10 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
     ("image", "vehicle_picture_pkg"): "vehicle_picture",
     ("lock", "vehicle_lock"): "lock",
     ("number", "charge_limit_setting"): "set_charge_limit",
+    ("number", "driver_seat_heating"): "driver_seat_heating",
+    ("number", "passenger_seat_heating"): "passenger_seat_heating",
+    ("number", "driver_seat_ventilation"): "driver_seat_ventilation",
+    ("number", "passenger_seat_ventilation"): "passenger_seat_ventilation",
     ("sensor", "battery_percent"): "battery",
     ("sensor", "battery_percent_precise"): "precise_battery",
     ("sensor", "remaining_range_km"): "range",
@@ -138,6 +142,8 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
     ("sensor", "last_message_time"): "last_message_time",
     ("switch", "charging_schedule"): "charging_schedule",
     ("switch", "battery_preheat"): "battery_preheat",
+    ("switch", "steering_wheel_heat"): "steering_wheel_heating",
+    ("switch", "rearview_mirror_heat"): "mirror_heating",
     ("sensor", "last_charge_energy_kwh"): "last_charge_energy",
 }
 

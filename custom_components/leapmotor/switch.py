@@ -35,6 +35,38 @@ BATTERY_PREHEAT_OFF_ACTION = RemoteActionSpec(
     service_name="battery_preheat_off",
 )
 
+STEERING_WHEEL_HEAT_ON_ACTION = RemoteActionSpec(
+    action="steering_wheel_heat_on",
+    translation_key="steering_wheel_heat",
+    icon="mdi:steering",
+    method_name="steering_wheel_heat_on",
+    service_name="steering_wheel_heat_on",
+)
+
+STEERING_WHEEL_HEAT_OFF_ACTION = RemoteActionSpec(
+    action="steering_wheel_heat_off",
+    translation_key="steering_wheel_heat",
+    icon="mdi:steering",
+    method_name="steering_wheel_heat_off",
+    service_name="steering_wheel_heat_off",
+)
+
+REARVIEW_MIRROR_HEAT_ON_ACTION = RemoteActionSpec(
+    action="rearview_mirror_heat_on",
+    translation_key="rearview_mirror_heat",
+    icon="mdi:mirror",
+    method_name="rearview_mirror_heat_on",
+    service_name="rearview_mirror_heat_on",
+)
+
+REARVIEW_MIRROR_HEAT_OFF_ACTION = RemoteActionSpec(
+    action="rearview_mirror_heat_off",
+    translation_key="rearview_mirror_heat",
+    icon="mdi:mirror",
+    method_name="rearview_mirror_heat_off",
+    service_name="rearview_mirror_heat_off",
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -47,6 +79,32 @@ async def async_setup_entry(
     for vin in coordinator.data.get("vehicles", {}):
         entities.append(LeapmotorChargingScheduleSwitch(coordinator, vin))
         entities.append(LeapmotorBatteryPreheatSwitch(coordinator, vin))
+        diagnostics = coordinator.data["vehicles"][vin].get("diagnostics", {})
+        if diagnostics.get("steering_wheel_heating") is not None:
+            entities.append(LeapmotorRemoteStateSwitch(
+                coordinator,
+                vin,
+                unique_suffix="steering_wheel_heat",
+                translation_key="steering_wheel_heat",
+                icon="mdi:steering",
+                state_keys=("steering_wheel_heating",),
+                on_action=STEERING_WHEEL_HEAT_ON_ACTION,
+                off_action=STEERING_WHEEL_HEAT_OFF_ACTION,
+            ))
+        if (
+            diagnostics.get("left_mirror_heating") is not None
+            or diagnostics.get("right_mirror_heating") is not None
+        ):
+            entities.append(LeapmotorRemoteStateSwitch(
+                coordinator,
+                vin,
+                unique_suffix="rearview_mirror_heat",
+                translation_key="rearview_mirror_heat",
+                icon="mdi:mirror",
+                state_keys=("left_mirror_heating", "right_mirror_heating"),
+                on_action=REARVIEW_MIRROR_HEAT_ON_ACTION,
+                off_action=REARVIEW_MIRROR_HEAT_OFF_ACTION,
+            ))
     async_add_entities(entities)
 
 
@@ -235,6 +293,100 @@ class LeapmotorBatteryPreheatSwitch(
             self.coordinator,
             self.vin,
             BATTERY_PREHEAT_OFF_ACTION,
+        )
+
+
+class LeapmotorRemoteStateSwitch(
+    CoordinatorEntity[LeapmotorDataUpdateCoordinator],
+    SwitchEntity,
+):
+    """Stateful remote switch backed by diagnostic status signals."""
+
+    _attr_has_entity_name = True
+
+    def __init__(
+        self,
+        coordinator: LeapmotorDataUpdateCoordinator,
+        vin: str,
+        *,
+        unique_suffix: str,
+        translation_key: str,
+        icon: str,
+        state_keys: tuple[str, ...],
+        on_action: RemoteActionSpec,
+        off_action: RemoteActionSpec,
+    ) -> None:
+        super().__init__(coordinator)
+        self.vin = vin
+        self._state_keys = state_keys
+        self._on_action = on_action
+        self._off_action = off_action
+        self._attr_translation_key = translation_key
+        self._attr_icon = icon
+        self._attr_unique_id = f"{vin}_{unique_suffix}"
+        vehicle = self.vehicle_data["vehicle"]
+        self._attr_suggested_object_id = _suggested_object_id(
+            vehicle,
+            english_entity_slug("switch", unique_suffix) or unique_suffix,
+        )
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, vin)},
+            manufacturer="Leapmotor",
+            model=vehicle.get("car_type"),
+            name=build_vehicle_display_name(vehicle),
+            serial_number=vin,
+        )
+
+    @property
+    def vehicle_data(self) -> dict[str, Any]:
+        """Return current data for this vehicle."""
+        return self.coordinator.data["vehicles"][self.vin]
+
+    @property
+    def available(self) -> bool:
+        """Return entity availability."""
+        return super().available and bool(self.coordinator.client.operation_password)
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return whether any backing status signal is on."""
+        values = [
+            self.vehicle_data["diagnostics"].get(key)
+            for key in self._state_keys
+            if self.vehicle_data["diagnostics"].get(key) is not None
+        ]
+        if not values:
+            return None
+        return any(bool(value) for value in values)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return useful vehicle metadata."""
+        vehicle = self.vehicle_data["vehicle"]
+        diagnostics = self.vehicle_data["diagnostics"]
+        return {
+            "vin": self.vin,
+            "car_id": vehicle.get("car_id"),
+            "car_type": vehicle.get("car_type"),
+            "is_shared": vehicle.get("is_shared"),
+            "operation_password_configured": bool(self.coordinator.client.operation_password),
+            **{key: diagnostics.get(key) for key in self._state_keys},
+        }
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn the remote switch on."""
+        await async_execute_remote_action(
+            self.coordinator,
+            self.vin,
+            self._on_action,
+        )
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn the remote switch off."""
+        await async_execute_remote_action(
+            self.coordinator,
+            self.vin,
+            self._off_action,
         )
 
 

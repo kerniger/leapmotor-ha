@@ -487,6 +487,18 @@
     "number": {
       "charge_limit_setting": {
         "name": "Regler limite de charge"
+      },
+      "driver_seat_heating": {
+        "name": "Chauffage siege conducteur"
+      },
+      "passenger_seat_heating": {
+        "name": "Chauffage siege passager"
+      },
+      "driver_seat_ventilation": {
+        "name": "Ventilation siege conducteur"
+      },
+      "passenger_seat_ventilation": {
+        "name": "Ventilation siege passager"
       }
     },
     "switch": {
@@ -495,6 +507,12 @@
       },
       "battery_preheat": {
         "name": "Prechauffage batterie"
+      },
+      "steering_wheel_heat": {
+        "name": "Chauffage volant"
+      },
+      "rearview_mirror_heat": {
+        "name": "Chauffage retroviseurs"
       }
     }
   },

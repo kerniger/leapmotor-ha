@@ -40,6 +40,12 @@ from .const import (
     REMOTE_CTL_LOCK,
     REMOTE_CTL_QUICK_COOL,
     REMOTE_CTL_QUICK_HEAT,
+    REMOTE_CTL_REARVIEW_MIRROR_HEAT_OFF,
+    REMOTE_CTL_REARVIEW_MIRROR_HEAT_ON,
+    REMOTE_CTL_SEAT_HEAT,
+    REMOTE_CTL_SEAT_VENTILATION,
+    REMOTE_CTL_STEERING_WHEEL_HEAT_OFF,
+    REMOTE_CTL_STEERING_WHEEL_HEAT_ON,
     REMOTE_CTL_SUNSHADE,
     REMOTE_CTL_SUNSHADE_CLOSE,
     REMOTE_CTL_SUNSHADE_OPEN,
@@ -239,6 +245,40 @@ class LeapmotorApiClient:
     def battery_preheat_off(self, vin: str) -> dict[str, Any]:
         """Turn off battery preheating."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_BATTERY_PREHEAT_OFF)
+
+    def steering_wheel_heat_on(self, vin: str) -> dict[str, Any]:
+        """Turn on steering wheel heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_STEERING_WHEEL_HEAT_ON)
+
+    def steering_wheel_heat_off(self, vin: str) -> dict[str, Any]:
+        """Turn off steering wheel heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_STEERING_WHEEL_HEAT_OFF)
+
+    def rearview_mirror_heat_on(self, vin: str) -> dict[str, Any]:
+        """Turn on rearview mirror heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_REARVIEW_MIRROR_HEAT_ON)
+
+    def rearview_mirror_heat_off(self, vin: str) -> dict[str, Any]:
+        """Turn off rearview mirror heating."""
+        return self._remote_control(vin=vin, action=REMOTE_CTL_REARVIEW_MIRROR_HEAT_OFF)
+
+    def seat_heat(self, vin: str, position: int, level: int) -> dict[str, Any]:
+        """Set seat heating level using Marko's position,level mapping."""
+        cmd_content = json.dumps({"value": f"{position},{level}"}, separators=(",", ":"))
+        return self._remote_control(
+            vin=vin,
+            action=REMOTE_CTL_SEAT_HEAT,
+            cmd_content=cmd_content,
+        )
+
+    def seat_ventilation(self, vin: str, position: int, level: int) -> dict[str, Any]:
+        """Set seat ventilation level using Marko's position,level mapping."""
+        cmd_content = json.dumps({"value": f"{position},{level}"}, separators=(",", ":"))
+        return self._remote_control(
+            vin=vin,
+            action=REMOTE_CTL_SEAT_VENTILATION,
+            cmd_content=cmd_content,
+        )
 
     def windows(self, vin: str) -> dict[str, Any]:
         """Trigger the verified window action."""
