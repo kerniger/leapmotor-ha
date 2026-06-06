@@ -13,7 +13,7 @@ from .exceptions import (
 )
 from .crypto import derive_operate_password, derive_session_device_id
 from .models import Vehicle
-from .remote import REMOTE_ACTION_SPECS, RemoteActionSpec
+from .remote import REMOTE_ACTION_SPECS, RemoteActionSpec, build_seat_comfort_payload
 from .transport import CurlTransport
 
 __all__ = [
@@ -24,6 +24,7 @@ __all__ = [
     "LeapmotorNoVehicleError",
     "REMOTE_ACTION_SPECS",
     "RemoteActionSpec",
+    "build_seat_comfort_payload",
     "CurlTransport",
     "Vehicle",
     "derive_operate_password",

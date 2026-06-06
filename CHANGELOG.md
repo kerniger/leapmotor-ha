@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.11 - 2026-06-06
+
+- Correct steering-wheel and exterior-mirror heating payloads from live C10
+  captures of the international app.
+- Correct driver/passenger seat heating and ventilation payloads and restore
+  the `0-3` Home Assistant level controls. Passenger ventilation level 2 was
+  additionally verified by sending it to a C10 through the API.
+- Turn climate control fully off with `{"operate":"off"}` instead of the
+  incomplete `close` operation reported in issue #42.
+
 ## 0.6.10 - 2026-05-28
 
 - Add comfort controls based on `markoceri/leapmotor-api`: steering wheel

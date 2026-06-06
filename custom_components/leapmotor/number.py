@@ -30,7 +30,7 @@ class SeatComfortNumberDescription:
     diagnostic_key: str
     method_name: str
     action_name: str
-    position: int
+    position: str
 
 
 SEAT_COMFORT_NUMBERS: tuple[SeatComfortNumberDescription, ...] = (
@@ -40,7 +40,7 @@ SEAT_COMFORT_NUMBERS: tuple[SeatComfortNumberDescription, ...] = (
         diagnostic_key="driver_seat_heating_level",
         method_name="seat_heat",
         action_name="seat_heat",
-        position=3,
+        position="driver",
     ),
     SeatComfortNumberDescription(
         unique_suffix="passenger_seat_heating",
@@ -48,7 +48,7 @@ SEAT_COMFORT_NUMBERS: tuple[SeatComfortNumberDescription, ...] = (
         diagnostic_key="passenger_seat_heating_level",
         method_name="seat_heat",
         action_name="seat_heat",
-        position=2,
+        position="copilot",
     ),
     SeatComfortNumberDescription(
         unique_suffix="driver_seat_ventilation",
@@ -56,7 +56,7 @@ SEAT_COMFORT_NUMBERS: tuple[SeatComfortNumberDescription, ...] = (
         diagnostic_key="driver_seat_ventilation_level",
         method_name="seat_ventilation",
         action_name="seat_ventilation",
-        position=3,
+        position="driver",
     ),
     SeatComfortNumberDescription(
         unique_suffix="passenger_seat_ventilation",
@@ -64,7 +64,7 @@ SEAT_COMFORT_NUMBERS: tuple[SeatComfortNumberDescription, ...] = (
         diagnostic_key="passenger_seat_ventilation_level",
         method_name="seat_ventilation",
         action_name="seat_ventilation",
-        position=2,
+        position="copilot",
     ),
 )
 

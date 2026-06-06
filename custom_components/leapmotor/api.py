@@ -70,6 +70,7 @@ from .leap_api import (
     LeapmotorMissingAppCertError,
     LeapmotorNoVehicleError,
     Vehicle,
+    build_seat_comfort_payload,
     derive_operate_password,
     derive_session_device_id,
 )
@@ -262,18 +263,18 @@ class LeapmotorApiClient:
         """Turn off rearview mirror heating."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_REARVIEW_MIRROR_HEAT_OFF)
 
-    def seat_heat(self, vin: str, position: int, level: int) -> dict[str, Any]:
-        """Set seat heating level using Marko's position,level mapping."""
-        cmd_content = json.dumps({"value": f"{position},{level}"}, separators=(",", ":"))
+    def seat_heat(self, vin: str, position: str, level: int) -> dict[str, Any]:
+        """Set the driver or passenger seat heating level."""
+        cmd_content = build_seat_comfort_payload(position, level)
         return self._remote_control(
             vin=vin,
             action=REMOTE_CTL_SEAT_HEAT,
             cmd_content=cmd_content,
         )
 
-    def seat_ventilation(self, vin: str, position: int, level: int) -> dict[str, Any]:
-        """Set seat ventilation level using Marko's position,level mapping."""
-        cmd_content = json.dumps({"value": f"{position},{level}"}, separators=(",", ":"))
+    def seat_ventilation(self, vin: str, position: str, level: int) -> dict[str, Any]:
+        """Set the driver or passenger seat ventilation level."""
+        cmd_content = build_seat_comfort_payload(position, level)
         return self._remote_control(
             vin=vin,
             action=REMOTE_CTL_SEAT_VENTILATION,
@@ -316,7 +317,7 @@ class LeapmotorApiClient:
         return self._remote_control(vin=vin, action=REMOTE_CTL_AC_ON, cmd_content=params)
 
     def ac_off(self, vin: str) -> dict[str, Any]:
-        """Turn climate control off using the close operation."""
+        """Turn climate control fully off."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_AC_OFF)
 
     def set_climate(

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 
 from ..const import (
     REMOTE_CTL_AC_OFF,
@@ -43,6 +44,18 @@ class RemoteActionSpec:
     cmd_content: str
 
 
+def build_seat_comfort_payload(position: str, level: int) -> str:
+    """Build the seat heating/ventilation payload used by the international app."""
+    if position not in {"driver", "copilot"}:
+        raise ValueError(f"Unsupported seat position: {position}")
+    if isinstance(level, bool) or not isinstance(level, int) or not 0 <= level <= 3:
+        raise ValueError(f"Seat comfort level must be an integer from 0 to 3: {level}")
+    return json.dumps(
+        {"position": position, "level": str(level)},
+        separators=(",", ":"),
+    )
+
+
 REMOTE_ACTION_SPECS: dict[str, RemoteActionSpec] = {
     REMOTE_CTL_UNLOCK: RemoteActionSpec(cmd_id="110", cmd_content='{"value":"unlock"}'),
     REMOTE_CTL_LOCK: RemoteActionSpec(cmd_id="110", cmd_content='{"value":"lock"}'),
@@ -59,18 +72,24 @@ REMOTE_ACTION_SPECS: dict[str, RemoteActionSpec] = {
     REMOTE_CTL_SUNSHADE_CLOSE: RemoteActionSpec(cmd_id="240", cmd_content='{"value":"0"}'),
     REMOTE_CTL_BATTERY_PREHEAT: RemoteActionSpec(cmd_id="160", cmd_content='{"value":"ptcon"}'),
     REMOTE_CTL_BATTERY_PREHEAT_OFF: RemoteActionSpec(cmd_id="160", cmd_content='{"value":"ptcoff"}'),
-    REMOTE_CTL_STEERING_WHEEL_HEAT_ON: RemoteActionSpec(cmd_id="320", cmd_content='{"value":"on"}'),
-    REMOTE_CTL_STEERING_WHEEL_HEAT_OFF: RemoteActionSpec(cmd_id="320", cmd_content='{"value":"off"}'),
-    REMOTE_CTL_REARVIEW_MIRROR_HEAT_ON: RemoteActionSpec(cmd_id="440", cmd_content='{"value":"on"}'),
-    REMOTE_CTL_REARVIEW_MIRROR_HEAT_OFF: RemoteActionSpec(cmd_id="440", cmd_content='{"value":"off"}'),
-    REMOTE_CTL_SEAT_HEAT: RemoteActionSpec(cmd_id="301", cmd_content='{"value":"3,3"}'),
-    REMOTE_CTL_SEAT_VENTILATION: RemoteActionSpec(cmd_id="370", cmd_content='{"value":"3,3"}'),
+    REMOTE_CTL_STEERING_WHEEL_HEAT_ON: RemoteActionSpec(cmd_id="320", cmd_content='{"level":"2"}'),
+    REMOTE_CTL_STEERING_WHEEL_HEAT_OFF: RemoteActionSpec(cmd_id="320", cmd_content='{"level":"1"}'),
+    REMOTE_CTL_REARVIEW_MIRROR_HEAT_ON: RemoteActionSpec(cmd_id="440", cmd_content='{"value":"2"}'),
+    REMOTE_CTL_REARVIEW_MIRROR_HEAT_OFF: RemoteActionSpec(cmd_id="440", cmd_content='{"value":"1"}'),
+    REMOTE_CTL_SEAT_HEAT: RemoteActionSpec(
+        cmd_id="301",
+        cmd_content='{"position":"driver","level":"3"}',
+    ),
+    REMOTE_CTL_SEAT_VENTILATION: RemoteActionSpec(
+        cmd_id="370",
+        cmd_content='{"position":"driver","level":"3"}',
+    ),
     REMOTE_CTL_WINDOWS: RemoteActionSpec(cmd_id="230", cmd_content='{"value":"2"}'),
     REMOTE_CTL_WINDOWS_OPEN: RemoteActionSpec(cmd_id="230", cmd_content='{"value":"2"}'),
     REMOTE_CTL_WINDOWS_CLOSE: RemoteActionSpec(cmd_id="230", cmd_content='{"value":"0"}'),
     REMOTE_CTL_AC_SWITCH: RemoteActionSpec(
         cmd_id="170",
-        cmd_content='{"circle":"out","mode":"wind","operate":"close","position":"all","temperature":"26","windlevel":"3","wshld":"0"}',
+        cmd_content='{"operate":"off"}',
     ),
     REMOTE_CTL_AC_ON: RemoteActionSpec(
         cmd_id="170",
@@ -78,7 +97,7 @@ REMOTE_ACTION_SPECS: dict[str, RemoteActionSpec] = {
     ),
     REMOTE_CTL_AC_OFF: RemoteActionSpec(
         cmd_id="170",
-        cmd_content='{"circle":"out","mode":"wind","operate":"close","position":"all","temperature":"26","windlevel":"3","wshld":"0"}',
+        cmd_content='{"operate":"off"}',
     ),
     REMOTE_CTL_QUICK_COOL: RemoteActionSpec(
         cmd_id="170",
