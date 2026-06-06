@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.12 - 2026-06-06
+
+- Refresh expired access tokens through `/acct/v1/token/refresh` before falling
+  back to a full account login.
+- Read the current charging plan through the dedicated `getAppointment`
+  endpoint when vehicle status does not contain a complete plan, fixing charge
+  limit and schedule updates on affected vehicles such as T03.
+- Route B11 vehicle status requests through the shared C10 status endpoint,
+  matching the international backend behavior.
+
 ## 0.6.11 - 2026-06-06
 
 - Correct steering-wheel and exterior-mirror heating payloads from live C10

@@ -116,6 +116,7 @@ class LeapmotorApiClient:
         self.language = language
         self.user_id: str | None = None
         self.token: str | None = None
+        self.refresh_token: str | None = None
         self.sign_ikm: str | None = None
         self.sign_salt: str | None = None
         self.sign_info: str | None = None
@@ -148,6 +149,7 @@ class LeapmotorApiClient:
     def _clear_auth(self) -> None:
         """Clear token and account certificate state before re-login."""
         self.token = None
+        self.refresh_token = None
         self.device_id = self.login_device_id
         self.user_id = None
         self.sign_ikm = None
@@ -197,10 +199,8 @@ class LeapmotorApiClient:
 
         try:
             return self._fetch_authenticated_data()
-        except LeapmotorApiError:
-            self._clear_auth()
-            self._ensure_static_cert_files()
-            self.login()
+        except LeapmotorApiError as exc:
+            self._recover_session(exc)
             return self._fetch_authenticated_data()
 
     def lock_vehicle(self, vin: str) -> dict[str, Any]:
@@ -370,23 +370,40 @@ class LeapmotorApiClient:
     ) -> dict[str, Any]:
         """Update the charging plan command payload while preserving existing values."""
         vehicle = self._find_vehicle_by_vin(vin)
-        status_json = self.get_vehicle_status(vehicle)
-        charge_plan = (((status_json.get("data") or {}).get("config") or {}).get("3") or {})
+        try:
+            status_json = self.get_vehicle_status(vehicle)
+        except LeapmotorApiError as exc:
+            if not _is_token_error(exc):
+                raise
+            self._recover_session(exc)
+            status_json = self.get_vehicle_status(vehicle)
+        status_charge_plan = (
+            ((status_json.get("data") or {}).get("config") or {}).get("3") or {}
+        )
+        charge_plan = _normalize_charge_plan(status_charge_plan)
+        if not _charge_plan_is_complete(charge_plan):
+            charge_plan = _merge_charge_plans(
+                charge_plan,
+                _normalize_charge_plan(self.get_charge_schedule(vin)),
+            )
+
+        if charge_plan_enabled is not None and not _charge_plan_is_complete(charge_plan):
+            raise LeapmotorApiError(
+                "Current charging plan is incomplete, cannot safely enable or disable it."
+            )
 
         start_time = charge_plan.get("beginTime")
         end_time = charge_plan.get("endTime")
         cycles = charge_plan.get("cycles")
         current_charge_limit = _safe_int(charge_plan.get("percent"))
-        if not start_time or not end_time or not cycles:
-            raise LeapmotorApiError(
-                "Current charging plan is incomplete, cannot safely update it."
-            )
+        if not start_time:
+            start_time = "00:00"
+        if not end_time:
+            end_time = "08:00"
+        if not cycles:
+            cycles = "1,2,3,4,5,6,7"
         if charge_limit_percent is None:
-            if current_charge_limit is None:
-                raise LeapmotorApiError(
-                    "Current charging plan has no charge limit, cannot safely update it."
-                )
-            charge_limit_percent = current_charge_limit
+            charge_limit_percent = current_charge_limit if current_charge_limit is not None else 80
         charge_enable = (
             int(bool(charge_plan_enabled))
             if charge_plan_enabled is not None
@@ -416,6 +433,68 @@ class LeapmotorApiClient:
             ),
             vehicle=vehicle,
         )
+
+    def get_charge_schedule(self, vin: str) -> dict[str, Any]:
+        """Return the current charging schedule from the appointment endpoint."""
+        try:
+            return self._get_charge_schedule(vin)
+        except LeapmotorApiError as exc:
+            if not _is_token_error(exc):
+                raise
+            self._recover_session(exc)
+            return self._get_charge_schedule(vin)
+
+    def _get_charge_schedule(self, vin: str) -> dict[str, Any]:
+        """Fetch the charging schedule without authentication retry."""
+        headers = self._build_signed_headers(
+            vin=vin,
+            body_params={"cmdId": "190"},
+        )
+        headers.update(self._auth_headers(content_type="application/x-www-form-urlencoded"))
+        body = f"vin={requests.utils.quote(vin, safe='')}&cmdId=190"
+        response = self._post_with_curl(
+            path="/carownerservice/oversea/vehicle/v1/app/remote/ctl/getAppointment",
+            headers=headers,
+            data=body,
+            cert=self.account_cert,
+        )
+        try:
+            response_body = json.loads(response["body"])
+        except ValueError as exc:
+            self._record_api_result(
+                "charge schedule",
+                status_code=response["status_code"],
+                code=None,
+                message="non_json",
+            )
+            raise LeapmotorApiError(
+                f"charge schedule returned non-JSON response: {response['body'][:200]}"
+            ) from exc
+
+        result_code = response_body.get("result", response_body.get("code"))
+        message = response_body.get("message")
+        self._record_api_result(
+            "charge schedule",
+            status_code=response["status_code"],
+            code=result_code,
+            message=message,
+        )
+        if response["status_code"] != 200 or result_code != 0:
+            if "permission" in str(message or "").lower():
+                return {}
+            raise LeapmotorApiError(
+                f"Leapmotor charge schedule failed: {message or response['body'][:200]}"
+            )
+
+        schedule = response_body.get("data")
+        if not schedule:
+            return {}
+        if isinstance(schedule, str):
+            try:
+                schedule = json.loads(schedule)
+            except ValueError:
+                return {}
+        return dict(schedule) if isinstance(schedule, dict) else {}
 
     def send_destination(
         self,
@@ -597,8 +676,55 @@ class LeapmotorApiClient:
         self.sign_ikm = str(login_data.get("signIkm"))
         self.sign_salt = str(login_data.get("signSalt"))
         self.sign_info = str(login_data.get("signInfo"))
+        self.refresh_token = str(login_data.get("refreshToken") or "") or None
         self._load_account_cert(login_data)
         self.remote_cert_synced = False
+
+    def token_refresh(self) -> None:
+        """Refresh the access token without repeating the full account login."""
+        if not self.refresh_token:
+            raise LeapmotorAuthError("No refresh token available; a full login is required.")
+
+        current_refresh_token = self.refresh_token
+        headers = self._build_signed_headers(
+            body_params={"refreshToken": current_refresh_token},
+        )
+        headers.update(self._auth_headers(content_type="application/x-www-form-urlencoded"))
+        response = self._post_with_curl(
+            path="/carownerservice/oversea/acct/v1/token/refresh",
+            headers=headers,
+            data=f"refreshToken={requests.utils.quote(current_refresh_token, safe='')}",
+            cert=self.account_cert,
+        )
+        result = self._parse_api_body(
+            response["status_code"],
+            response["body"],
+            "token refresh",
+        )
+        refresh_data = result.get("data") or {}
+        refreshed_token = refresh_data.get("token")
+        if not refreshed_token:
+            raise LeapmotorAuthError("Leapmotor token refresh returned no access token.")
+        self.token = str(refreshed_token)
+        self.refresh_token = (
+            str(refresh_data.get("refreshToken") or "") or current_refresh_token
+        )
+        _LOGGER.debug("Leapmotor access token refreshed successfully")
+
+    def _recover_session(self, exc: LeapmotorApiError) -> None:
+        """Refresh an expired token, falling back to a complete login."""
+        if _is_token_error(exc) and self.refresh_token:
+            try:
+                self.token_refresh()
+                return
+            except LeapmotorApiError as refresh_exc:
+                _LOGGER.debug(
+                    "Leapmotor token refresh failed, using full login: %s",
+                    refresh_exc,
+                )
+        self._clear_auth()
+        self._ensure_static_cert_files()
+        self.login()
 
     def get_vehicle_list(self) -> list[Vehicle]:
         """Fetch the account vehicle list."""
@@ -1035,13 +1161,11 @@ class LeapmotorApiClient:
         try:
             vehicles = self.get_vehicle_list()
         except LeapmotorApiError as exc:
-            if "token is invalid" not in str(exc).lower():
+            if not _is_token_error(exc):
                 raise
             # Resolving the vehicle happens before any remote command is sent,
-            # so retrying after a fresh login is safe and avoids stale-token failures.
-            self._clear_auth()
-            self._ensure_static_cert_files()
-            self.login()
+            # so refreshing and retrying here cannot duplicate a vehicle action.
+            self._recover_session(exc)
             vehicles = self.get_vehicle_list()
 
         for vehicle in vehicles:
@@ -1143,22 +1267,28 @@ class LeapmotorApiClient:
             "sign": hashlib.sha256(sign_input.encode("utf-8")).hexdigest(),
         }
 
-    def _build_signed_headers(self, *, vin: str | None = None) -> dict[str, str]:
+    def _build_signed_headers(
+        self,
+        *,
+        vin: str | None = None,
+        body_params: dict[str, str] | None = None,
+    ) -> dict[str, str]:
         nonce = str(random.randint(100000, 9999999))
         timestamp = str(int(time.time() * 1000))
-        sign_input_parts = [
-            self.language,
-            DEFAULT_CHANNEL,
-            self.device_id,
-            DEFAULT_DEVICE_TYPE,
-            nonce,
-            DEFAULT_SOURCE,
-            timestamp,
-            DEFAULT_APP_VERSION,
-        ]
+        sign_fields = {
+            "acceptLanguage": self.language,
+            "channel": DEFAULT_CHANNEL,
+            "deviceId": self.device_id,
+            "deviceType": DEFAULT_DEVICE_TYPE,
+            "nonce": nonce,
+            "source": DEFAULT_SOURCE,
+            "timestamp": timestamp,
+            "version": DEFAULT_APP_VERSION,
+            **(body_params or {}),
+        }
         if vin:
-            sign_input_parts.append(vin)
-        sign_input = "".join(sign_input_parts)
+            sign_fields["vin"] = vin
+        sign_input = "".join(value for _, value in sorted(sign_fields.items()))
         return {
             "acceptLanguage": self.language,
             "channel": DEFAULT_CHANNEL,
@@ -1864,11 +1994,56 @@ def normalize_vehicle(
 def _vehicle_status_car_type_path(car_type: str | None) -> str:
     """Return the backend status path segment for a vehicle model."""
     normalized = str(car_type or "C10").strip().lower()
-    if normalized == "b10":
-        # The international backend reports carType=B10 in the vehicle list,
-        # but the status endpoint is shared with C10.
+    if normalized in {"b10", "b11"}:
+        # The international backend reports these B-series model names in the
+        # vehicle list, but their status endpoint is shared with C10.
         return "c10"
     return normalized or "c10"
+
+
+def _normalize_charge_plan(plan: Any) -> dict[str, Any]:
+    """Normalize status and appointment charge-plan key variants."""
+    if not isinstance(plan, dict):
+        return {}
+    return {
+        "isEnable": plan.get("isEnable", plan.get("chargeEnable")),
+        "percent": plan.get("percent", plan.get("chargesoc")),
+        "circulation": plan.get("circulation"),
+        "cycles": plan.get("cycles"),
+        "endTime": plan.get("endTime", plan.get("endtime")),
+        "recharge": plan.get("recharge"),
+        "beginTime": plan.get("beginTime", plan.get("starttime")),
+    }
+
+
+def _charge_plan_is_complete(plan: dict[str, Any]) -> bool:
+    """Return whether a plan contains the fields needed for safe preservation."""
+    return bool(
+        plan.get("beginTime")
+        and plan.get("endTime")
+        and plan.get("cycles")
+        and _safe_int(plan.get("percent")) is not None
+    )
+
+
+def _merge_charge_plans(
+    primary: dict[str, Any],
+    fallback: dict[str, Any],
+) -> dict[str, Any]:
+    """Fill missing primary charge-plan values from a fallback source."""
+    return {
+        key: value if value not in (None, "") else fallback.get(key)
+        for key, value in primary.items()
+    }
+
+
+def _is_token_error(exc: Exception) -> bool:
+    """Return whether an API error indicates an invalid or expired token."""
+    message = str(exc).lower()
+    return "token" in message and any(
+        marker in message
+        for marker in ("invalid", "expired", "expire", "unauthorized", "not valid")
+    )
 
 
 def _status_data_signal(status_data: dict[str, Any]) -> dict[str, Any]:
