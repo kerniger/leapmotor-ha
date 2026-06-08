@@ -76,6 +76,47 @@ SET_CLIMATE_FIELDS = vol.Schema(
     }
 )
 
+def _schedule_days(value: object) -> list[int]:
+    """Validate climate schedule weekdays. The app uses 0=Sunday through 6=Saturday."""
+    if value in (None, ""):
+        return []
+    if isinstance(value, str):
+        raw_values = [part.strip() for part in value.split(",") if part.strip()]
+    elif isinstance(value, (list, tuple, set)):
+        raw_values = list(value)
+    else:
+        raise vol.Invalid("days must be a list or comma-separated string")
+
+    days: list[int] = []
+    for raw_value in raw_values:
+        try:
+            day = int(raw_value)
+        except (TypeError, ValueError) as exc:
+            raise vol.Invalid("days must contain integers from 0 to 6") from exc
+        if not 0 <= day <= 6:
+            raise vol.Invalid("days must contain integers from 0 to 6")
+        if day not in days:
+            days.append(day)
+    return days
+
+
+SET_CLIMATE_SCHEDULE_FIELDS = vol.Schema(
+    {
+        vol.Required("start_time"): vol.All(str, vol.Length(min=1)),
+        vol.Optional("mode", default="nohotcold"): vol.In(("cold", "hot", "nohotcold")),
+        vol.Optional("operate", default="manual"): vol.In(("manual", "auto")),
+        vol.Optional("temperature", default=26): vol.All(vol.Coerce(int), vol.Range(min=18, max=32)),
+        vol.Optional("fan_speed", default=4): vol.All(vol.Coerce(int), vol.Range(min=1, max=7)),
+        vol.Optional("recirculate", default=False): bool,
+        vol.Optional("windshield_defrost", default=False): bool,
+        vol.Optional("days", default=[]): _schedule_days,
+        vol.Optional("enabled", default=True): bool,
+        vol.Optional("set_id"): str,
+        vol.Optional("vin"): str,
+        vol.Optional("entity_id"): str,
+    }
+)
+
 _SERVICE_SCHEMAS = {
     "windows_open": WINDOW_POSITION_SERVICE_FIELDS,
     "windows_close": WINDOW_POSITION_SERVICE_FIELDS,
@@ -89,6 +130,22 @@ SET_CLIMATE_ACTION = RemoteActionSpec(
     icon="mdi:air-conditioner",
     method_name="set_climate",
     service_name="set_climate",
+)
+
+SET_CLIMATE_SCHEDULE_ACTION = RemoteActionSpec(
+    action="set_climate_schedule",
+    translation_key="set_climate_schedule",
+    icon="mdi:calendar-clock",
+    method_name="set_climate_schedule",
+    service_name="set_climate_schedule",
+)
+
+CANCEL_CLIMATE_SCHEDULE_ACTION = RemoteActionSpec(
+    action="cancel_climate_schedule",
+    translation_key="cancel_climate_schedule",
+    icon="mdi:calendar-remove",
+    method_name="cancel_climate_schedule",
+    service_name="cancel_climate_schedule",
 )
 
 SET_CHARGE_LIMIT_FIELDS = vol.Schema(
@@ -213,6 +270,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
     specs = {spec.service_name: spec for spec in BUTTON_SPECS}
     specs["lock"] = LOCK_ACTION
     specs["unlock"] = UNLOCK_ACTION
+    specs["cancel_climate_schedule"] = CANCEL_CLIMATE_SCHEDULE_ACTION
 
     async def handle_remote(service_action: str, call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}
@@ -338,6 +396,53 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         }
         await async_execute_remote_action(coordinator, target_vin, SET_CLIMATE_ACTION, kwargs)
 
+    async def handle_set_climate_schedule(call: ServiceCall) -> None:
+        domain_data = hass.data.get(DOMAIN) or {}
+        if not domain_data:
+            raise HomeAssistantError("No Leapmotor config entry is loaded.")
+
+        coordinator = None
+        target_vin = call.data.get("vin")
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            state = hass.states.get(entity_id)
+            if state:
+                target_vin = state.attributes.get("vin") or target_vin
+        for candidate in domain_data.values():
+            if target_vin and target_vin not in (candidate.data.get("vehicles") or {}):
+                continue
+            try:
+                resolved_vin = resolve_target_vin(candidate, target_vin)
+            except Exception:
+                continue
+            coordinator = candidate
+            target_vin = resolved_vin
+            break
+
+        if coordinator is None or not target_vin:
+            raise HomeAssistantError(
+                "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
+            )
+
+        kwargs = {
+            "start_time": call.data["start_time"],
+            "mode": call.data["mode"],
+            "operate": call.data["operate"],
+            "temperature": call.data["temperature"],
+            "fan_speed": call.data["fan_speed"],
+            "recirculate": call.data["recirculate"],
+            "windshield_defrost": call.data["windshield_defrost"],
+            "days": call.data["days"],
+            "enabled": call.data["enabled"],
+            "set_id": call.data.get("set_id"),
+        }
+        await async_execute_remote_action(
+            coordinator,
+            target_vin,
+            SET_CLIMATE_SCHEDULE_ACTION,
+            kwargs,
+        )
+
     async def handle_send_destination(call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}
         if not domain_data:
@@ -456,6 +561,20 @@ async def _async_register_services(hass: HomeAssistant) -> None:
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_climate")
     hass.services.async_register(
         DOMAIN,
+        "set_climate_schedule",
+        handle_set_climate_schedule,
+        schema=SET_CLIMATE_SCHEDULE_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_climate_schedule")
+    hass.services.async_register(
+        DOMAIN,
+        "cancel_climate_schedule",
+        make_handler("cancel_climate_schedule"),
+        schema=SERVICE_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "cancel_climate_schedule")
+    hass.services.async_register(
+        DOMAIN,
         "set_charge_limit",
         handle_set_charge_limit,
         schema=SET_CHARGE_LIMIT_FIELDS,
@@ -484,6 +603,10 @@ def _async_unregister_services(hass: HomeAssistant) -> None:
             hass.services.async_remove(DOMAIN, service_name)
     if hass.services.has_service(DOMAIN, "set_climate"):
         hass.services.async_remove(DOMAIN, "set_climate")
+    if hass.services.has_service(DOMAIN, "set_climate_schedule"):
+        hass.services.async_remove(DOMAIN, "set_climate_schedule")
+    if hass.services.has_service(DOMAIN, "cancel_climate_schedule"):
+        hass.services.async_remove(DOMAIN, "cancel_climate_schedule")
     if hass.services.has_service(DOMAIN, "set_charge_limit"):
         hass.services.async_remove(DOMAIN, "set_charge_limit")
     if hass.services.has_service(DOMAIN, "send_destination"):

@@ -130,6 +130,7 @@ permissions.
 | `leapmotor.sunshade_open` / `leapmotor.sunshade_close` | yes | Open or close sunshade |
 | `leapmotor.ac_off` | yes | Climate off |
 | `leapmotor.set_climate` | yes | Parameterised climate command |
+| `leapmotor.set_climate_schedule` / `leapmotor.cancel_climate_schedule` | yes | Climate pre-conditioning schedule |
 | `leapmotor.quick_cool` / `leapmotor.quick_heat` | yes | Climate quick profiles |
 | `leapmotor.windshield_defrost` | yes | Windshield defrost |
 | `leapmotor.set_charge_limit` | yes | Set charge limit |
@@ -141,6 +142,10 @@ permissions.
 `set_climate` requires `mode` (`cold`, `hot`, or `wind`) and accepts optional
 `temperature` (`18` to `32`), `fan_speed` (`1` to `7`), `recirculate`, and
 `windshield_defrost`.
+`set_climate_schedule` replaces all climate pre-conditioning schedules with one
+entry. `start_time` must be in the future in the vehicle/app local time; `days`
+uses the app mapping `0=Sunday` through `6=Saturday` and an empty list means a
+one-time schedule.
 Battery preheating is exposed as a stateful `switch` instead of a one-shot
 service/button, so it can be turned on and off from Home Assistant.
 `set_charge_limit` requires `charge_limit_percent`. `send_destination` requires
@@ -172,6 +177,19 @@ data:
   temperature: 26
   fan_speed: 4
   recirculate: true
+```
+
+Schedule cabin pre-conditioning for Monday morning:
+
+```yaml
+action: leapmotor.set_climate_schedule
+data:
+  entity_id: sensor.c10_battery
+  start_time: "2026-06-09 07:30:00"
+  mode: hot
+  temperature: 26
+  fan_speed: 4
+  days: [1]
 ```
 
 Send a destination:

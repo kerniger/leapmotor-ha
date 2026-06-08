@@ -182,7 +182,7 @@ windows_close:
         text:
 ac_off:
   name: Climate off
-  description: Turn climate control off using the official close operation. Requires the configured Vehicle PIN.
+  description: Turn climate control fully off. Requires the configured Vehicle PIN.
   fields:
     vin:
       name: VIN
@@ -241,6 +241,125 @@ set_climate:
       example: false
       selector:
         boolean:
+    vin:
+      name: VIN
+      description: Target VIN. Required when multiple vehicles are configured.
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: Optional Leapmotor entity to resolve the target vehicle.
+      selector:
+        text:
+set_climate_schedule:
+  name: Set climate schedule
+  description: Replace all climate pre-conditioning schedules with one schedule entry. Requires the configured Vehicle PIN. The start time must be in the future in vehicle/app local time.
+  fields:
+    start_time:
+      name: Start time
+      description: Future schedule start time, for example 2026-06-09 07:30:00.
+      required: true
+      example: "2026-06-09 07:30:00"
+      selector:
+        datetime:
+    mode:
+      name: Mode
+      description: Schedule mode. Use nohotcold for ventilation or no heat/cool selection.
+      example: cold
+      selector:
+        select:
+          options:
+            - cold
+            - hot
+            - nohotcold
+    operate:
+      name: Operation
+      description: App operation value. Most schedules use manual; app defrost/no-selection presets use auto.
+      example: manual
+      selector:
+        select:
+          options:
+            - manual
+            - auto
+    temperature:
+      name: Temperature
+      description: Target temperature in °C, from 18 to 32. Defaults to 26.
+      example: 22
+      selector:
+        number:
+          min: 18
+          max: 32
+          step: 1
+          mode: box
+    fan_speed:
+      name: Fan speed
+      description: Fan level from 1 to 7. Defaults to 4.
+      example: 4
+      selector:
+        number:
+          min: 1
+          max: 7
+          step: 1
+          mode: slider
+    recirculate:
+      name: Recirculate
+      description: Use cabin air recirculation instead of outside air. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    windshield_defrost:
+      name: Windshield defrost
+      description: Enable front windshield defrost for the schedule. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    days:
+      name: Days
+      description: Optional repeat days where 0=Sunday through 6=Saturday. Leave empty for a one-time schedule.
+      example: [1, 2, 3, 4, 5]
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Sunday
+              value: "0"
+            - label: Monday
+              value: "1"
+            - label: Tuesday
+              value: "2"
+            - label: Wednesday
+              value: "3"
+            - label: Thursday
+              value: "4"
+            - label: Friday
+              value: "5"
+            - label: Saturday
+              value: "6"
+    enabled:
+      name: Enabled
+      description: Whether the schedule entry is active. Defaults to true.
+      example: true
+      selector:
+        boolean:
+    set_id:
+      name: Set ID
+      description: Optional existing opaque app schedule ID to reuse when editing. Leave empty for a new schedule.
+      selector:
+        text:
+    vin:
+      name: VIN
+      description: Target VIN. Required when multiple vehicles are configured.
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: Optional Leapmotor entity to resolve the target vehicle.
+      selector:
+        text:
+cancel_climate_schedule:
+  name: Cancel climate schedule
+  description: Cancel all climate pre-conditioning schedules by sending an empty controls list. Requires the configured Vehicle PIN.
+  fields:
     vin:
       name: VIN
       description: Target VIN. Required when multiple vehicles are configured.

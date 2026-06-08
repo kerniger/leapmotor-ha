@@ -341,6 +341,58 @@ class LeapmotorApiClient:
         params["wshld"] = "1" if windshield_defrost else "0"
         return self._remote_control(vin=vin, action=REMOTE_CTL_AC_ON, cmd_content=params)
 
+    def set_climate_schedule(
+        self,
+        vin: str,
+        *,
+        start_time: str,
+        mode: str = "nohotcold",
+        operate: str = "manual",
+        temperature: int = 26,
+        fan_speed: int = 4,
+        recirculate: bool = False,
+        windshield_defrost: bool = False,
+        days: list[int] | None = None,
+        enabled: bool = True,
+        set_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Replace the climate schedule list with one planned pre-conditioning entry."""
+        vehicle = self._find_vehicle_by_vin(vin)
+        try:
+            entry = _build_climate_schedule_entry(
+                start_time=start_time,
+                mode=mode,
+                operate=operate,
+                temperature=temperature,
+                fan_speed=fan_speed,
+                recirculate=recirculate,
+                windshield_defrost=windshield_defrost,
+                days=days,
+                enabled=enabled,
+                set_id=set_id,
+            )
+        except ValueError as exc:
+            raise LeapmotorApiError(str(exc)) from exc
+        cmd_content = json.dumps({"controls": [entry]}, separators=(",", ":"))
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="171",
+            cmd_content=cmd_content,
+            action_label="set_climate_schedule",
+            vehicle=vehicle,
+        )
+
+    def cancel_climate_schedule(self, vin: str) -> dict[str, Any]:
+        """Cancel all climate pre-conditioning schedules."""
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="171",
+            cmd_content='{"controls":[]}',
+            action_label="cancel_climate_schedule",
+            vehicle=vehicle,
+        )
+
     def quick_cool(self, vin: str) -> dict[str, Any]:
         """Trigger the verified quick-cool profile."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_QUICK_COOL)
@@ -2035,6 +2087,73 @@ def _merge_charge_plans(
         key: value if value not in (None, "") else fallback.get(key)
         for key, value in primary.items()
     }
+
+
+def _build_climate_schedule_entry(
+    *,
+    start_time: str,
+    mode: str,
+    operate: str,
+    temperature: int,
+    fan_speed: int,
+    recirculate: bool,
+    windshield_defrost: bool,
+    days: list[int] | None,
+    enabled: bool,
+    set_id: str | None,
+) -> dict[str, Any]:
+    """Build one climate pre-conditioning schedule entry for cmdId 171."""
+    if mode not in {"cold", "hot", "nohotcold"}:
+        raise ValueError(f"Unsupported climate schedule mode: {mode}")
+    if operate not in {"manual", "auto"}:
+        raise ValueError(f"Unsupported climate schedule operation: {operate}")
+    if not 18 <= int(temperature) <= 32:
+        raise ValueError(f"Climate schedule temperature must be 18..32: {temperature}")
+    if not 1 <= int(fan_speed) <= 7:
+        raise ValueError(f"Climate schedule fan speed must be 1..7: {fan_speed}")
+
+    normalized_days = _normalize_climate_schedule_days(days or [])
+    now_ms = int(time.time() * 1000)
+    return {
+        "mode": mode,
+        "operate": operate,
+        "temperature": str(int(temperature)),
+        "circle": "in" if recirculate else "out",
+        "windlevel": str(int(fan_speed)),
+        "wshld": "2" if windshield_defrost else "1",
+        "days": normalized_days,
+        "on": "1" if enabled else "0",
+        "position": "all",
+        "start_time": _normalize_climate_schedule_start_time(start_time),
+        "set_id": set_id.strip() if set_id and set_id.strip() else _new_climate_schedule_id(now_ms),
+        "update_time": str(now_ms),
+    }
+
+
+def _normalize_climate_schedule_days(days: list[int]) -> list[int]:
+    """Normalize app weekday values where 0=Sunday and 6=Saturday."""
+    normalized: list[int] = []
+    for day in days:
+        day_int = int(day)
+        if not 0 <= day_int <= 6:
+            raise ValueError(f"Climate schedule day must be 0..6: {day}")
+        if day_int not in normalized:
+            normalized.append(day_int)
+    return normalized
+
+
+def _normalize_climate_schedule_start_time(start_time: str) -> str:
+    """Normalize a service datetime value to the app's local string format."""
+    text = start_time.strip()
+    if not text:
+        raise ValueError("Climate schedule start_time is required.")
+    parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    return parsed.strftime("%Y-%m-%d %H:%M:00")
+
+
+def _new_climate_schedule_id(now_ms: int) -> str:
+    """Return an app-shaped opaque schedule id."""
+    return f"ios_{uuid.uuid4().hex}{now_ms // 1000}"
 
 
 def _is_token_error(exc: Exception) -> bool:

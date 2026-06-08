@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.13 - 2026-06-08
+
+- Add B10-verified climate pre-conditioning schedule services using `cmdId=171`:
+  `leapmotor.set_climate_schedule` writes one future schedule entry and
+  `leapmotor.cancel_climate_schedule` sends an empty schedule list.
+
 ## 0.6.12 - 2026-06-06
 
 - Refresh expired access tokens through `/acct/v1/token/refresh` before falling
