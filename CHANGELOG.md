@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.16 - 2026-06-08
+
+- Fix prepare-car service selectors so the `off` seat mode is parsed as a
+  string by Home Assistant's service metadata loader.
+
 ## 0.6.15 - 2026-06-08
 
 - Add B10-verified one-touch vehicle preparation services:

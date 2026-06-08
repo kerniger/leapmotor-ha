@@ -438,7 +438,7 @@ prepare_car:
       selector:
         select:
           options:
-            - off
+            - "off"
             - heat
             - ventilation
     driver_seat_level:
@@ -458,7 +458,7 @@ prepare_car:
       selector:
         select:
           options:
-            - off
+            - "off"
             - heat
             - ventilation
     passenger_seat_level:
@@ -633,7 +633,7 @@ set_prepare_car_schedule:
       selector:
         select:
           options:
-            - off
+            - "off"
             - heat
             - ventilation
     driver_seat_level:
@@ -653,7 +653,7 @@ set_prepare_car_schedule:
       selector:
         select:
           options:
-            - off
+            - "off"
             - heat
             - ventilation
     passenger_seat_level:
