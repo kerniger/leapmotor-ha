@@ -393,6 +393,135 @@ class LeapmotorApiClient:
             vehicle=vehicle,
         )
 
+    def prepare_car(
+        self,
+        vin: str,
+        *,
+        climate_enabled: bool = True,
+        mode: str = "cold",
+        operate: str = "manual",
+        temperature: int = 18,
+        fan_speed: int = 7,
+        recirculate: bool = True,
+        windshield_defrost: bool = False,
+        driver_seat: str = "off",
+        driver_seat_level: int = 3,
+        passenger_seat: str = "off",
+        passenger_seat_level: int = 3,
+        steering_wheel_heat: bool = False,
+        mirror_heat: bool = False,
+        destination_name: str | None = None,
+        destination_address: str | None = None,
+        destination_latitude: float | None = None,
+        destination_longitude: float | None = None,
+    ) -> dict[str, Any]:
+        """Run one-touch vehicle preparation immediately with cmdId 360."""
+        vehicle = self._find_vehicle_by_vin(vin)
+        try:
+            datacontent = _build_prepare_car_datacontent(
+                climate_enabled=climate_enabled,
+                mode=mode,
+                operate=operate,
+                temperature=temperature,
+                fan_speed=fan_speed,
+                recirculate=recirculate,
+                windshield_defrost=windshield_defrost,
+                driver_seat=driver_seat,
+                driver_seat_level=driver_seat_level,
+                passenger_seat=passenger_seat,
+                passenger_seat_level=passenger_seat_level,
+                steering_wheel_heat=steering_wheel_heat,
+                mirror_heat=mirror_heat,
+                destination_name=destination_name,
+                destination_address=destination_address,
+                destination_latitude=destination_latitude,
+                destination_longitude=destination_longitude,
+            )
+        except ValueError as exc:
+            raise LeapmotorApiError(str(exc)) from exc
+        cmd_content = json.dumps(datacontent, separators=(",", ":"))
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="360",
+            cmd_content=cmd_content,
+            action_label="prepare_car",
+            vehicle=vehicle,
+        )
+
+    def set_prepare_car_schedule(
+        self,
+        vin: str,
+        *,
+        start_time: str,
+        climate_enabled: bool = True,
+        mode: str = "cold",
+        operate: str = "manual",
+        temperature: int = 18,
+        fan_speed: int = 7,
+        recirculate: bool = True,
+        windshield_defrost: bool = False,
+        driver_seat: str = "off",
+        driver_seat_level: int = 3,
+        passenger_seat: str = "off",
+        passenger_seat_level: int = 3,
+        steering_wheel_heat: bool = False,
+        mirror_heat: bool = False,
+        destination_name: str | None = None,
+        destination_address: str | None = None,
+        destination_latitude: float | None = None,
+        destination_longitude: float | None = None,
+        days: list[int] | None = None,
+        enabled: bool = True,
+        set_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Replace prepare-car schedules with one cmdId 361 schedule entry."""
+        vehicle = self._find_vehicle_by_vin(vin)
+        try:
+            entry = _build_prepare_car_schedule_entry(
+                start_time=start_time,
+                climate_enabled=climate_enabled,
+                mode=mode,
+                operate=operate,
+                temperature=temperature,
+                fan_speed=fan_speed,
+                recirculate=recirculate,
+                windshield_defrost=windshield_defrost,
+                driver_seat=driver_seat,
+                driver_seat_level=driver_seat_level,
+                passenger_seat=passenger_seat,
+                passenger_seat_level=passenger_seat_level,
+                steering_wheel_heat=steering_wheel_heat,
+                mirror_heat=mirror_heat,
+                destination_name=destination_name,
+                destination_address=destination_address,
+                destination_latitude=destination_latitude,
+                destination_longitude=destination_longitude,
+                days=days,
+                enabled=enabled,
+                set_id=set_id,
+            )
+        except ValueError as exc:
+            raise LeapmotorApiError(str(exc)) from exc
+        cmd_content = json.dumps({"controls": [entry]}, separators=(",", ":"))
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="361",
+            cmd_content=cmd_content,
+            action_label="set_prepare_car_schedule",
+            vehicle=vehicle,
+        )
+
+    def cancel_prepare_car_schedule(self, vin: str) -> dict[str, Any]:
+        """Cancel all one-touch prepare-car schedules."""
+        vehicle = self._find_vehicle_by_vin(vin)
+        return self._remote_control_raw(
+            vin=vehicle.vin,
+            cmd_id="361",
+            cmd_content='{"controls":[]}',
+            action_label="cancel_prepare_car_schedule",
+            vehicle=vehicle,
+        )
+
     def quick_cool(self, vin: str) -> dict[str, Any]:
         """Trigger the verified quick-cool profile."""
         return self._remote_control(vin=vin, action=REMOTE_CTL_QUICK_COOL)
@@ -2155,6 +2284,185 @@ def _normalize_climate_schedule_start_time(start_time: str) -> str:
 def _new_climate_schedule_id(now_ms: int) -> str:
     """Return an app-shaped opaque schedule id."""
     return f"ios_{uuid.uuid4().hex}{now_ms // 1000}"
+
+
+def _build_prepare_car_schedule_entry(
+    *,
+    start_time: str,
+    climate_enabled: bool,
+    mode: str,
+    operate: str,
+    temperature: int,
+    fan_speed: int,
+    recirculate: bool,
+    windshield_defrost: bool,
+    driver_seat: str,
+    driver_seat_level: int,
+    passenger_seat: str,
+    passenger_seat_level: int,
+    steering_wheel_heat: bool,
+    mirror_heat: bool,
+    destination_name: str | None,
+    destination_address: str | None,
+    destination_latitude: float | None,
+    destination_longitude: float | None,
+    days: list[int] | None,
+    enabled: bool,
+    set_id: str | None,
+) -> dict[str, Any]:
+    """Build one one-touch vehicle preparation schedule entry for cmdId 361."""
+    now_ms = int(time.time() * 1000)
+    return {
+        "datacontent": _build_prepare_car_datacontent(
+            climate_enabled=climate_enabled,
+            mode=mode,
+            operate=operate,
+            temperature=temperature,
+            fan_speed=fan_speed,
+            recirculate=recirculate,
+            windshield_defrost=windshield_defrost,
+            driver_seat=driver_seat,
+            driver_seat_level=driver_seat_level,
+            passenger_seat=passenger_seat,
+            passenger_seat_level=passenger_seat_level,
+            steering_wheel_heat=steering_wheel_heat,
+            mirror_heat=mirror_heat,
+            destination_name=destination_name,
+            destination_address=destination_address,
+            destination_latitude=destination_latitude,
+            destination_longitude=destination_longitude,
+        ),
+        "days": _normalize_climate_schedule_days(days or []),
+        "enable": bool(enabled),
+        "set_id": set_id.strip() if set_id and set_id.strip() else _new_climate_schedule_id(now_ms),
+        "start_time": _normalize_climate_schedule_start_time(start_time),
+    }
+
+
+def _build_prepare_car_datacontent(
+    *,
+    climate_enabled: bool,
+    mode: str,
+    operate: str,
+    temperature: int,
+    fan_speed: int,
+    recirculate: bool,
+    windshield_defrost: bool,
+    driver_seat: str,
+    driver_seat_level: int,
+    passenger_seat: str,
+    passenger_seat_level: int,
+    steering_wheel_heat: bool,
+    mirror_heat: bool,
+    destination_name: str | None,
+    destination_address: str | None,
+    destination_latitude: float | None,
+    destination_longitude: float | None,
+) -> dict[str, Any]:
+    """Build the cmdId 360/361 datacontent bundle captured from the B10 app."""
+    datacontent: dict[str, Any] = {}
+    if climate_enabled:
+        if mode not in {"cold", "hot", "nohotcold"}:
+            raise ValueError(f"Prepare-car climate mode must be cold, hot or nohotcold: {mode}")
+        if operate not in {"manual", "auto"}:
+            raise ValueError(f"Prepare-car operation must be manual or auto: {operate}")
+        if not 18 <= int(temperature) <= 32:
+            raise ValueError(f"Prepare-car temperature must be 18..32: {temperature}")
+        if not 1 <= int(fan_speed) <= 7:
+            raise ValueError(f"Prepare-car fan speed must be 1..7: {fan_speed}")
+        datacontent["air_condition"] = {
+            "mode": mode,
+            "temperature": str(int(temperature)),
+            "circle": "in" if recirculate else "out",
+            "windlevel": str(int(fan_speed)),
+            "wshld": "2" if windshield_defrost else "1",
+            "operate": operate,
+            "position": "all",
+            "enable": True,
+        }
+
+    seat_setting = {
+        "driver": _prepare_car_seat_code(driver_seat, driver_seat_level, "driver"),
+        "copilot": _prepare_car_seat_code(passenger_seat, passenger_seat_level, "passenger"),
+        "left_rear": "0",
+        "right_rear": "0",
+    }
+    if any(value != "0" for value in seat_setting.values()):
+        datacontent["seat_setting"] = {**seat_setting, "enable": True}
+
+    if steering_wheel_heat:
+        datacontent["steeringWheelHeatCtrl"] = {"enable": True, "level": "2"}
+    if mirror_heat:
+        datacontent["rearMirrorHeating"] = {"enable": True, "value": "2"}
+
+    destination = _build_prepare_car_destination(
+        destination_name=destination_name,
+        destination_address=destination_address,
+        destination_latitude=destination_latitude,
+        destination_longitude=destination_longitude,
+    )
+    if destination:
+        datacontent["syn_path"] = destination
+
+    if not datacontent:
+        raise ValueError("Prepare-car requires at least one enabled dimension.")
+    return datacontent
+
+
+def _prepare_car_seat_code(mode: str, level: int, label: str) -> str:
+    """Return the prepare-car seat setting code."""
+    if mode not in {"off", "heat", "ventilation"}:
+        raise ValueError(f"Prepare-car {label} seat mode must be off, heat or ventilation: {mode}")
+    if mode == "off":
+        return "0"
+    level_int = int(level)
+    if not 1 <= level_int <= 3:
+        raise ValueError(f"Prepare-car {label} seat level must be 1..3: {level}")
+    if mode == "heat":
+        return str(level_int)
+    return str(10 + level_int)
+
+
+def _build_prepare_car_destination(
+    *,
+    destination_name: str | None,
+    destination_address: str | None,
+    destination_latitude: float | None,
+    destination_longitude: float | None,
+) -> dict[str, Any] | None:
+    """Build the optional navigation sync payload inside prepare-car."""
+    has_destination = any(
+        value not in (None, "")
+        for value in (
+            destination_name,
+            destination_address,
+            destination_latitude,
+            destination_longitude,
+        )
+    )
+    if not has_destination:
+        return None
+    if destination_latitude is None or destination_longitude is None:
+        raise ValueError("Prepare-car destination requires latitude and longitude.")
+    name = (destination_name or "").strip()
+    if not name:
+        raise ValueError("Prepare-car destination requires destination_name.")
+    address = (destination_address or name).strip()
+    return {
+        "address": address,
+        "addressname": name,
+        "addresskey": "",
+        "config": "0110",
+        "latitude": _format_prepare_car_coordinate(destination_latitude),
+        "longitude": _format_prepare_car_coordinate(destination_longitude),
+        "linenum": "0",
+        "enable": True,
+    }
+
+
+def _format_prepare_car_coordinate(value: float) -> str:
+    """Format coordinates like the app payload while avoiding scientific notation."""
+    return f"{float(value):.8f}".rstrip("0").rstrip(".")
 
 
 def _is_token_error(exc: Exception) -> bool:

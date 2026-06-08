@@ -21,6 +21,9 @@ research logs, or reverse-engineering workfiles.
   to navigation.
 - Charging schedule switch for enabling/disabling the existing schedule while
   preserving start time, end time, recurrence, and charge limit.
+- One-touch vehicle preparation services for immediate and scheduled climate,
+  front-seat comfort, steering-wheel heat, mirror heat, and optional navigation
+  sync on supported vehicles.
 - Comfort controls for supported vehicles: steering wheel heating and mirror
   heating as switches, plus driver/passenger seat heating and ventilation as
   `0-3` level controls.
@@ -132,6 +135,8 @@ permissions.
 | `leapmotor.ac_off` | yes | Climate off |
 | `leapmotor.set_climate` | yes | Parameterised climate command |
 | `leapmotor.set_climate_schedule` / `leapmotor.cancel_climate_schedule` | yes | Climate pre-conditioning schedule |
+| `leapmotor.prepare_car` | yes | One-touch vehicle preparation |
+| `leapmotor.set_prepare_car_schedule` / `leapmotor.cancel_prepare_car_schedule` | yes | Scheduled vehicle preparation |
 | `leapmotor.quick_cool` / `leapmotor.quick_heat` | yes | Climate quick profiles |
 | `leapmotor.windshield_defrost` | yes | Windshield defrost |
 | `leapmotor.set_charge_limit` | yes | Set charge limit |
@@ -147,6 +152,11 @@ permissions.
 entry. `start_time` must be in the future in the vehicle/app local time; `days`
 uses the app mapping `0=Sunday` through `6=Saturday` and an empty list means a
 one-time schedule.
+`prepare_car` and `set_prepare_car_schedule` use the B10-verified one-touch
+vehicle preparation command. They can combine climate, front-seat heating or
+ventilation, steering-wheel heating, mirror heating, and an optional navigation
+destination. Schedule writes replace all prepare-car schedules with one entry;
+`cancel_prepare_car_schedule` sends an empty schedule list.
 Battery preheating is exposed as a stateful `switch` instead of a one-shot
 service/button, so it can be turned on and off from Home Assistant.
 `set_charge_limit` requires `charge_limit_percent`. `send_destination` requires
@@ -191,6 +201,22 @@ data:
   temperature: 26
   fan_speed: 4
   days: [1]
+```
+
+Prepare the car immediately with cooling and seat ventilation:
+
+```yaml
+action: leapmotor.prepare_car
+data:
+  entity_id: sensor.c10_battery
+  mode: cold
+  temperature: 18
+  fan_speed: 7
+  recirculate: true
+  driver_seat: ventilation
+  driver_seat_level: 3
+  passenger_seat: ventilation
+  passenger_seat_level: 3
 ```
 
 Send a destination:

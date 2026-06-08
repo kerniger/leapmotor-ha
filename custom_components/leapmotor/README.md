@@ -44,6 +44,9 @@ Available data includes:
 - Scheduled charging flag as a read-only binary sensor
 - Charging schedule switch for enabling/disabling the existing schedule while
   preserving start time, end time, recurrence, and charge limit
+- One-touch vehicle preparation services for immediate and scheduled climate,
+  front-seat comfort, steering-wheel heat, mirror heat, and optional navigation
+  sync on supported vehicles
 - Tire pressures
 - GPS location as a Home Assistant device tracker
 - Remote-control buttons for:
@@ -287,6 +290,22 @@ Start quick climate heating:
 action: leapmotor.quick_heat
 data:
   entity_id: sensor.c10_battery
+```
+
+Prepare the car immediately with cooling and seat ventilation:
+
+```yaml
+action: leapmotor.prepare_car
+data:
+  entity_id: sensor.c10_battery
+  mode: cold
+  temperature: 18
+  fan_speed: 7
+  recirculate: true
+  driver_seat: ventilation
+  driver_seat_level: 3
+  passenger_seat: ventilation
+  passenger_seat_level: 3
 ```
 
 Partially open windows:

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.15 - 2026-06-08
+
+- Add B10-verified one-touch vehicle preparation services:
+  `leapmotor.prepare_car`, `leapmotor.set_prepare_car_schedule`, and
+  `leapmotor.cancel_prepare_car_schedule` using cmdIds `360` and `361`.
+
 ## 0.6.14 - 2026-06-08
 
 - Add a `Vehicle READY` diagnostic binary sensor based on signal `1258`

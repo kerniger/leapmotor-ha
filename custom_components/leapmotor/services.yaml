@@ -370,6 +370,370 @@ cancel_climate_schedule:
       description: Optional Leapmotor entity to resolve the target vehicle.
       selector:
         text:
+prepare_car:
+  name: Prepare car
+  description: Run one-touch vehicle preparation immediately with climate, front-seat comfort, steering-wheel heat, mirror heat, and optional navigation destination. Requires the configured Vehicle PIN.
+  fields:
+    climate_enabled:
+      name: Climate enabled
+      description: Include the air-conditioning preparation block. Defaults to true.
+      example: true
+      selector:
+        boolean:
+    mode:
+      name: Climate mode
+      description: Preparation climate mode.
+      example: cold
+      selector:
+        select:
+          options:
+            - cold
+            - hot
+            - nohotcold
+    operate:
+      name: Operation
+      description: App operation value. Most preparations use manual.
+      example: manual
+      selector:
+        select:
+          options:
+            - manual
+            - auto
+    temperature:
+      name: Temperature
+      description: Target temperature in °C, from 18 to 32. Defaults to 18.
+      example: 18
+      selector:
+        number:
+          min: 18
+          max: 32
+          step: 1
+          mode: box
+    fan_speed:
+      name: Fan speed
+      description: Fan level from 1 to 7. Defaults to 7.
+      example: 7
+      selector:
+        number:
+          min: 1
+          max: 7
+          step: 1
+          mode: slider
+    recirculate:
+      name: Recirculate
+      description: Use cabin air recirculation instead of outside air. Defaults to true.
+      example: true
+      selector:
+        boolean:
+    windshield_defrost:
+      name: Windshield defrost
+      description: Enable front windshield defrost. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    driver_seat:
+      name: Driver seat
+      description: Driver seat preparation mode. Active modes use the selected level.
+      example: heat
+      selector:
+        select:
+          options:
+            - off
+            - heat
+            - ventilation
+    driver_seat_level:
+      name: Driver seat level
+      description: Driver seat level from 1 to 3. Defaults to 3.
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 3
+          step: 1
+          mode: slider
+    passenger_seat:
+      name: Passenger seat
+      description: Passenger seat preparation mode. Active modes use the selected level.
+      example: ventilation
+      selector:
+        select:
+          options:
+            - off
+            - heat
+            - ventilation
+    passenger_seat_level:
+      name: Passenger seat level
+      description: Passenger seat level from 1 to 3. Defaults to 3.
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 3
+          step: 1
+          mode: slider
+    steering_wheel_heat:
+      name: Steering wheel heat
+      description: Include steering-wheel heating. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    mirror_heat:
+      name: Mirror heat
+      description: Include exterior mirror heating. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    destination_name:
+      name: Destination name
+      description: Optional navigation destination name. Latitude and longitude are required when a destination is used.
+      example: Bern Bahnhof
+      selector:
+        text:
+    destination_address:
+      name: Destination address
+      description: Optional navigation destination address. Defaults to the destination name.
+      example: Bahnhofplatz, Bern, Schweiz
+      selector:
+        text:
+    destination_latitude:
+      name: Destination latitude
+      description: Optional navigation destination latitude.
+      example: 46.94809
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: 0.000001
+          mode: box
+    destination_longitude:
+      name: Destination longitude
+      description: Optional navigation destination longitude.
+      example: 7.43914
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: 0.000001
+          mode: box
+    vin:
+      name: VIN
+      description: Target VIN. Required when multiple vehicles are configured.
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: Optional Leapmotor entity to resolve the target vehicle.
+      selector:
+        text:
+set_prepare_car_schedule:
+  name: Set prepare-car schedule
+  description: Replace all one-touch vehicle preparation schedules with one schedule entry. Requires the configured Vehicle PIN.
+  fields:
+    start_time:
+      name: Start time
+      description: Schedule start time, for example 2026-06-09 07:30:00.
+      required: true
+      example: "2026-06-09 07:30:00"
+      selector:
+        datetime:
+    days:
+      name: Days
+      description: Optional repeat days where 0=Sunday through 6=Saturday. Leave empty for a one-time schedule.
+      example: [1, 2, 3, 4, 5]
+      selector:
+        select:
+          multiple: true
+          options:
+            - label: Sunday
+              value: "0"
+            - label: Monday
+              value: "1"
+            - label: Tuesday
+              value: "2"
+            - label: Wednesday
+              value: "3"
+            - label: Thursday
+              value: "4"
+            - label: Friday
+              value: "5"
+            - label: Saturday
+              value: "6"
+    enabled:
+      name: Enabled
+      description: Whether the schedule entry is active. Defaults to true.
+      example: true
+      selector:
+        boolean:
+    set_id:
+      name: Set ID
+      description: Optional existing opaque app schedule ID to reuse when editing. Leave empty for a new schedule.
+      selector:
+        text:
+    climate_enabled:
+      name: Climate enabled
+      description: Include the air-conditioning preparation block. Defaults to true.
+      example: true
+      selector:
+        boolean:
+    mode:
+      name: Climate mode
+      description: Preparation climate mode.
+      example: cold
+      selector:
+        select:
+          options:
+            - cold
+            - hot
+            - nohotcold
+    operate:
+      name: Operation
+      description: App operation value. Most preparations use manual.
+      example: manual
+      selector:
+        select:
+          options:
+            - manual
+            - auto
+    temperature:
+      name: Temperature
+      description: Target temperature in °C, from 18 to 32. Defaults to 18.
+      example: 18
+      selector:
+        number:
+          min: 18
+          max: 32
+          step: 1
+          mode: box
+    fan_speed:
+      name: Fan speed
+      description: Fan level from 1 to 7. Defaults to 7.
+      example: 7
+      selector:
+        number:
+          min: 1
+          max: 7
+          step: 1
+          mode: slider
+    recirculate:
+      name: Recirculate
+      description: Use cabin air recirculation instead of outside air. Defaults to true.
+      example: true
+      selector:
+        boolean:
+    windshield_defrost:
+      name: Windshield defrost
+      description: Enable front windshield defrost. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    driver_seat:
+      name: Driver seat
+      description: Driver seat preparation mode. Active modes use the selected level.
+      example: heat
+      selector:
+        select:
+          options:
+            - off
+            - heat
+            - ventilation
+    driver_seat_level:
+      name: Driver seat level
+      description: Driver seat level from 1 to 3. Defaults to 3.
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 3
+          step: 1
+          mode: slider
+    passenger_seat:
+      name: Passenger seat
+      description: Passenger seat preparation mode. Active modes use the selected level.
+      example: ventilation
+      selector:
+        select:
+          options:
+            - off
+            - heat
+            - ventilation
+    passenger_seat_level:
+      name: Passenger seat level
+      description: Passenger seat level from 1 to 3. Defaults to 3.
+      example: 3
+      selector:
+        number:
+          min: 1
+          max: 3
+          step: 1
+          mode: slider
+    steering_wheel_heat:
+      name: Steering wheel heat
+      description: Include steering-wheel heating. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    mirror_heat:
+      name: Mirror heat
+      description: Include exterior mirror heating. Defaults to false.
+      example: false
+      selector:
+        boolean:
+    destination_name:
+      name: Destination name
+      description: Optional navigation destination name. Latitude and longitude are required when a destination is used.
+      example: Bern Bahnhof
+      selector:
+        text:
+    destination_address:
+      name: Destination address
+      description: Optional navigation destination address. Defaults to the destination name.
+      example: Bahnhofplatz, Bern, Schweiz
+      selector:
+        text:
+    destination_latitude:
+      name: Destination latitude
+      description: Optional navigation destination latitude.
+      example: 46.94809
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: 0.000001
+          mode: box
+    destination_longitude:
+      name: Destination longitude
+      description: Optional navigation destination longitude.
+      example: 7.43914
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: 0.000001
+          mode: box
+    vin:
+      name: VIN
+      description: Target VIN. Required when multiple vehicles are configured.
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: Optional Leapmotor entity to resolve the target vehicle.
+      selector:
+        text:
+cancel_prepare_car_schedule:
+  name: Cancel prepare-car schedule
+  description: Cancel all one-touch vehicle preparation schedules by sending an empty controls list. Requires the configured Vehicle PIN.
+  fields:
+    vin:
+      name: VIN
+      description: Target VIN. Required when multiple vehicles are configured.
+      selector:
+        text:
+    entity_id:
+      name: Entity ID
+      description: Optional Leapmotor entity to resolve the target vehicle.
+      selector:
+        text:
 quick_cool:
   name: Quick cool
   description: Trigger the verified quick-cool profile. Requires the configured Vehicle PIN.

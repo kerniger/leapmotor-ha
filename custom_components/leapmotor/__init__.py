@@ -100,6 +100,29 @@ def _schedule_days(value: object) -> list[int]:
     return days
 
 
+def _prepare_car_kwargs(data: dict[str, object]) -> dict[str, object]:
+    """Extract prepare-car payload options from Home Assistant service data."""
+    return {
+        "climate_enabled": data["climate_enabled"],
+        "mode": data["mode"],
+        "operate": data["operate"],
+        "temperature": data["temperature"],
+        "fan_speed": data["fan_speed"],
+        "recirculate": data["recirculate"],
+        "windshield_defrost": data["windshield_defrost"],
+        "driver_seat": data["driver_seat"],
+        "driver_seat_level": data["driver_seat_level"],
+        "passenger_seat": data["passenger_seat"],
+        "passenger_seat_level": data["passenger_seat_level"],
+        "steering_wheel_heat": data["steering_wheel_heat"],
+        "mirror_heat": data["mirror_heat"],
+        "destination_name": data.get("destination_name"),
+        "destination_address": data.get("destination_address"),
+        "destination_latitude": data.get("destination_latitude"),
+        "destination_longitude": data.get("destination_longitude"),
+    }
+
+
 SET_CLIMATE_SCHEDULE_FIELDS = vol.Schema(
     {
         vol.Required("start_time"): vol.All(str, vol.Length(min=1)),
@@ -114,6 +137,40 @@ SET_CLIMATE_SCHEDULE_FIELDS = vol.Schema(
         vol.Optional("set_id"): str,
         vol.Optional("vin"): str,
         vol.Optional("entity_id"): str,
+    }
+)
+
+PREPARE_CAR_BASE_FIELDS = {
+    vol.Optional("climate_enabled", default=True): bool,
+    vol.Optional("mode", default="cold"): vol.In(("cold", "hot", "nohotcold")),
+    vol.Optional("operate", default="manual"): vol.In(("manual", "auto")),
+    vol.Optional("temperature", default=18): vol.All(vol.Coerce(int), vol.Range(min=18, max=32)),
+    vol.Optional("fan_speed", default=7): vol.All(vol.Coerce(int), vol.Range(min=1, max=7)),
+    vol.Optional("recirculate", default=True): bool,
+    vol.Optional("windshield_defrost", default=False): bool,
+    vol.Optional("driver_seat", default="off"): vol.In(("off", "heat", "ventilation")),
+    vol.Optional("driver_seat_level", default=3): vol.All(vol.Coerce(int), vol.Range(min=1, max=3)),
+    vol.Optional("passenger_seat", default="off"): vol.In(("off", "heat", "ventilation")),
+    vol.Optional("passenger_seat_level", default=3): vol.All(vol.Coerce(int), vol.Range(min=1, max=3)),
+    vol.Optional("steering_wheel_heat", default=False): bool,
+    vol.Optional("mirror_heat", default=False): bool,
+    vol.Optional("destination_name"): vol.All(str, vol.Length(min=1)),
+    vol.Optional("destination_address"): vol.All(str, vol.Length(min=1)),
+    vol.Optional("destination_latitude"): vol.All(vol.Coerce(float), vol.Range(min=-90, max=90)),
+    vol.Optional("destination_longitude"): vol.All(vol.Coerce(float), vol.Range(min=-180, max=180)),
+    vol.Optional("vin"): str,
+    vol.Optional("entity_id"): str,
+}
+
+PREPARE_CAR_FIELDS = vol.Schema(PREPARE_CAR_BASE_FIELDS)
+
+PREPARE_CAR_SCHEDULE_FIELDS = vol.Schema(
+    {
+        vol.Required("start_time"): vol.All(str, vol.Length(min=1)),
+        vol.Optional("days", default=[]): _schedule_days,
+        vol.Optional("enabled", default=True): bool,
+        vol.Optional("set_id"): str,
+        **PREPARE_CAR_BASE_FIELDS,
     }
 )
 
@@ -146,6 +203,30 @@ CANCEL_CLIMATE_SCHEDULE_ACTION = RemoteActionSpec(
     icon="mdi:calendar-remove",
     method_name="cancel_climate_schedule",
     service_name="cancel_climate_schedule",
+)
+
+PREPARE_CAR_ACTION = RemoteActionSpec(
+    action="prepare_car",
+    translation_key="prepare_car",
+    icon="mdi:car-cog",
+    method_name="prepare_car",
+    service_name="prepare_car",
+)
+
+SET_PREPARE_CAR_SCHEDULE_ACTION = RemoteActionSpec(
+    action="set_prepare_car_schedule",
+    translation_key="set_prepare_car_schedule",
+    icon="mdi:calendar-clock",
+    method_name="set_prepare_car_schedule",
+    service_name="set_prepare_car_schedule",
+)
+
+CANCEL_PREPARE_CAR_SCHEDULE_ACTION = RemoteActionSpec(
+    action="cancel_prepare_car_schedule",
+    translation_key="cancel_prepare_car_schedule",
+    icon="mdi:calendar-remove",
+    method_name="cancel_prepare_car_schedule",
+    service_name="cancel_prepare_car_schedule",
 )
 
 SET_CHARGE_LIMIT_FIELDS = vol.Schema(
@@ -272,6 +353,32 @@ async def _async_register_services(hass: HomeAssistant) -> None:
     specs["lock"] = LOCK_ACTION
     specs["unlock"] = UNLOCK_ACTION
     specs["cancel_climate_schedule"] = CANCEL_CLIMATE_SCHEDULE_ACTION
+    specs["cancel_prepare_car_schedule"] = CANCEL_PREPARE_CAR_SCHEDULE_ACTION
+
+    def resolve_call_target(call: ServiceCall) -> tuple[LeapmotorDataUpdateCoordinator, str]:
+        """Resolve one Leapmotor service call to coordinator and VIN."""
+        domain_data = hass.data.get(DOMAIN) or {}
+        if not domain_data:
+            raise HomeAssistantError("No Leapmotor config entry is loaded.")
+
+        target_vin = call.data.get("vin")
+        entity_id = call.data.get("entity_id")
+        if entity_id:
+            state = hass.states.get(entity_id)
+            if state:
+                target_vin = state.attributes.get("vin") or target_vin
+        for candidate in domain_data.values():
+            if target_vin and target_vin not in (candidate.data.get("vehicles") or {}):
+                continue
+            try:
+                resolved_vin = resolve_target_vin(candidate, target_vin)
+            except Exception:
+                continue
+            return candidate, resolved_vin
+
+        raise HomeAssistantError(
+            "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
+        )
 
     async def handle_remote(service_action: str, call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}
@@ -445,6 +552,31 @@ async def _async_register_services(hass: HomeAssistant) -> None:
             kwargs,
         )
 
+    async def handle_prepare_car(call: ServiceCall) -> None:
+        coordinator, target_vin = resolve_call_target(call)
+        await async_execute_remote_action(
+            coordinator,
+            target_vin,
+            PREPARE_CAR_ACTION,
+            _prepare_car_kwargs(call.data),
+        )
+
+    async def handle_set_prepare_car_schedule(call: ServiceCall) -> None:
+        coordinator, target_vin = resolve_call_target(call)
+        kwargs = {
+            "start_time": call.data["start_time"],
+            "days": call.data["days"],
+            "enabled": call.data["enabled"],
+            "set_id": call.data.get("set_id"),
+            **_prepare_car_kwargs(call.data),
+        }
+        await async_execute_remote_action(
+            coordinator,
+            target_vin,
+            SET_PREPARE_CAR_SCHEDULE_ACTION,
+            kwargs,
+        )
+
     async def handle_send_destination(call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}
         if not domain_data:
@@ -577,6 +709,27 @@ async def _async_register_services(hass: HomeAssistant) -> None:
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "cancel_climate_schedule")
     hass.services.async_register(
         DOMAIN,
+        "prepare_car",
+        handle_prepare_car,
+        schema=PREPARE_CAR_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "prepare_car")
+    hass.services.async_register(
+        DOMAIN,
+        "set_prepare_car_schedule",
+        handle_set_prepare_car_schedule,
+        schema=PREPARE_CAR_SCHEDULE_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_prepare_car_schedule")
+    hass.services.async_register(
+        DOMAIN,
+        "cancel_prepare_car_schedule",
+        make_handler("cancel_prepare_car_schedule"),
+        schema=SERVICE_FIELDS,
+    )
+    _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "cancel_prepare_car_schedule")
+    hass.services.async_register(
+        DOMAIN,
         "set_charge_limit",
         handle_set_charge_limit,
         schema=SET_CHARGE_LIMIT_FIELDS,
@@ -609,6 +762,12 @@ def _async_unregister_services(hass: HomeAssistant) -> None:
         hass.services.async_remove(DOMAIN, "set_climate_schedule")
     if hass.services.has_service(DOMAIN, "cancel_climate_schedule"):
         hass.services.async_remove(DOMAIN, "cancel_climate_schedule")
+    if hass.services.has_service(DOMAIN, "prepare_car"):
+        hass.services.async_remove(DOMAIN, "prepare_car")
+    if hass.services.has_service(DOMAIN, "set_prepare_car_schedule"):
+        hass.services.async_remove(DOMAIN, "set_prepare_car_schedule")
+    if hass.services.has_service(DOMAIN, "cancel_prepare_car_schedule"):
+        hass.services.async_remove(DOMAIN, "cancel_prepare_car_schedule")
     if hass.services.has_service(DOMAIN, "set_charge_limit"):
         hass.services.async_remove(DOMAIN, "set_charge_limit")
     if hass.services.has_service(DOMAIN, "send_destination"):
