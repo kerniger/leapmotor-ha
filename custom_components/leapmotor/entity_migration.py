@@ -19,6 +19,7 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
     ("binary_sensor", "dc_cable_connected"): "dc_charge_cable_plugged_in",
     ("binary_sensor", "charging_planned_enabled"): "scheduled_charging",
     ("binary_sensor", "charging_planned_weekly"): "weekly_charging_schedule",
+    ("binary_sensor", "vehicle_ready"): "vehicle_ready",
     ("binary_sensor", "remote_session_active"): "remote_session_active",
     ("binary_sensor", "vehicle_security_active"): "vehicle_security_active",
     ("binary_sensor", "battery_heating"): "battery_heating",

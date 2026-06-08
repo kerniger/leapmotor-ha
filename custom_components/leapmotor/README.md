@@ -31,6 +31,7 @@ Available data includes:
 - Vehicle lock as a native Home Assistant lock entity for remote lock/unlock
   actions
 - Vehicle state as a readable status sensor
+- Vehicle READY/ON3 diagnostic based on signal `1258`
 - Charge-cable plugged-in state and active-charging state
 - Door and trunk open states
 - Window, skylight, gear, speed, battery temperature, PTC power, and range-mode
@@ -364,6 +365,14 @@ data:
   account in Home Assistant and the official app can log the app out.
 - Remote-control support depends on model, account rights, shared-car
   permissions, vehicle state, and backend policy.
+
+## Related Projects
+
+- [leapmotor-mate](https://github.com/ProtossBlaster/leapmotor-mate) is a
+  self-hosted companion with trip tracking, charge logging, pricing, exports,
+  schedules, and its own web UI. Use it when you want TeslaMate-style history;
+  this integration stays focused on native Home Assistant entities and
+  services.
 
 ## Troubleshooting
 

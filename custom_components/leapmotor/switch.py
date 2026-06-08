@@ -214,6 +214,7 @@ class LeapmotorChargingScheduleSwitch(
             result=result,
         )
         await self.coordinator.async_request_refresh()
+        self.coordinator.schedule_remote_followup_refresh(self.vin)
 
 
 class LeapmotorBatteryPreheatSwitch(

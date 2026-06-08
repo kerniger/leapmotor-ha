@@ -325,6 +325,9 @@
       "remote_session_active": {
         "name": "Sesión remota activa"
       },
+      "vehicle_ready": {
+        "name": "Vehículo READY"
+      },
       "vehicle_security_active": {
         "name": "Seguridad del vehículo activa"
       },

@@ -1910,6 +1910,7 @@ def normalize_vehicle(
             "raw_signal_1149": signal.get("1149"),
             "remote_session_active": _one_is_on(signal.get("1256")) or _one_is_on(signal.get("1257")),
             "vehicle_security_active": _positive_int(signal.get("1255")),
+            "vehicle_ready": _one_is_on(signal.get("1258")),
             "on3_open": _one_is_on(signal.get("1258")),
             "driver_door_open": _one_is_on(signal.get("1277")),
             "passenger_door_open": _one_is_on(signal.get("1278")),
@@ -2226,6 +2227,7 @@ def _named_status_to_signal(status_data: dict[str, Any]) -> dict[str, Any]:
         "leftRearWindowStatus": "1695",
         "rightRearWindowStatus": "1696",
         "bcmKeyPositionOn1": "1256",
+        "bcmKeyPositionOn2": "1257",
         "bcmKeyPositionOn3": "1258",
     }
     for source, target in bool_map.items():

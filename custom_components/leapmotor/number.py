@@ -188,6 +188,7 @@ class LeapmotorChargeLimitNumber(
             result=result,
         )
         await self.coordinator.async_request_refresh()
+        self.coordinator.schedule_remote_followup_refresh(self.vin)
 
 
 class LeapmotorSeatComfortNumber(
@@ -298,6 +299,7 @@ class LeapmotorSeatComfortNumber(
             result=result,
         )
         await self.coordinator.async_request_refresh()
+        self.coordinator.schedule_remote_followup_refresh(self.vin)
 
 
 def _suggested_object_id(vehicle: dict[str, Any], slug: str) -> str:

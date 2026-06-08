@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 from functools import partial
 import logging
@@ -56,6 +57,7 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         self._last_remote_results: dict[str, dict[str, Any]] = {}
         self._last_abrp_results: dict[str, dict[str, Any]] = {}
         self._last_vehicle_states: dict[str, str] = {}
+        self._followup_refresh_tasks: dict[str, asyncio.Task[None]] = {}
         self._integration_status: dict[str, Any] = {
             "last_update_status": "unknown",
             "last_update_success": None,
@@ -160,6 +162,27 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         self._pending_update_reason = "manual"
         await self.async_request_refresh()
 
+    def schedule_remote_followup_refresh(
+        self,
+        vin: str,
+        *,
+        delay_seconds: float = 4.0,
+    ) -> None:
+        """Schedule one coalesced refresh after remote-command state has settled."""
+        previous_task = self._followup_refresh_tasks.pop(vin, None)
+        if previous_task and not previous_task.done():
+            previous_task.cancel()
+        self._followup_refresh_tasks[vin] = self.hass.async_create_task(
+            self._async_remote_followup_refresh(vin, delay_seconds)
+        )
+
+    def cancel_scheduled_followup_refreshes(self) -> None:
+        """Cancel pending delayed refreshes during unload."""
+        for task in self._followup_refresh_tasks.values():
+            if not task.done():
+                task.cancel()
+        self._followup_refresh_tasks.clear()
+
     def set_lock_state_override(
         self,
         vin: str,
@@ -173,6 +196,29 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             data = dict(self.data)
             self._apply_single_lock_override(data, vin, is_locked)
             self.async_set_updated_data(data)
+
+    async def _async_remote_followup_refresh(
+        self,
+        vin: str,
+        delay_seconds: float,
+    ) -> None:
+        """Refresh shortly after a command because vehicle signals can lag."""
+        try:
+            await asyncio.sleep(delay_seconds)
+            self._pending_update_reason = "remote_followup"
+            await self.async_request_refresh()
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            _LOGGER.debug(
+                "Leapmotor follow-up refresh failed for VIN %s",
+                vin,
+                exc_info=True,
+            )
+        finally:
+            current_task = asyncio.current_task()
+            if self._followup_refresh_tasks.get(vin) is current_task:
+                self._followup_refresh_tasks.pop(vin, None)
 
     def record_remote_action(
         self,

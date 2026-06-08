@@ -27,6 +27,7 @@ OPTIONAL_BINARY_SENSOR_PATHS = {
     "is_driving": "status.is_driving",
     "charging_planned_enabled": "charging.charging_planned_enabled",
     "charging_planned_weekly": "charging.charging_planned_cycles",
+    "vehicle_ready": "diagnostics.vehicle_ready",
     "remote_session_active": "diagnostics.remote_session_active",
     "vehicle_security_active": "diagnostics.vehicle_security_active",
     "battery_heating": "diagnostics.battery_heating",
@@ -114,6 +115,14 @@ BINARY_SENSOR_DESCRIPTIONS: tuple[LeapmotorBinarySensorEntityDescription, ...] =
         icon="mdi:remote",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("remote_session_active"),
+    ),
+    LeapmotorBinarySensorEntityDescription(
+        key="vehicle_ready",
+        translation_key="vehicle_ready",
+        icon="mdi:power",
+        device_class=BinarySensorDeviceClass.RUNNING,
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("vehicle_ready"),
     ),
     LeapmotorBinarySensorEntityDescription(
         key="vehicle_security_active",

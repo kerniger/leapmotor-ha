@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.14 - 2026-06-08
+
+- Add a `Vehicle READY` diagnostic binary sensor based on signal `1258`
+  (`bcmKeyPositionOn3`), matching B10 READY/ON3 behavior.
+- Schedule a short follow-up refresh after remote-control commands so delayed
+  comfort, climate, charge-limit, and schedule status changes surface faster
+  without increasing normal polling.
+- Replace the deprecated Home Assistant device-tracker `TrackerEntity` import.
+- Add a README reference to `leapmotor-mate` for TeslaMate-style trip and charge
+  history.
+
 ## 0.6.13 - 2026-06-08
 
 - Add B10-verified climate pre-conditioning schedule services using `cmdId=171`:

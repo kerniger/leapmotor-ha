@@ -253,6 +253,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         coordinator = hass.data[DOMAIN].pop(entry.entry_id)
+        coordinator.cancel_scheduled_followup_refreshes()
         await hass.async_add_executor_job(coordinator.client.close)
         if not hass.data.get(DOMAIN):
             _async_unregister_services(hass)
@@ -358,6 +359,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
             result=result,
         )
         await coordinator.async_request_refresh()
+        coordinator.schedule_remote_followup_refresh(target_vin)
 
     async def handle_set_climate(call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}

@@ -13,6 +13,7 @@ research logs, or reverse-engineering workfiles.
 
 - Vehicle state, battery, range, odometer, charging, doors, windows, lock, GPS
   tracker, tire pressure, diagnostics, and mileage/energy history.
+- Vehicle READY/ON3 diagnostic based on signal `1258`.
 - Native Home Assistant entities for sensors, binary sensors, lock, buttons,
   number, switch, image, and device tracker.
 - Remote-control services for supported actions such as lock/unlock, charger
@@ -249,6 +250,14 @@ material first. For public issues, prefer `leapmotor.export_diagnostics`.
 ## Screenshots
 
 Installation screenshots are stored in `docs/screenshots`.
+
+## Related Projects
+
+- [leapmotor-mate](https://github.com/ProtossBlaster/leapmotor-mate) is a
+  self-hosted companion with trip tracking, charge logging, pricing, exports,
+  schedules, and its own web UI. It is a good fit when you want TeslaMate-style
+  history alongside Home Assistant. This integration stays focused on native
+  Home Assistant entities and services.
 
 ## Special Thanks
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 from dataclasses import dataclass
 from functools import partial
 from typing import Any
@@ -22,6 +21,7 @@ class RemoteActionSpec:
     icon: str
     method_name: str
     service_name: str
+    followup_refresh_delay: float | None = 4.0
 
 
 def resolve_target_vin(
@@ -114,7 +114,9 @@ async def async_execute_remote_action(
     elif spec.action == "unlock":
         coordinator.set_lock_state_override(vin, False, ttl_seconds=15)
     await coordinator.async_request_refresh()
-    if spec.action in {"lock", "unlock"}:
-        await asyncio.sleep(4)
-        await coordinator.async_request_refresh()
+    if spec.followup_refresh_delay is not None:
+        coordinator.schedule_remote_followup_refresh(
+            vin,
+            delay_seconds=spec.followup_refresh_delay,
+        )
     return result
