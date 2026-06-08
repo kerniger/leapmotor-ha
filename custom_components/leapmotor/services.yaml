@@ -503,7 +503,6 @@ prepare_car:
         number:
           min: -90
           max: 90
-          step: 0.000001
           mode: box
     destination_longitude:
       name: Destination longitude
@@ -513,7 +512,6 @@ prepare_car:
         number:
           min: -180
           max: 180
-          step: 0.000001
           mode: box
     vin:
       name: VIN
@@ -698,7 +696,6 @@ set_prepare_car_schedule:
         number:
           min: -90
           max: 90
-          step: 0.000001
           mode: box
     destination_longitude:
       name: Destination longitude
@@ -708,7 +705,6 @@ set_prepare_car_schedule:
         number:
           min: -180
           max: 180
-          step: 0.000001
           mode: box
     vin:
       name: VIN

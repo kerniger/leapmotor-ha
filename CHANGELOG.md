@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.17 - 2026-06-08
+
+- Fix prepare-car coordinate service selectors for Home Assistant's service
+  metadata schema.
+
 ## 0.6.16 - 2026-06-08
 
 - Fix prepare-car service selectors so the `off` seat mode is parsed as a
