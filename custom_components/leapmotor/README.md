@@ -34,7 +34,7 @@ Available data includes:
 - Vehicle READY/ON3 diagnostic based on signal `1258`
 - Charge-cable plugged-in state and active-charging state
 - Door and trunk open states
-- Window, skylight, gear, speed, battery temperature, PTC power, and range-mode
+- Window, skylight, gear, speed, parking brake, battery temperature, PTC power, and range-mode
   diagnostics from APK-verified status signals
 - Interior and climate target temperatures
 - Climate mode and climate/heating activity diagnostics

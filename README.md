@@ -30,7 +30,8 @@ research logs, or reverse-engineering workfiles.
 - Native climate on/off switch on vehicles that expose the climate state.
 - Optional ABRP Generic Telemetry push and EVCC helper sensors.
 - Multi-vehicle support for main-account and shared vehicles.
-- Redacted diagnostics export for support.
+- Redacted diagnostics export for support, including account identifiers and
+  remote-control secrets.
 - Native HA unit metadata for standard measurements; EV consumption is exposed
   as `kWh/100 km` plus optional `mi/kWh` when the API provides it.
 - HACS-ready release ZIP, translations, and brand assets.

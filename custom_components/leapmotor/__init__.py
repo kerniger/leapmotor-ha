@@ -32,7 +32,7 @@ from .const import (
 from .coordinator import LeapmotorDataUpdateCoordinator
 from .entity_migration import (
     async_migrate_entity_registry_to_english,
-    async_remove_obsolete_climate_off_buttons,
+    async_remove_obsolete_entities,
 )
 from .lock import LOCK_ACTION, UNLOCK_ACTION
 from .remote_helpers import (
@@ -315,7 +315,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         eco_update_interval=timedelta(minutes=max(eco_scan_interval, scan_interval)),
     )
     await coordinator.async_config_entry_first_refresh()
-    await async_remove_obsolete_climate_off_buttons(hass)
+    await async_remove_obsolete_entities(hass)
     await async_migrate_entity_registry_to_english(
         hass,
         set(coordinator.data.get("vehicles") or {}),
@@ -326,6 +326,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await _async_register_services(hass)
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    await async_remove_obsolete_entities(hass)
     await async_migrate_entity_registry_to_english(
         hass,
         set(coordinator.data.get("vehicles") or {}),

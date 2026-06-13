@@ -22,6 +22,7 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
     ("binary_sensor", "vehicle_ready"): "vehicle_ready",
     ("binary_sensor", "remote_session_active"): "remote_session_active",
     ("binary_sensor", "vehicle_security_active"): "vehicle_security_active",
+    ("binary_sensor", "parking_brake_active"): "parking_brake",
     ("binary_sensor", "battery_heating"): "battery_heating",
     ("binary_sensor", "driver_door_open"): "driver_door",
     ("binary_sensor", "passenger_door_open"): "passenger_door",
@@ -48,6 +49,8 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
     ("binary_sensor", "sentinel_mode"): "sentinel_mode",
     ("binary_sensor", "parking_photo"): "parking_photo",
     ("binary_sensor", "fully_charged"): "fully_charged",
+    ("binary_sensor", "healthy_charging_enabled"): "healthy_charging",
+    ("binary_sensor", "charging_schedule_cancelled_once"): "charging_schedule_cancelled_once",
     ("binary_sensor", "bluetooth_enabled"): "bluetooth",
     ("binary_sensor", "hotspot_enabled"): "hotspot",
     ("binary_sensor", "windows_remote_supported"): "windows_remote_supported",
@@ -98,7 +101,6 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
     ("sensor", "ptc_state"): "ptc_state",
     ("sensor", "ptc_power_setting_value"): "ptc_power_setting",
     ("sensor", "available_energy_kwh"): "available_energy",
-    ("sensor", "parking_camera_state"): "parking_camera_state",
     ("sensor", "charging_planned_start"): "charging_schedule_start",
     ("sensor", "charging_planned_end"): "charging_schedule_end",
     ("sensor", "charging_planned_circulation"): "charging_schedule_recurrence",
@@ -154,17 +156,25 @@ def english_entity_slug(domain: str, suffix: str) -> str | None:
     return _ENGLISH_ENTITY_SLUGS.get((domain, suffix))
 
 
-async def async_remove_obsolete_climate_off_buttons(
+async def async_remove_obsolete_entities(
     hass: HomeAssistant,
 ) -> None:
-    """Remove climate-off buttons superseded by the climate switch."""
+    """Remove registry entries superseded by corrected entities."""
     registry = er.async_get(hass)
     for entry in list(registry.entities.values()):
         if (
             entry.platform == DOMAIN
-            and entry.entity_id.startswith("button.")
             and isinstance(entry.unique_id, str)
-            and entry.unique_id.endswith(("_ac_off", "_ac_switch"))
+            and (
+                (
+                    entry.entity_id.startswith("button.")
+                    and entry.unique_id.endswith(("_ac_off", "_ac_switch"))
+                )
+                or (
+                    entry.entity_id.startswith("sensor.")
+                    and entry.unique_id.endswith("_parking_camera_state")
+                )
+            )
         ):
             registry.async_remove(entry.entity_id)
             _LOGGER.info("Removed obsolete Leapmotor entity %s", entry.entity_id)

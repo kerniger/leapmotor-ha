@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.19 - 2026-06-13
+
+- Harden diagnostics redaction for account e-mail addresses, usernames,
+  camelCase secrets such as `operatePassword`, identifiers, and vehicle-picture
+  key material.
+- Recreate missing temporary account certificate files by logging in again
+  before sending a remote command.
+- Correct signal `1480` from parking-camera state to parking-brake state.
+- Treat both positive states of signal `1945` as active windshield defrost.
+- Add diagnostic binary sensors for healthy charging (signal `48`) and a
+  one-time charging-schedule cancellation (signal `3737`).
+
 ## 0.6.18 - 2026-06-13
 
 - Add a native climate on/off switch backed by signal `1938`. Turning it on

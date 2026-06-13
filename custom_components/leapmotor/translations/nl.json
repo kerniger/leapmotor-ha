@@ -200,9 +200,6 @@
       "ptc_power_w": {
         "name": "PTC-vermogen"
       },
-      "parking_camera_state": {
-        "name": "Parkeercamerastatus"
-      },
       "climate_mode": {
         "name": "Klimaatmodus"
       },
@@ -331,6 +328,9 @@
       "vehicle_security_active": {
         "name": "Voertuigbeveiliging actief"
       },
+      "parking_brake_active": {
+        "name": "Parkeerrem actief"
+      },
       "battery_heating": {
         "name": "Accuverwarming"
       },
@@ -405,6 +405,12 @@
       },
       "fully_charged": {
         "name": "Volledig opgeladen"
+      },
+      "healthy_charging_enabled": {
+        "name": "Gezond laden ingeschakeld"
+      },
+      "charging_schedule_cancelled_once": {
+        "name": "Laadschema eenmalig uitgesteld"
       },
       "climate_temp_mode": {
         "name": "Climate temperature mode"

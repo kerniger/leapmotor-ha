@@ -200,9 +200,6 @@
       "ptc_power_w": {
         "name": "Moc PTC"
       },
-      "parking_camera_state": {
-        "name": "Stan kamery parkowania"
-      },
       "climate_mode": {
         "name": "Tryb klimatyzacji"
       },
@@ -331,6 +328,9 @@
       "vehicle_security_active": {
         "name": "Zabezpieczenie pojazdu aktywne"
       },
+      "parking_brake_active": {
+        "name": "Hamulec postojowy aktywny"
+      },
       "battery_heating": {
         "name": "Ogrzewanie baterii"
       },
@@ -405,6 +405,12 @@
       },
       "fully_charged": {
         "name": "W pełni naładowany"
+      },
+      "healthy_charging_enabled": {
+        "name": "Zdrowe ładowanie włączone"
+      },
+      "charging_schedule_cancelled_once": {
+        "name": "Harmonogram ładowania jednorazowo wstrzymany"
       },
       "climate_temp_mode": {
         "name": "Climate temperature mode"

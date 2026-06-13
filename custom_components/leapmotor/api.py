@@ -166,6 +166,20 @@ class LeapmotorApiClient:
             raise LeapmotorAuthError("No account certificate loaded.")
         return (self.account_cert_file, self.account_key_file)
 
+    def _ensure_account_cert_files(self) -> None:
+        """Recreate missing temporary account certificate files before a request."""
+        if (
+            self.account_cert_file
+            and self.account_key_file
+            and Path(self.account_cert_file).is_file()
+            and Path(self.account_key_file).is_file()
+        ):
+            return
+        if self.token:
+            _LOGGER.info("Leapmotor account certificate files are missing; logging in again")
+            self._clear_auth()
+        self.login()
+
     @property
     def sign_key(self) -> bytes:
         if self.sign_ikm is None or self.sign_salt is None or self.sign_info is None:
@@ -1126,6 +1140,7 @@ class LeapmotorApiClient:
         """Execute a remote-control action using the verified operatePassword flow."""
         if not self.token:
             self.login()
+        self._ensure_account_cert_files()
         if not self.operation_password:
             raise LeapmotorAuthError(
                 "No vehicle PIN configured. Read-only data works without a PIN, "
@@ -1168,6 +1183,7 @@ class LeapmotorApiClient:
         )
         if not self.token:
             self.login()
+        self._ensure_account_cert_files()
         if not self.operation_password:
             raise LeapmotorAuthError(
                 "No vehicle PIN configured. Read-only data works without a PIN, "
@@ -1255,6 +1271,7 @@ class LeapmotorApiClient:
         )
         if not self.token:
             self.login()
+        self._ensure_account_cert_files()
 
         headers = self._build_remote_ctl_write_headers_without_pin(
             vin=vin,
@@ -2049,7 +2066,7 @@ def normalize_vehicle(
             "ptc_power_w": _safe_int(signal.get("1348")),
             "ptc_state": _safe_int(status_data.get("ptcState")),
             "ptc_power_setting_value": _safe_int(status_data.get("ptcPowerSettingValue")),
-            "parking_camera_state": signal.get("1480"),
+            "parking_brake_active": _one_is_on(signal.get("1480")),
             "battery_min_temp_c": _safe_int(signal.get("1182")),
             "battery_thermal_request": _safe_int(signal.get("1186")),
             "battery_heating": _safe_int(signal.get("1186")) == 4 if signal.get("1186") is not None else None,
@@ -2082,7 +2099,7 @@ def normalize_vehicle(
             "door_control_allowed": _safe_bool(status_data.get("bcmDoorCtrlAllow")),
             "fast_cooling_active": _two_is_on(signal.get("2669")),
             "fast_heating_active": _two_is_on(signal.get("2681")),
-            "windshield_defrosting": _two_is_on(signal.get("1945")),
+            "windshield_defrosting": _positive_int(signal.get("1945")),
             "rear_window_heating": _one_is_on(signal.get("1946")),
             "steering_wheel_heating": _two_is_on(signal.get("1816")),
             "steering_wheel_heating_remaining_minutes": _safe_int(signal.get("1624")),
@@ -2098,6 +2115,8 @@ def normalize_vehicle(
             "fully_charged": _one_is_on(signal.get("3736"))
             if signal.get("3736") is not None
             else _safe_bool(status_data.get("chargeCompleted")),
+            "healthy_charging_enabled": _one_is_on(signal.get("48")),
+            "charging_schedule_cancelled_once": _one_is_on(signal.get("3737")),
             "speed_limit_enabled": _one_is_on(signal.get("12054")),
             "speed_limit_kmh": _safe_int(signal.get("6048")),
             "speed_limit_unit": signal.get("6047"),
@@ -2106,6 +2125,7 @@ def normalize_vehicle(
             "tire_pressure_alarm_rear_left": _safe_int(signal.get("2655")),
             "tire_pressure_alarm_rear_right": _safe_int(signal.get("2662")),
             "raw_signal_1010": signal.get("1010"),
+            "raw_signal_48": signal.get("48"),
             "raw_signal_1182": signal.get("1182"),
             "raw_signal_1186": signal.get("1186"),
             "raw_signal_1197": signal.get("1197"),
@@ -2155,6 +2175,7 @@ def normalize_vehicle(
             "raw_signal_3727": signal.get("3727"),
             "raw_signal_3728": signal.get("3728"),
             "raw_signal_3736": signal.get("3736"),
+            "raw_signal_3737": signal.get("3737"),
             "raw_signal_3257": signal.get("3257"),
             "raw_signal_6047": signal.get("6047"),
             "raw_signal_6048": signal.get("6048"),

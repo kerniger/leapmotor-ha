@@ -61,7 +61,6 @@ OPTIONAL_SENSOR_PATHS = {
     "ptc_state": "diagnostics.ptc_state",
     "ptc_power_setting_value": "diagnostics.ptc_power_setting_value",
     "available_energy_kwh": "diagnostics.available_energy_kwh",
-    "parking_camera_state": "diagnostics.parking_camera_state",
     "charging_planned_start": "charging.charging_planned_start",
     "charging_planned_end": "charging.charging_planned_end",
     "charging_planned_circulation": "charging.charging_planned_circulation",
@@ -335,13 +334,6 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         icon="mdi:battery-lightning",
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=lambda data: data["diagnostics"].get("available_energy_kwh"),
-    ),
-    LeapmotorSensorEntityDescription(
-        key="parking_camera_state",
-        translation_key="parking_camera_state",
-        icon="mdi:camera-rear",
-        entity_category=EntityCategory.DIAGNOSTIC,
-        value_fn=lambda data: data["diagnostics"].get("parking_camera_state"),
     ),
     LeapmotorSensorEntityDescription(
         key="charging_planned_start",

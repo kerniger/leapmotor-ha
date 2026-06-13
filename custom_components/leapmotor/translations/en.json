@@ -191,9 +191,6 @@
       "ptc_power_w": {
         "name": "PTC power"
       },
-      "parking_camera_state": {
-        "name": "Parking camera state"
-      },
       "climate_mode": {
         "name": "Climate mode"
       },
@@ -331,6 +328,9 @@
       "vehicle_security_active": {
         "name": "Vehicle security active"
       },
+      "parking_brake_active": {
+        "name": "Parking brake active"
+      },
       "battery_heating": {
         "name": "Battery heating"
       },
@@ -405,6 +405,12 @@
       },
       "fully_charged": {
         "name": "Fully charged"
+      },
+      "healthy_charging_enabled": {
+        "name": "Healthy charging enabled"
+      },
+      "charging_schedule_cancelled_once": {
+        "name": "Charging schedule cancelled once"
       },
       "climate_temp_mode": {
         "name": "Climate temperature mode"

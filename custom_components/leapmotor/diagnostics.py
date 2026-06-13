@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any
 
@@ -13,7 +14,10 @@ from .const import DOMAIN
 _REDACTED = "**REDACTED**"
 _SENSITIVE_KEYS = {
     "password",
+    "username",
+    "email",
     "operation_password",
+    "operatePassword",
     "account_p12_password",
     "token",
     "refreshToken",
@@ -27,9 +31,15 @@ _SENSITIVE_KEYS = {
     "gigyaSessionToken",
     "gigyaSessionSecret",
     "car_picture_url",
+    "car_picture_key",
+    "car_picture_whole",
     "url",
     "abrp_token",
 }
+_SENSITIVE_KEY_NAMES = {key.casefold() for key in _SENSITIVE_KEYS}
+_EMAIL_PATTERN = re.compile(
+    r"(?<![\w.+-])[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}(?![\w.-])"
+)
 
 
 async def async_get_config_entry_diagnostics(
@@ -73,7 +83,7 @@ async def async_get_config_entry_diagnostics(
                     "privacy_data": vehicle_data.get("location", {}).get("privacy_data"),
                 },
                 "media": _redact(media),
-                "remote_control": remote,
+                "remote_control": _redact(remote),
                 "abrp": _redact(abrp),
             }
 
@@ -95,14 +105,14 @@ async def async_get_config_entry_diagnostics(
             }
         ),
         "client": {
-            "user_id": getattr(client, "user_id", None),
+            "user_id": _redact_identifier(getattr(client, "user_id", None)),
             "app_cert_present": Path(static_cert).exists() if static_cert else None,
             "app_key_present": Path(static_key).exists() if static_key else None,
             "account_cert_loaded": bool(getattr(client, "account_cert_file", None)),
             "account_p12_password_source": getattr(client, "account_p12_password_source", None),
             "operation_password_configured": bool(getattr(client, "operation_password", None)),
             "language": getattr(client, "language", None),
-            "last_api_results": getattr(client, "last_api_results", {}),
+            "last_api_results": _redact(getattr(client, "last_api_results", {})),
             "integration_status": integration_status,
         },
         "vehicles": vehicles,
@@ -149,11 +159,15 @@ def _redact(value: Any) -> Any:
     """Recursively redact secrets from diagnostics."""
     if isinstance(value, dict):
         return {
-            key: _REDACTED if str(key) in _SENSITIVE_KEYS else _redact(item)
+            key: _REDACTED
+            if str(key).casefold() in _SENSITIVE_KEY_NAMES
+            else _redact(item)
             for key, item in value.items()
         }
     if isinstance(value, list):
         return [_redact(item) for item in value]
+    if isinstance(value, str):
+        return _EMAIL_PATTERN.sub(_REDACTED, value)
     return value
 
 
