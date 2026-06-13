@@ -13,7 +13,6 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
     DOMAIN,
-    REMOTE_CTL_AC_OFF,
     REMOTE_CTL_FIND_CAR,
     REMOTE_CTL_QUICK_COOL,
     REMOTE_CTL_QUICK_HEAT,
@@ -88,13 +87,6 @@ BUTTON_SPECS: tuple[RemoteActionSpec, ...] = (
         icon="mdi:window-closed",
         method_name="close_windows",
         service_name=REMOTE_CTL_WINDOWS_CLOSE,
-    ),
-    RemoteActionSpec(
-        action=REMOTE_CTL_AC_OFF,
-        translation_key="ac_off",
-        icon="mdi:air-conditioner-off",
-        method_name="ac_off",
-        service_name=REMOTE_CTL_AC_OFF,
     ),
     RemoteActionSpec(
         action=REMOTE_CTL_QUICK_COOL,

@@ -338,7 +338,7 @@ class LeapmotorApiClient:
             circle="in" if recirculate else "out",
             operate="manual",
         )
-        params["wshld"] = "1" if windshield_defrost else "0"
+        params["wshld"] = "2" if windshield_defrost else "1"
         return self._remote_control(vin=vin, action=REMOTE_CTL_AC_ON, cmd_content=params)
 
     def set_climate_schedule(
@@ -2674,13 +2674,15 @@ def _build_climate_payload(
     operate: str,
 ) -> dict[str, str]:
     """Build the cmd_id=170 climate payload used by the official app."""
-    resolved_mode = mode or "wind"
+    resolved_mode = mode or "nohotcold"
+    if resolved_mode == "wind":
+        resolved_mode = "nohotcold"
     resolved_circle = circle or "out"
-    resolved_temperature = 26 if temperature is None else int(temperature)
-    resolved_windlevel = 3 if windlevel is None else int(windlevel)
+    resolved_temperature = 24 if temperature is None else int(temperature)
+    resolved_windlevel = 4 if windlevel is None else int(windlevel)
 
-    if resolved_mode not in {"cold", "hot", "wind"}:
-        raise LeapmotorApiError("Climate mode must be one of: cold, hot, wind.")
+    if resolved_mode not in {"cold", "hot", "nohotcold"}:
+        raise LeapmotorApiError("Climate mode must be one of: cold, hot, wind, nohotcold.")
     if resolved_circle not in {"in", "out"}:
         raise LeapmotorApiError("Climate circulation must be one of: in, out.")
     if resolved_temperature < 18 or resolved_temperature > 32:
@@ -2695,7 +2697,7 @@ def _build_climate_payload(
         "position": "all",
         "temperature": str(resolved_temperature),
         "windlevel": str(resolved_windlevel),
-        "wshld": "0",
+        "wshld": "1",
     }
 
 

@@ -93,7 +93,7 @@ REMOTE_ACTION_SPECS: dict[str, RemoteActionSpec] = {
     ),
     REMOTE_CTL_AC_ON: RemoteActionSpec(
         cmd_id="170",
-        cmd_content='{"circle":"out","mode":"wind","operate":"manual","position":"all","temperature":"26","windlevel":"3","wshld":"0"}',
+        cmd_content='{"circle":"out","mode":"nohotcold","operate":"manual","position":"all","temperature":"24","windlevel":"4","wshld":"1"}',
     ),
     REMOTE_CTL_AC_OFF: RemoteActionSpec(
         cmd_id="170",
@@ -101,14 +101,14 @@ REMOTE_ACTION_SPECS: dict[str, RemoteActionSpec] = {
     ),
     REMOTE_CTL_QUICK_COOL: RemoteActionSpec(
         cmd_id="170",
-        cmd_content='{"circle":"in","mode":"cold","operate":"manual","position":"all","temperature":"18","windlevel":"7","wshld":"0"}',
+        cmd_content='{"circle":"in","mode":"cold","operate":"manual","position":"all","temperature":"18","windlevel":"7","wshld":"1"}',
     ),
     REMOTE_CTL_QUICK_HEAT: RemoteActionSpec(
         cmd_id="170",
-        cmd_content='{"circle":"in","mode":"hot","operate":"manual","position":"all","temperature":"32","windlevel":"7","wshld":"0"}',
+        cmd_content='{"circle":"in","mode":"hot","operate":"manual","position":"all","temperature":"32","windlevel":"7","wshld":"1"}',
     ),
     REMOTE_CTL_WINDSHIELD_DEFROST: RemoteActionSpec(
         cmd_id="170",
-        cmd_content='{"circle":"in","mode":"hot","operate":"manual","position":"all","temperature":"32","windlevel":"7","wshld":"1"}',
+        cmd_content='{"circle":"in","mode":"hot","operate":"manual","position":"all","temperature":"32","windlevel":"7","wshld":"2"}',
     ),
 }

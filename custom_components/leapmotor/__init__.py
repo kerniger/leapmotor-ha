@@ -30,7 +30,10 @@ from .const import (
     STATIC_CERT_STORAGE_DIR,
 )
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_migration import async_migrate_entity_registry_to_english
+from .entity_migration import (
+    async_migrate_entity_registry_to_english,
+    async_remove_obsolete_climate_off_buttons,
+)
 from .lock import LOCK_ACTION, UNLOCK_ACTION
 from .remote_helpers import (
     RemoteActionSpec,
@@ -66,7 +69,7 @@ SUNSHADE_POSITION_SERVICE_FIELDS = vol.Schema(
 
 SET_CLIMATE_FIELDS = vol.Schema(
     {
-        vol.Required("mode"): vol.In(("cold", "hot", "wind")),
+        vol.Required("mode"): vol.In(("cold", "hot", "wind", "nohotcold")),
         vol.Optional("temperature", default=26): vol.All(vol.Coerce(int), vol.Range(min=18, max=32)),
         vol.Optional("fan_speed", default=3): vol.All(vol.Coerce(int), vol.Range(min=1, max=7)),
         vol.Optional("recirculate", default=False): bool,
@@ -312,6 +315,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         eco_update_interval=timedelta(minutes=max(eco_scan_interval, scan_interval)),
     )
     await coordinator.async_config_entry_first_refresh()
+    await async_remove_obsolete_climate_off_buttons(hass)
     await async_migrate_entity_registry_to_english(
         hass,
         set(coordinator.data.get("vehicles") or {}),

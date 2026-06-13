@@ -38,6 +38,7 @@ Available data includes:
   diagnostics from APK-verified status signals
 - Interior and climate target temperatures
 - Climate mode and climate/heating activity diagnostics
+- Native climate on/off switch on vehicles that expose the climate state
 - Seat heating/ventilation levels and mirror heating diagnostics
 - Charge limit
 - Scheduled charging window and recurrence details

@@ -505,6 +505,9 @@
       }
     },
     "switch": {
+      "climate_control": {
+        "name": "Climatisation"
+      },
       "charging_schedule": {
         "name": "Programme de charge"
       },

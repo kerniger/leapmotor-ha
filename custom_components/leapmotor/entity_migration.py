@@ -62,7 +62,6 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
     ("button", "battery_preheat"): "battery_preheat",
     ("button", "windows_open"): "open_windows",
     ("button", "windows_close"): "close_windows",
-    ("button", "ac_switch"): "climate_off",
     ("button", "quick_cool"): "quick_cool",
     ("button", "quick_heat"): "quick_heat",
     ("button", "windshield_defrost"): "windshield_defrost",
@@ -74,6 +73,7 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
     ("number", "passenger_seat_heating"): "passenger_seat_heating",
     ("number", "driver_seat_ventilation"): "driver_seat_ventilation",
     ("number", "passenger_seat_ventilation"): "passenger_seat_ventilation",
+    ("switch", "climate_control"): "climate",
     ("sensor", "battery_percent"): "battery",
     ("sensor", "battery_percent_precise"): "precise_battery",
     ("sensor", "remaining_range_km"): "range",
@@ -152,6 +152,22 @@ _ENGLISH_ENTITY_SLUGS: dict[tuple[str, str], str] = {
 def english_entity_slug(domain: str, suffix: str) -> str | None:
     """Return the stable English entity slug for a Leapmotor unique-id suffix."""
     return _ENGLISH_ENTITY_SLUGS.get((domain, suffix))
+
+
+async def async_remove_obsolete_climate_off_buttons(
+    hass: HomeAssistant,
+) -> None:
+    """Remove climate-off buttons superseded by the climate switch."""
+    registry = er.async_get(hass)
+    for entry in list(registry.entities.values()):
+        if (
+            entry.platform == DOMAIN
+            and entry.entity_id.startswith("button.")
+            and isinstance(entry.unique_id, str)
+            and entry.unique_id.endswith(("_ac_off", "_ac_switch"))
+        ):
+            registry.async_remove(entry.entity_id)
+            _LOGGER.info("Removed obsolete Leapmotor entity %s", entry.entity_id)
 
 
 async def async_migrate_entity_registry_to_english(

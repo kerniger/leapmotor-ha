@@ -209,6 +209,7 @@ set_climate:
             - cold
             - hot
             - wind
+            - nohotcold
     temperature:
       name: Temperature
       description: Target temperature in °C, from 18 to 32. Defaults to 26.

@@ -12,7 +12,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DOMAIN, REMOTE_CTL_AC_OFF, REMOTE_CTL_AC_ON
 from .coordinator import LeapmotorDataUpdateCoordinator
 from .entity_helpers import build_vehicle_display_name
 from .entity_migration import english_entity_slug
@@ -67,6 +67,22 @@ REARVIEW_MIRROR_HEAT_OFF_ACTION = RemoteActionSpec(
     service_name="rearview_mirror_heat_off",
 )
 
+CLIMATE_ON_ACTION = RemoteActionSpec(
+    action=REMOTE_CTL_AC_ON,
+    translation_key="climate_control",
+    icon="mdi:air-conditioner",
+    method_name="ac_on",
+    service_name=REMOTE_CTL_AC_ON,
+)
+
+CLIMATE_OFF_ACTION = RemoteActionSpec(
+    action=REMOTE_CTL_AC_OFF,
+    translation_key="climate_control",
+    icon="mdi:air-conditioner",
+    method_name="ac_off",
+    service_name=REMOTE_CTL_AC_OFF,
+)
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -80,6 +96,17 @@ async def async_setup_entry(
         entities.append(LeapmotorChargingScheduleSwitch(coordinator, vin))
         entities.append(LeapmotorBatteryPreheatSwitch(coordinator, vin))
         diagnostics = coordinator.data["vehicles"][vin].get("diagnostics", {})
+        if diagnostics.get("climate_on") is not None:
+            entities.append(LeapmotorRemoteStateSwitch(
+                coordinator,
+                vin,
+                unique_suffix="climate_control",
+                translation_key="climate_control",
+                icon="mdi:air-conditioner",
+                state_keys=("climate_on",),
+                on_action=CLIMATE_ON_ACTION,
+                off_action=CLIMATE_OFF_ACTION,
+            ))
         if diagnostics.get("steering_wheel_heating") is not None:
             entities.append(LeapmotorRemoteStateSwitch(
                 coordinator,

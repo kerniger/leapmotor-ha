@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.18 - 2026-06-13
+
+- Add a native climate on/off switch backed by signal `1938`. Turning it on
+  uses the app-captured neutral climate profile (`nohotcold`, 24 °C, fan level 4);
+  turning it off sends `{"operate":"off"}`.
+- Align climate payloads with app captures: normal commands use `wshld=1`,
+  defrost uses `wshld=2`, and the legacy `wind` mode is translated to
+  `nohotcold`.
+- Remove the redundant climate-off button now covered by the climate switch;
+  the `leapmotor.ac_off` service remains available for automations.
+
 ## 0.6.17 - 2026-06-08
 
 - Fix prepare-car coordinate service selectors for Home Assistant's service

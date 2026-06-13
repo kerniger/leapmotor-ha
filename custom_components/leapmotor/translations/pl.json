@@ -505,6 +505,9 @@
       }
     },
     "switch": {
+      "climate_control": {
+        "name": "Klimatyzacja"
+      },
       "charging_schedule": {
         "name": "Harmonogram ladowania"
       },
