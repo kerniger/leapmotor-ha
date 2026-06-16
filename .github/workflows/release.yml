@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  contents: write
+
+jobs:
+  upload-hacs-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Build HACS release ZIP
+        run: bash scripts/build_release_zip.sh /tmp/leapmotor-ha.zip
+
+      - name: Validate HACS release ZIP
+        run: |
+          python - <<'PY'
+          import zipfile
+
+          with zipfile.ZipFile("/tmp/leapmotor-ha.zip") as archive:
+              names = set(archive.namelist())
+          required = {"manifest.json", "__init__.py", "api.py"}
+          forbidden = {
+              "custom_components/leapmotor/manifest.json",
+              "app_cert.pem",
+              "app_key.pem",
+          }
+          missing = required - names
+          present_forbidden = forbidden & names
+          if missing:
+              raise SystemExit(f"release ZIP missing root files: {sorted(missing)}")
+          if present_forbidden:
+              raise SystemExit(
+                  f"release ZIP contains forbidden entries: {sorted(present_forbidden)}"
+              )
+          print("ok release ZIP layout")
+          PY
+
+      - name: Upload HACS release ZIP
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release upload "${{ github.event.release.tag_name }}"
+          /tmp/leapmotor-ha.zip
+          --clobber
+          --repo "${{ github.repository }}"
