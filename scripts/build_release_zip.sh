@@ -8,7 +8,10 @@ rm -f "$zip_path"
 (
   cd "$repo_root/custom_components/leapmotor"
   zip -r "$zip_path" . \
+    -x '__pycache__/' \
     -x '__pycache__/*' \
+    -x '*/__pycache__/' \
+    -x '*/__pycache__/*' \
     -x '*.pyc' \
     -x 'app_cert.pem' \
     -x 'app_key.pem' \
@@ -29,8 +32,15 @@ with zipfile.ZipFile(zip_path) as archive:
         "app_cert.pem",
         "app_key.pem",
     } & names
+    cache_entries = {
+        name for name in names if "__pycache__" in name or name.endswith(".pyc")
+    }
     if missing:
         raise SystemExit(f"release ZIP missing root files: {sorted(missing)}")
     if forbidden:
         raise SystemExit(f"release ZIP contains forbidden entries: {sorted(forbidden)}")
+    if cache_entries:
+        raise SystemExit(
+            f"release ZIP contains Python cache entries: {sorted(cache_entries)}"
+        )
 PY

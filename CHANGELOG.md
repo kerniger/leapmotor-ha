@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.20 - 2026-06-19
+
+- Include all numeric vehicle-status signals in redacted support diagnostics so
+  previously unknown model-specific fields, including B10 REEV telemetry, can
+  be identified from comparison captures.
+- Exclude the known latitude and longitude signal IDs from the expanded raw
+  signal export to prevent location disclosure in public support bundles.
+- Reject Python cache files and directories when building release ZIP assets.
+
 ## 0.6.19 - 2026-06-13
 
 - Harden diagnostics redaction for account e-mail addresses, usernames,

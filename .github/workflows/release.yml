@@ -35,11 +35,20 @@ jobs:
           }
           missing = required - names
           present_forbidden = forbidden & names
+          cache_entries = {
+              name
+              for name in names
+              if "__pycache__" in name or name.endswith(".pyc")
+          }
           if missing:
               raise SystemExit(f"release ZIP missing root files: {sorted(missing)}")
           if present_forbidden:
               raise SystemExit(
                   f"release ZIP contains forbidden entries: {sorted(present_forbidden)}"
+              )
+          if cache_entries:
+              raise SystemExit(
+                  f"release ZIP contains Python cache entries: {sorted(cache_entries)}"
               )
           print("ok release ZIP layout")
           PY

@@ -1943,6 +1943,7 @@ def normalize_vehicle(
     last_week_split = _energy_breakdown_percentages(breakdown_data)
     status_endpoint_path = _vehicle_status_car_type_path(vehicle.car_type)
     status_payload_keys = sorted(str(key) for key in status_data)
+    support_raw_signals = _support_raw_signals(signal)
 
     return {
         "vehicle": {
@@ -2189,8 +2190,19 @@ def normalize_vehicle(
             "raw_signal_100015": signal.get("100015"),
             "raw_signal_100016": signal.get("100016"),
             "raw_signal_100017": signal.get("100017"),
+            **support_raw_signals,
         },
         "raw_updated_at": time.time(),
+    }
+
+
+def _support_raw_signals(signal: dict[str, Any]) -> dict[str, Any]:
+    """Return status signals safe to include in redacted support diagnostics."""
+    location_signal_ids = {"2190", "2191", "3724", "3725"}
+    return {
+        f"raw_signal_{signal_id}": value
+        for signal_id, value in signal.items()
+        if str(signal_id).isdigit() and str(signal_id) not in location_signal_ids
     }
 
 
