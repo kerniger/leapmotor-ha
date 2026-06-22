@@ -301,10 +301,18 @@ class LeapmotorApiClient:
 
     def open_windows(self, vin: str, value: int | None = None) -> dict[str, Any]:
         """Open the windows via remote control."""
+        if value is not None:
+            vehicle = self._find_vehicle_by_vin(vin)
+            if vehicle.car_type in ("B10", "C10"):
+                value = round(value / 10.0)
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_OPEN, value=value)
 
     def close_windows(self, vin: str, value: int | None = None) -> dict[str, Any]:
         """Close the windows via remote control."""
+        if value is not None:
+            vehicle = self._find_vehicle_by_vin(vin)
+            if vehicle.car_type in ("B10", "C10"):
+                value = round(value / 10.0)
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_CLOSE, value=value)
 
     def ac_switch(self, vin: str) -> dict[str, Any]:
