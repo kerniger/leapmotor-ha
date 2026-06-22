@@ -90,6 +90,15 @@
       "remaining_range_km": {
         "name": "Range"
       },
+      "fuel_level_percent": {
+        "name": "Fuel level"
+      },
+      "fuel_range_km": {
+        "name": "Fuel range"
+      },
+      "combined_range_km": {
+        "name": "Combined range"
+      },
       "odometer_km": {
         "name": "Odometer"
       },

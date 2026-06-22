@@ -1,11 +1,16 @@
 {
   "domain": "leapmotor",
   "name": "Leapmotor",
-  "codeowners": ["@kerniger"],
+  "codeowners": [
+    "@kerniger"
+  ],
   "config_flow": true,
   "documentation": "https://github.com/kerniger/leapmotor-ha",
   "issue_tracker": "https://github.com/kerniger/leapmotor-ha/issues",
   "iot_class": "cloud_polling",
-  "requirements": ["cryptography>=42.0.0", "requests>=2.31.0"],
-  "version": "0.6.20"
+  "requirements": [
+    "cryptography>=42.0.0",
+    "requests>=2.31.0"
+  ],
+  "version": "0.6.21"
 }

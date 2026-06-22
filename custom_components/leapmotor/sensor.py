@@ -41,6 +41,8 @@ CONSUMPTION_KWH_PER_100KM = "kWh/100 km"
 CONSUMPTION_MI_PER_KWH = "mi/kWh"
 WHOLE_KILOMETER_KEYS = {
     "remaining_range_km",
+    "fuel_range_km",
+    "combined_range_km",
     "cltc_range_km",
     "live_remaining_range_km",
     "odometer_km",
@@ -48,6 +50,9 @@ WHOLE_KILOMETER_KEYS = {
     "last_7_days_mileage_km",
 }
 OPTIONAL_SENSOR_PATHS = {
+    "fuel_level_percent": "status.fuel_level_percent",
+    "fuel_range_km": "status.fuel_range_km",
+    "combined_range_km": "status.combined_range_km",
     "battery_percent_precise": "status.battery_percent_precise",
     "wltp_max_range_km": "status.wltp_max_range_km",
     "live_remaining_range_km": "status.live_remaining_range_km",
@@ -124,6 +129,35 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         suggested_display_precision=0,
         icon="mdi:map-marker-distance",
         value_fn=lambda data: data["status"].get("remaining_range_km"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="fuel_level_percent",
+        translation_key="fuel_level_percent",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        icon="mdi:gas-station",
+        value_fn=lambda data: data["status"].get("fuel_level_percent"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="fuel_range_km",
+        translation_key="fuel_range_km",
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        icon="mdi:gas-station",
+        value_fn=lambda data: data["status"].get("fuel_range_km"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="combined_range_km",
+        translation_key="combined_range_km",
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        icon="mdi:map-marker-distance",
+        value_fn=lambda data: data["status"].get("combined_range_km"),
     ),
     LeapmotorSensorEntityDescription(
         key="wltp_max_range_km",

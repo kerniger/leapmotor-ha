@@ -298,6 +298,15 @@
       },
       "last_charge_energy_kwh": {
         "name": "Energie laatste laadbeurt"
+      },
+      "fuel_level_percent": {
+        "name": "Brandstofpeil"
+      },
+      "fuel_range_km": {
+        "name": "Brandstof actieradius"
+      },
+      "combined_range_km": {
+        "name": "Gecombineerde actieradius"
       }
     },
     "binary_sensor": {

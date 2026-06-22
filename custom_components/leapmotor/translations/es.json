@@ -298,6 +298,15 @@
       },
       "last_charge_energy_kwh": {
         "name": "Energia ultima carga"
+      },
+      "fuel_level_percent": {
+        "name": "Nivel de combustible"
+      },
+      "fuel_range_km": {
+        "name": "Autonomía de combustible"
+      },
+      "combined_range_km": {
+        "name": "Autonomía combinada"
       }
     },
     "binary_sensor": {

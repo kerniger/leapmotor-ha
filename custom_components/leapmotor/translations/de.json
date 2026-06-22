@@ -90,6 +90,15 @@
       "remaining_range_km": {
         "name": "Reichweite"
       },
+      "fuel_level_percent": {
+        "name": "Kraftstoffstand"
+      },
+      "fuel_range_km": {
+        "name": "Kraftstoff-Reichweite"
+      },
+      "combined_range_km": {
+        "name": "Kombinierte Reichweite"
+      },
       "odometer_km": {
         "name": "Kilometerstand"
       },
