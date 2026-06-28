@@ -754,6 +754,11 @@ class LeapmotorApiClient:
                 self.get_consumption_last_week_breakdown,
                 vehicle,
             )
+            consumption_today = self._fetch_optional_read(
+                "consumption today breakdown",
+                self.get_consumption_today_breakdown,
+                vehicle,
+            )
             picture = self._fetch_optional_read(
                 "car picture",
                 self.get_car_picture,
@@ -771,6 +776,7 @@ class LeapmotorApiClient:
                 mileage_json=mileage,
                 consumption_rank_json=consumption_rank,
                 consumption_breakdown_json=consumption_breakdown,
+                consumption_today_json=consumption_today,
                 picture_json=picture,
                 charging_daily_json=charging_daily,
             )
@@ -1068,6 +1074,28 @@ class LeapmotorApiClient:
             cert=self.account_cert,
         )
         return self._parse_api_body(response["status_code"], response["body"], "consumption last week breakdown")
+
+    def get_consumption_today_breakdown(self, vehicle: Vehicle) -> dict[str, Any]:
+        """Fetch read-only today's energy split by driving, A/C, and other."""
+        begintime, endtime = _today_window_seconds()
+        headers = self._build_consumption_last_week_headers(
+            carvin=vehicle.vin,
+            begintime=str(begintime),
+            endtime=str(endtime),
+        )
+        headers.update(self._auth_headers(content_type="application/x-www-form-urlencoded"))
+        body = (
+            f"endtime={endtime}"
+            f"&begintime={begintime}"
+            f"&carvin={requests.utils.quote(vehicle.vin, safe='')}"
+        )
+        response = self._post_with_curl(
+            path="/carownerservice/oversea/drivingRecord/v1/getLastweekEC",
+            headers=headers,
+            data=body,
+            cert=self.account_cert,
+        )
+        return self._parse_api_body(response["status_code"], response["body"], "consumption today breakdown")
 
     def get_charging_daily_detail(self, vehicle: Vehicle) -> dict[str, Any]:
         """Fetch recent per-session charging details."""
@@ -1929,6 +1957,7 @@ def normalize_vehicle(
     mileage_json: dict[str, Any] | None = None,
     consumption_rank_json: dict[str, Any] | None = None,
     consumption_breakdown_json: dict[str, Any] | None = None,
+    consumption_today_json: dict[str, Any] | None = None,
     picture_json: dict[str, Any] | None = None,
     charging_daily_json: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
@@ -1942,6 +1971,7 @@ def normalize_vehicle(
     rank_result = rank_data.get("rankResult") or {}
     weekly_ec = rank_data.get("weeklyEC") or []
     breakdown_data = (consumption_breakdown_json or {}).get("data") or {}
+    today_data = (consumption_today_json or {}).get("data") or {}
     picture_data = (picture_json or {}).get("data") or {}
     charge_records = ((charging_daily_json or {}).get("data") or {}).get("list") or []
     last_charge = charge_records[0] if charge_records else None
@@ -1949,6 +1979,7 @@ def normalize_vehicle(
     tire_pressures = _tire_pressures_bar(vehicle.car_type, signal)
     last_7_days_energy = _sum_detail_field(mileage_data.get("detail"), "accumulatedEnergyConsume")
     last_week_split = _energy_breakdown_percentages(breakdown_data)
+    today_split = _energy_breakdown_percentages(today_data)
     status_endpoint_path = _vehicle_status_car_type_path(vehicle.car_type)
     status_payload_keys = sorted(str(key) for key in status_data)
     support_raw_signals = _support_raw_signals(signal)
@@ -2040,6 +2071,12 @@ def normalize_vehicle(
             "last_week_driving_energy_percent": last_week_split.get("driving"),
             "last_week_climate_energy_percent": last_week_split.get("climate"),
             "last_week_other_energy_percent": last_week_split.get("other"),
+            "today_driving_energy_kwh": _safe_float(today_data.get("driverEC")),
+            "today_climate_energy_kwh": _safe_float(today_data.get("acEC")),
+            "today_other_energy_kwh": _safe_float(today_data.get("otherEC")),
+            "today_driving_energy_percent": today_split.get("driving"),
+            "today_climate_energy_percent": today_split.get("climate"),
+            "today_other_energy_percent": today_split.get("other"),
         },
         "charging_history": {
             "last_charge_energy_kwh": (
@@ -2648,6 +2685,18 @@ def _previous_week_window_seconds() -> tuple[int, int]:
     start = this_monday - timedelta(days=7)
     end = this_monday - timedelta(seconds=1)
     return int(start.timestamp()), int(end.timestamp())
+
+
+def _today_window_seconds() -> tuple[int, int]:
+    """Return the start of today to the current time, in seconds."""
+    now = _berlin_now()
+    start = now.replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+    return int(start.timestamp()), int(now.timestamp())
 
 
 def _berlin_now() -> datetime:

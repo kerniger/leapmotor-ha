@@ -257,6 +257,15 @@
       "last_week_other_energy_percent": {
         "name": "Sonstige Energie letzte Woche"
       },
+      "today_driving_energy_percent": {
+        "name": "Fahrenergie heute"
+      },
+      "today_climate_energy_percent": {
+        "name": "Klimaenergie heute"
+      },
+      "today_other_energy_percent": {
+        "name": "Sonstige Energie heute"
+      },
       "unread_message_count": {
         "name": "Ungelesene Nachrichten"
       },

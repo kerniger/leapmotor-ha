@@ -681,6 +681,36 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         value_fn=lambda data: data["history"].get("last_week_other_energy_percent"),
     ),
     LeapmotorSensorEntityDescription(
+        key="today_driving_energy_percent",
+        translation_key="today_driving_energy_percent",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        icon="mdi:car-electric",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["history"].get("today_driving_energy_percent"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="today_climate_energy_percent",
+        translation_key="today_climate_energy_percent",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        icon="mdi:air-conditioner",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["history"].get("today_climate_energy_percent"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="today_other_energy_percent",
+        translation_key="today_other_energy_percent",
+        native_unit_of_measurement=PERCENTAGE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        icon="mdi:lightning-bolt-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["history"].get("today_other_energy_percent"),
+    ),
+    LeapmotorSensorEntityDescription(
         key="last_charge_energy_kwh",
         translation_key="last_charge_energy_kwh",
         native_unit_of_measurement=ENERGY_KWH,
@@ -934,6 +964,19 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
                     "driving_energy_kwh": history.get("last_week_driving_energy_kwh"),
                     "climate_energy_kwh": history.get("last_week_climate_energy_kwh"),
                     "other_energy_kwh": history.get("last_week_other_energy_kwh"),
+                }
+            )
+        if self.entity_description.key in {
+            "today_driving_energy_percent",
+            "today_climate_energy_percent",
+            "today_other_energy_percent",
+        }:
+            history = self.vehicle_data["history"]
+            attributes.update(
+                {
+                    "driving_energy_kwh": history.get("today_driving_energy_kwh"),
+                    "climate_energy_kwh": history.get("today_climate_energy_kwh"),
+                    "other_energy_kwh": history.get("today_other_energy_kwh"),
                 }
             )
         if self.entity_description.extra_attrs_fn is not None:

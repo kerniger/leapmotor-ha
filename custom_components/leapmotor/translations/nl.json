@@ -307,6 +307,15 @@
       },
       "combined_range_km": {
         "name": "Gecombineerde actieradius"
+      },
+      "today_driving_energy_percent": {
+        "name": "Aandrijvingsenergie vandaag"
+      },
+      "today_climate_energy_percent": {
+        "name": "Klimaatenergie vandaag"
+      },
+      "today_other_energy_percent": {
+        "name": "Overige energie vandaag"
       }
     },
     "binary_sensor": {

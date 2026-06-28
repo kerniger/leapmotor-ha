@@ -307,6 +307,15 @@
       },
       "combined_range_km": {
         "name": "Zasięg łączny"
+      },
+      "today_driving_energy_percent": {
+        "name": "Dzisiejsza energia z napędu"
+      },
+      "today_climate_energy_percent": {
+        "name": "Dzisiejsza energia z klimatyzacji"
+      },
+      "today_other_energy_percent": {
+        "name": "Inna dzisiejsza energia"
       }
     },
     "binary_sensor": {

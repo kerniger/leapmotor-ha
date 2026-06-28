@@ -307,6 +307,15 @@
       },
       "combined_range_km": {
         "name": "Autonomía combinada"
+      },
+      "today_driving_energy_percent": {
+        "name": "Energía de conducción de hoy"
+      },
+      "today_climate_energy_percent": {
+        "name": "Energía de clima de hoy"
+      },
+      "today_other_energy_percent": {
+        "name": "Otra energía de hoy"
       }
     },
     "binary_sensor": {
