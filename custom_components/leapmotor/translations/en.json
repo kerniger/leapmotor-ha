@@ -316,6 +316,13 @@
       },
       "last_charge_energy_kwh": {
         "name": "Last charge energy"
+      },
+      "ac_operation_mode": {
+        "name": "AC operation mode",
+        "state": {
+          "auto": "Auto",
+          "manual": "Manual"
+        }
       }
     },
     "binary_sensor": {

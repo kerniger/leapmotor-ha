@@ -2133,6 +2133,7 @@ def normalize_vehicle(
             "rear_right_window_position_percent": _safe_int(signal.get("1880")),
             "climate_on": _one_is_on(signal.get("1938")),
             "climate_mode": _climate_mode(signal),
+            "ac_operation_mode": _ac_operation_mode(signal),
             "outdoor_temp_c": _safe_float(status_data.get("outdoorTemp")),
             "climate_fan_volume": _safe_int(status_data.get("acAirVolume")),
             "climate_fan_volume_setting": _safe_int(status_data.get("acAirVolumeSetting")),
@@ -3001,6 +3002,14 @@ def _climate_mode(signal: dict[str, Any]) -> str | None:
         1: "fast_cool",
         3: "fast_heat",
         4: "quick_ventilation",
+    }.get(mode)
+
+
+def _ac_operation_mode(signal: dict[str, Any]) -> str | None:
+    mode = _safe_int(signal.get("1939"))
+    return {
+        0: "auto",
+        1: "manual",
     }.get(mode)
 
 

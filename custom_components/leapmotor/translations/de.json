@@ -316,6 +316,13 @@
       },
       "last_charge_energy_kwh": {
         "name": "Letzte Lademenge"
+      },
+      "ac_operation_mode": {
+        "name": "Klima Betriebsmodus",
+        "state": {
+          "auto": "Auto",
+          "manual": "Manuell"
+        }
       }
     },
     "binary_sensor": {

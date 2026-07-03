@@ -316,6 +316,13 @@
       },
       "today_other_energy_percent": {
         "name": "Inna dzisiejsza energia"
+      },
+      "ac_operation_mode": {
+        "name": "Tryb pracy klimatyzacji",
+        "state": {
+          "auto": "Auto",
+          "manual": "Ręczny"
+        }
       }
     },
     "binary_sensor": {

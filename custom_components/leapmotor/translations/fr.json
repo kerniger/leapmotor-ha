@@ -316,6 +316,13 @@
       },
       "today_other_energy_percent": {
         "name": "Autre énergie aujourd'hui"
+      },
+      "ac_operation_mode": {
+        "name": "Mode de fonctionnement de la climatisation",
+        "state": {
+          "auto": "Auto",
+          "manual": "Manuel"
+        }
       }
     },
     "binary_sensor": {

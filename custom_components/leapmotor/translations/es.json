@@ -316,6 +316,13 @@
       },
       "today_other_energy_percent": {
         "name": "Otra energía de hoy"
+      },
+      "ac_operation_mode": {
+        "name": "Modo de funcionamiento del aire acondicionado",
+        "state": {
+          "auto": "Auto",
+          "manual": "Manual"
+        }
       }
     },
     "binary_sensor": {

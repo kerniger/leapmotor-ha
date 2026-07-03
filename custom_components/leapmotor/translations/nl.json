@@ -316,6 +316,13 @@
       },
       "today_other_energy_percent": {
         "name": "Overige energie vandaag"
+      },
+      "ac_operation_mode": {
+        "name": "Airco bedieningsmodus",
+        "state": {
+          "auto": "Auto",
+          "manual": "Handmatig"
+        }
       }
     },
     "binary_sensor": {

@@ -435,6 +435,13 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         value_fn=lambda data: data["diagnostics"].get("climate_mode"),
     ),
     LeapmotorSensorEntityDescription(
+        key="ac_operation_mode",
+        translation_key="ac_operation_mode",
+        icon="mdi:air-conditioner",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=lambda data: data["diagnostics"].get("ac_operation_mode"),
+    ),
+    LeapmotorSensorEntityDescription(
         key="outdoor_temp_c",
         translation_key="outdoor_temp_c",
         native_unit_of_measurement=UnitOfTemperature.CELSIUS,
