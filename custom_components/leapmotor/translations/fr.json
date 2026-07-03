@@ -323,6 +323,12 @@
           "auto": "Auto",
           "manual": "Manuel"
         }
+      },
+      "max_fuel_range_km": {
+        "name": "Autonomie maximale carburant"
+      },
+      "max_combined_range_km": {
+        "name": "Autonomie combinée maximale"
       }
     },
     "binary_sensor": {

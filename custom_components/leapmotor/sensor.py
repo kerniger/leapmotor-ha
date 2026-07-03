@@ -32,7 +32,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_helpers import build_vehicle_display_name, load_localized_entity_names
+from .entity_helpers import build_vehicle_display_name
 from .entity_migration import english_entity_slug
 
 PRESSURE_BAR = "bar"
@@ -42,7 +42,9 @@ CONSUMPTION_MI_PER_KWH = "mi/kWh"
 WHOLE_KILOMETER_KEYS = {
     "remaining_range_km",
     "fuel_range_km",
+    "max_fuel_range_km",
     "combined_range_km",
+    "max_combined_range_km",
     "cltc_range_km",
     "live_remaining_range_km",
     "odometer_km",
@@ -52,7 +54,9 @@ WHOLE_KILOMETER_KEYS = {
 OPTIONAL_SENSOR_PATHS = {
     "fuel_level_percent": "status.fuel_level_percent",
     "fuel_range_km": "status.fuel_range_km",
+    "max_fuel_range_km": "status.max_fuel_range_km",
     "combined_range_km": "status.combined_range_km",
+    "max_combined_range_km": "status.max_combined_range_km",
     "battery_percent_precise": "status.battery_percent_precise",
     "wltp_max_range_km": "status.wltp_max_range_km",
     "live_remaining_range_km": "status.live_remaining_range_km",
@@ -150,6 +154,16 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         value_fn=lambda data: data["status"].get("fuel_range_km"),
     ),
     LeapmotorSensorEntityDescription(
+        key="max_fuel_range_km",
+        translation_key="max_fuel_range_km",
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        icon="mdi:gas-station",
+        value_fn=lambda data: data["status"].get("max_fuel_range_km"),
+    ),
+    LeapmotorSensorEntityDescription(
         key="combined_range_km",
         translation_key="combined_range_km",
         native_unit_of_measurement=UnitOfLength.KILOMETERS,
@@ -158,6 +172,16 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         suggested_display_precision=0,
         icon="mdi:map-marker-distance",
         value_fn=lambda data: data["status"].get("combined_range_km"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="max_combined_range_km",
+        translation_key="max_combined_range_km",
+        native_unit_of_measurement=UnitOfLength.KILOMETERS,
+        device_class=SensorDeviceClass.DISTANCE,
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=0,
+        icon="mdi:map-marker-distance",
+        value_fn=lambda data: data["status"].get("max_combined_range_km"),
     ),
     LeapmotorSensorEntityDescription(
         key="wltp_max_range_km",
@@ -804,15 +828,10 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor sensors."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    localized_names = await hass.async_add_executor_job(
-        load_localized_entity_names,
-        hass.config.language,
-        "sensor",
-    )
     entities: list[LeapmotorSensor] = []
     for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
         entities.extend(
-            LeapmotorSensor(coordinator, vin, description, localized_names)
+            LeapmotorSensor(coordinator, vin, description)
             for description in SENSOR_DESCRIPTIONS
             if _should_create_sensor(vehicle_data, description.key)
         )
@@ -829,7 +848,6 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
         coordinator: LeapmotorDataUpdateCoordinator,
         vin: str,
         description: LeapmotorSensorEntityDescription,
-        localized_names: dict[str, str],
     ) -> None:
         super().__init__(coordinator)
         self.vin = vin
@@ -837,10 +855,6 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
         self._attr_unique_id = f"{vin}_{description.key}"
         vehicle = self.vehicle_data["vehicle"]
         self._attr_has_entity_name = True
-        self._attr_name = localized_names.get(
-            description.translation_key or description.key,
-            description.key.replace("_", " ").capitalize(),
-        )
         self._attr_suggested_object_id = _suggested_object_id(
             vehicle,
             english_entity_slug("sensor", description.key) or description.key,
@@ -857,11 +871,6 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
     def vehicle_data(self) -> dict[str, Any]:
         """Return current data for this vehicle."""
         return self.coordinator.data["vehicles"][self.vin]
-
-    @property
-    def translation_key(self) -> str | None:
-        """Disable frontend-only name translations; names are localized in setup."""
-        return None
 
     @property
     def available(self) -> bool:

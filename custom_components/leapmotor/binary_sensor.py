@@ -20,7 +20,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_helpers import build_vehicle_display_name, load_localized_entity_names
+from .entity_helpers import build_vehicle_display_name
 from .entity_migration import english_entity_slug
 
 OPTIONAL_BINARY_SENSOR_PATHS = {
@@ -365,15 +365,10 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor binary sensors."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    localized_names = await hass.async_add_executor_job(
-        load_localized_entity_names,
-        hass.config.language,
-        "binary_sensor",
-    )
     entities: list[LeapmotorBinarySensor] = []
     for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
         entities.extend(
-            LeapmotorBinarySensor(coordinator, vin, description, localized_names)
+            LeapmotorBinarySensor(coordinator, vin, description)
             for description in BINARY_SENSOR_DESCRIPTIONS
             if _should_create_binary_sensor(vehicle_data, description.key)
         )
@@ -393,7 +388,6 @@ class LeapmotorBinarySensor(
         coordinator: LeapmotorDataUpdateCoordinator,
         vin: str,
         description: LeapmotorBinarySensorEntityDescription,
-        localized_names: dict[str, str],
     ) -> None:
         super().__init__(coordinator)
         self.vin = vin
@@ -401,10 +395,6 @@ class LeapmotorBinarySensor(
         self._attr_unique_id = f"{vin}_{description.key}"
         vehicle = self.vehicle_data["vehicle"]
         self._attr_has_entity_name = True
-        self._attr_name = localized_names.get(
-            description.translation_key or description.key,
-            description.key.replace("_", " ").capitalize(),
-        )
         self._attr_suggested_object_id = _suggested_object_id(
             vehicle,
             english_entity_slug("binary_sensor", description.key) or description.key,
@@ -421,11 +411,6 @@ class LeapmotorBinarySensor(
     def vehicle_data(self) -> dict[str, Any]:
         """Return current data for this vehicle."""
         return self.coordinator.data["vehicles"][self.vin]
-
-    @property
-    def translation_key(self) -> str | None:
-        """Disable frontend-only name translations; names are localized in setup."""
-        return None
 
     @property
     def is_on(self) -> bool | None:

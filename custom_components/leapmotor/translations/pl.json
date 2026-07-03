@@ -323,6 +323,12 @@
           "auto": "Auto",
           "manual": "Ręczny"
         }
+      },
+      "max_fuel_range_km": {
+        "name": "Maks. zasięg na paliwie"
+      },
+      "max_combined_range_km": {
+        "name": "Maks. zasięg łączony"
       }
     },
     "binary_sensor": {

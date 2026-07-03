@@ -323,6 +323,12 @@
           "auto": "Auto",
           "manual": "Handmatig"
         }
+      },
+      "max_fuel_range_km": {
+        "name": "Max. brandstof actieradius"
+      },
+      "max_combined_range_km": {
+        "name": "Max. gecombineerde actieradius"
       }
     },
     "binary_sensor": {
