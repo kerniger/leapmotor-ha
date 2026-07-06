@@ -30,10 +30,7 @@ from .const import (
     STATIC_CERT_STORAGE_DIR,
 )
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_migration import (
-    async_migrate_entity_registry_to_english,
-    async_remove_obsolete_entities,
-)
+from .entity_migration import async_remove_obsolete_entities
 from .lock import LOCK_ACTION, UNLOCK_ACTION
 from .remote_helpers import (
     RemoteActionSpec,
@@ -316,10 +313,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     await coordinator.async_config_entry_first_refresh()
     await async_remove_obsolete_entities(hass)
-    await async_migrate_entity_registry_to_english(
-        hass,
-        set(coordinator.data.get("vehicles") or {}),
-    )
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
     if not hass.services.has_service(DOMAIN, "lock"):
@@ -327,10 +320,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.async_on_unload(entry.add_update_listener(async_reload_entry))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await async_remove_obsolete_entities(hass)
-    await async_migrate_entity_registry_to_english(
-        hass,
-        set(coordinator.data.get("vehicles") or {}),
-    )
     return True
 
 
