@@ -23,6 +23,7 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfSpeed,
     UnitOfTemperature,
+    UnitOfVolume,
     UnitOfTime,
 )
 from homeassistant.core import HomeAssistant
@@ -53,6 +54,8 @@ WHOLE_KILOMETER_KEYS = {
 }
 OPTIONAL_SENSOR_PATHS = {
     "fuel_level_percent": "status.fuel_level_percent",
+    "fuel_level_liters": "status.fuel_level_liters",
+    "fuel_average_consumption": "status.fuel_level_liters",
     "fuel_range_km": "status.fuel_range_km",
     "max_fuel_range_km": "status.max_fuel_range_km",
     "combined_range_km": "status.combined_range_km",
@@ -133,6 +136,30 @@ SENSOR_DESCRIPTIONS: tuple[LeapmotorSensorEntityDescription, ...] = (
         suggested_display_precision=0,
         icon="mdi:map-marker-distance",
         value_fn=lambda data: data["status"].get("remaining_range_km"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="fuel_level_liters",
+        translation_key="fuel_level_liters",
+        native_unit_of_measurement=UnitOfVolume.LITERS,
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.VOLUME,
+        suggested_display_precision=1,
+        icon="mdi:gas-station",
+        value_fn=lambda data: data["status"].get("fuel_level_liters"),
+    ),
+    LeapmotorSensorEntityDescription(
+        key="fuel_average_consumption",
+        translation_key="fuel_average_consumption",
+        native_unit_of_measurement="L/100km",
+        state_class=SensorStateClass.MEASUREMENT,
+        suggested_display_precision=1,
+        icon="mdi:gas-station",
+        value_fn=lambda data: (
+            (data["status"].get("fuel_level_liters") / data["status"].get("fuel_range_km") * 100.0)
+            if data["status"].get("fuel_level_liters") is not None 
+            and data["status"].get("fuel_range_km")
+            else None
+        ),
     ),
     LeapmotorSensorEntityDescription(
         key="fuel_level_percent",

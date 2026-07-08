@@ -2000,6 +2000,7 @@ def normalize_vehicle(
         "status": {
             "battery_percent": signal.get("1204"),
             "fuel_level_percent": _safe_float(signal.get("3235")),
+            "fuel_level_liters": _safe_float(signal.get("2363")) / 1000.0 if signal.get("2363") is not None else None,
             "remaining_range_km": signal.get("3260"),
             "fuel_range_km": _safe_int(signal.get("3259")),
             "max_fuel_range_km": _safe_int(signal.get("3256")),

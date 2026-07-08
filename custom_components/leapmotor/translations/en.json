@@ -329,6 +329,12 @@
       },
       "max_combined_range_km": {
         "name": "Max combined range"
+      },
+      "fuel_level_liters": {
+        "name": "Fuel Level (Liters)"
+      },
+      "fuel_average_consumption": {
+        "name": "Average Fuel Consumption"
       }
     },
     "binary_sensor": {

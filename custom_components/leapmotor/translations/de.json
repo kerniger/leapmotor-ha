@@ -329,6 +329,12 @@
       },
       "max_combined_range_km": {
         "name": "Max. kombinierte Reichweite"
+      },
+      "fuel_level_liters": {
+        "name": "Tankinhalt (Liter)"
+      },
+      "fuel_average_consumption": {
+        "name": "Durchschnittsverbrauch Kraftstoff"
       }
     },
     "binary_sensor": {
