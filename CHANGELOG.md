@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.28 - 2026-07-11
+
+- Prefer signed GPS signals `2` and `3` on signal-based vehicles such as the
+  C10 and B10, fixing locations mirrored into the wrong hemisphere when the
+  absolute-value coordinate signals lose their South or West sign.
+- Exclude the signed GPS signals from support diagnostics to prevent precise
+  location disclosure.
+- Exclude nested ZIP artifacts from release packages and reject them during
+  local and GitHub release validation.
+
 ## 0.6.20 - 2026-06-19
 
 - Include all numeric vehicle-status signals in redacted support diagnostics so

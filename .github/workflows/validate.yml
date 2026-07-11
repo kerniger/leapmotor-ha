@@ -48,6 +48,7 @@ jobs:
           assert "custom_components/leapmotor/manifest.json" not in names
           assert "app_cert.pem" not in names
           assert "app_key.pem" not in names
+          assert not {name for name in names if name.lower().endswith(".zip")}
           print("ok release ZIP layout")
           PY
 

@@ -13,6 +13,7 @@ rm -f "$zip_path"
     -x '*/__pycache__/' \
     -x '*/__pycache__/*' \
     -x '*.pyc' \
+    -x '*.zip' \
     -x 'app_cert.pem' \
     -x 'app_key.pem' \
     -x '*/.DS_Store'
@@ -35,6 +36,7 @@ with zipfile.ZipFile(zip_path) as archive:
     cache_entries = {
         name for name in names if "__pycache__" in name or name.endswith(".pyc")
     }
+    nested_archives = {name for name in names if name.lower().endswith(".zip")}
     if missing:
         raise SystemExit(f"release ZIP missing root files: {sorted(missing)}")
     if forbidden:
@@ -42,5 +44,9 @@ with zipfile.ZipFile(zip_path) as archive:
     if cache_entries:
         raise SystemExit(
             f"release ZIP contains Python cache entries: {sorted(cache_entries)}"
+        )
+    if nested_archives:
+        raise SystemExit(
+            f"release ZIP contains nested ZIP files: {sorted(nested_archives)}"
         )
 PY

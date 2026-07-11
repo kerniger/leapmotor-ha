@@ -40,6 +40,9 @@ jobs:
               for name in names
               if "__pycache__" in name or name.endswith(".pyc")
           }
+          nested_archives = {
+              name for name in names if name.lower().endswith(".zip")
+          }
           if missing:
               raise SystemExit(f"release ZIP missing root files: {sorted(missing)}")
           if present_forbidden:
@@ -49,6 +52,10 @@ jobs:
           if cache_entries:
               raise SystemExit(
                   f"release ZIP contains Python cache entries: {sorted(cache_entries)}"
+              )
+          if nested_archives:
+              raise SystemExit(
+                  f"release ZIP contains nested ZIP files: {sorted(nested_archives)}"
               )
           print("ok release ZIP layout")
           PY

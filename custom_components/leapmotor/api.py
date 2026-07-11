@@ -2032,8 +2032,10 @@ def normalize_vehicle(
             "last_vehicle_timestamp": signal.get("sts"),
         },
         "location": {
-            "latitude": signal.get("3725", signal.get("2190")),
-            "longitude": signal.get("3724", signal.get("2191")),
+            # Signals 2/3 retain the West/South hemisphere sign. The newer
+            # 3724/3725 and legacy 2191/2190 variants contain absolute values.
+            "latitude": signal.get("3", signal.get("3725", signal.get("2190"))),
+            "longitude": signal.get("2", signal.get("3724", signal.get("2191"))),
             "privacy_gps": status_data.get("privacyGPS"),
             "privacy_data": status_data.get("privacyData"),
             "last_vehicle_timestamp": signal.get("sts"),
@@ -2250,7 +2252,7 @@ def normalize_vehicle(
 
 def _support_raw_signals(signal: dict[str, Any]) -> dict[str, Any]:
     """Return status signals safe to include in redacted support diagnostics."""
-    location_signal_ids = {"2190", "2191", "3724", "3725"}
+    location_signal_ids = {"2", "3", "2190", "2191", "3724", "3725"}
     return {
         f"raw_signal_{signal_id}": value
         for signal_id, value in signal.items()
