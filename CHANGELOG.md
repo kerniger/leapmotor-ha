@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.29 - 2026-07-15
+
+- Add initial B05 status support by retrying the shared C10 status endpoint
+  when a model-specific vehicle-status path returns HTTP 404.
+- Report the status endpoint path that actually succeeded in diagnostics,
+  including for shared vehicles.
+
 ## 0.6.28 - 2026-07-11
 
 - Prefer signed GPS signals `2` and `3` on signal-based vehicles such as the

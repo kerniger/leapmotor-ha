@@ -972,12 +972,30 @@ class LeapmotorApiClient:
         """Fetch read-only status for one vehicle."""
         car_type_path = _vehicle_status_car_type_path(vehicle.car_type)
         body = f"vin={requests.utils.quote(vehicle.vin, safe='')}"
-        status = self._get_vehicle_status_raw(
-            vehicle,
-            car_type_path=car_type_path,
-            body=body,
-            label="vehicle status",
-        )
+        try:
+            status = self._get_vehicle_status_raw(
+                vehicle,
+                car_type_path=car_type_path,
+                body=body,
+                label="vehicle status",
+            )
+        except LeapmotorApiError:
+            result = self.last_api_results.get("vehicle status") or {}
+            if car_type_path == "c10" or result.get("http_status") != 404:
+                raise
+            _LOGGER.info(
+                "Leapmotor status path /%s is unavailable for model %s; trying /c10",
+                car_type_path,
+                vehicle.car_type,
+            )
+            car_type_path = "c10"
+            status = self._get_vehicle_status_raw(
+                vehicle,
+                car_type_path=car_type_path,
+                body=body,
+                label="vehicle status c10 fallback",
+            )
+        status["_status_endpoint_path"] = car_type_path
         if (
             vehicle.is_shared
             and vehicle.car_id
@@ -997,6 +1015,7 @@ class LeapmotorApiClient:
             except LeapmotorApiError:
                 shared_status = None
             if shared_status and _status_signal_count(shared_status):
+                shared_status["_status_endpoint_path"] = car_type_path
                 return shared_status
         return status
 
@@ -1980,7 +1999,10 @@ def normalize_vehicle(
     last_7_days_energy = _sum_detail_field(mileage_data.get("detail"), "accumulatedEnergyConsume")
     last_week_split = _energy_breakdown_percentages(breakdown_data)
     today_split = _energy_breakdown_percentages(today_data)
-    status_endpoint_path = _vehicle_status_car_type_path(vehicle.car_type)
+    status_endpoint_path = str(
+        status_json.get("_status_endpoint_path")
+        or _vehicle_status_car_type_path(vehicle.car_type)
+    )
     status_payload_keys = sorted(str(key) for key in status_data)
     support_raw_signals = _support_raw_signals(signal)
 
