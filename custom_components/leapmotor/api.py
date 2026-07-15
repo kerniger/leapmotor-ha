@@ -2285,7 +2285,7 @@ def _support_raw_signals(signal: dict[str, Any]) -> dict[str, Any]:
 def _vehicle_status_car_type_path(car_type: str | None) -> str:
     """Return the backend status path segment for a vehicle model."""
     normalized = str(car_type or "C10").strip().lower()
-    if normalized in {"b10", "b11"}:
+    if normalized in {"b05", "b10", "b11"}:
         # The international backend reports these B-series model names in the
         # vehicle list, but their status endpoint is shared with C10.
         return "c10"

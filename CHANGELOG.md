@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.30 - 2026-07-15
+
+- Map B05 vehicles directly to the shared C10 status endpoint, confirmed by a
+  European B05 returning 95 status signals. This avoids the initial HTTP 404
+  request used by the discovery fallback in 0.6.29.
+
 ## 0.6.29 - 2026-07-15
 
 - Add initial B05 status support by retrying the shared C10 status endpoint
