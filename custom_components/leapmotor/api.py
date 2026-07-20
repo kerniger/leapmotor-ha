@@ -60,6 +60,7 @@ from .const import (
     REMOTE_CTL_WINDOWS_OPEN,
     STATIC_APP_CERT,
     STATIC_APP_KEY,
+    VEHICLE_ABILITY_UNLOCK_CHARGE_GUN,
 )
 from .leap_api import (
     REMOTE_ACTION_SPECS,
@@ -1205,6 +1206,14 @@ class LeapmotorApiClient:
             raise LeapmotorApiError(f"Remote action not configured: {action}")
 
         vehicle = self._find_vehicle_by_vin(vin)
+        if (
+            action == REMOTE_CTL_UNLOCK_CHARGER
+            and vehicle.abilities
+            and str(VEHICLE_ABILITY_UNLOCK_CHARGE_GUN) not in vehicle.abilities
+        ):
+            raise LeapmotorApiError(
+                f"Vehicle model {vehicle.car_type} does not declare remote charger-unlock support."
+            )
         spec = REMOTE_ACTION_SPECS[action]
         resolved_cmd_content = spec.cmd_content
         if isinstance(cmd_content, dict):

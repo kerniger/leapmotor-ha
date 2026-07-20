@@ -14,7 +14,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN, REMOTE_CTL_AC_OFF, REMOTE_CTL_AC_ON
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_helpers import build_vehicle_display_name
+from .entity_helpers import build_vehicle_display_name, vehicle_feature_supported
 from .entity_migration import english_entity_slug
 from .remote_helpers import RemoteActionSpec, async_execute_remote_action, format_remote_error
 
@@ -96,6 +96,7 @@ async def async_setup_entry(
         entities.append(LeapmotorChargingScheduleSwitch(coordinator, vin))
         entities.append(LeapmotorBatteryPreheatSwitch(coordinator, vin))
         diagnostics = coordinator.data["vehicles"][vin].get("diagnostics", {})
+        vehicle = coordinator.data["vehicles"][vin]["vehicle"]
         if diagnostics.get("climate_on") is not None:
             entities.append(LeapmotorRemoteStateSwitch(
                 coordinator,
@@ -107,7 +108,10 @@ async def async_setup_entry(
                 on_action=CLIMATE_ON_ACTION,
                 off_action=CLIMATE_OFF_ACTION,
             ))
-        if diagnostics.get("steering_wheel_heating") is not None:
+        if (
+            vehicle_feature_supported(vehicle, "steering_wheel_heating")
+            and diagnostics.get("steering_wheel_heating") is not None
+        ):
             entities.append(LeapmotorRemoteStateSwitch(
                 coordinator,
                 vin,

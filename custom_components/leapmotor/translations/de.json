@@ -172,7 +172,7 @@
         "name": "Ladeleistung"
       },
       "charging_current_a": {
-        "name": "Ladestrom"
+        "name": "Batteriestrom"
       },
       "charging_voltage_v": {
         "name": "Ladespannung"

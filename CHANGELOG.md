@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.31 - 2026-07-20
+
+- Gate remote charger unlock on declared vehicle ability `53`, hiding the
+  button and rejecting direct service calls on unsupported models while
+  retaining the previous behavior when ability data is unavailable.
+- Hide seat heating, seat ventilation, steering-wheel heating, and their
+  related diagnostic entities on the European T03, which does not physically
+  provide these features. Mirror heating remains available.
+- Refresh the cached vehicle image once per Home Assistant start so cloud-side
+  model or color changes become visible, with the existing image retained as
+  an offline fallback.
+- Rename the signed raw charging-current entity to Battery current in all
+  languages and document that negative values indicate energy flowing into
+  the battery. The entity ID and value remain unchanged.
+- Add a complete Portuguese translation for config flows, options, entities,
+  states, errors, and service metadata.
+
 ## 0.6.30 - 2026-07-15
 
 - Map B05 vehicles directly to the shared C10 status endpoint, confirmed by a

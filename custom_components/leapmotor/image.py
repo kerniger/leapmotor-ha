@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import io
-from pathlib import Path
+import logging
 import zipfile
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from homeassistant.components.image import ImageEntity
@@ -19,6 +20,8 @@ from .const import DOMAIN
 from .coordinator import LeapmotorDataUpdateCoordinator
 from .entity_helpers import build_vehicle_display_name
 from .entity_migration import english_entity_slug
+
+_LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
@@ -51,6 +54,7 @@ class LeapmotorVehicleImage(
         self._attr_content_type = "image/png"
         self._cached_image: bytes | None = None
         self._last_picture_key: str | None = None
+        self._cache_refresh_attempted = False
         self._attr_image_last_updated: datetime | None = None
 
         vehicle = self.vehicle_data["vehicle"]
@@ -96,11 +100,27 @@ class LeapmotorVehicleImage(
         if self._cached_image is not None:
             return self._cached_image
         cache_path = self._cache_path(picture_key)
+        if cache_path.exists() and not self._cache_refresh_attempted:
+            self._cache_refresh_attempted = True
+            try:
+                image = await self.hass.async_add_executor_job(
+                    self._download_static_vehicle_image,
+                    picture_key,
+                    cache_path,
+                )
+            except Exception:  # noqa: BLE001
+                _LOGGER.warning(
+                    "Could not refresh the Leapmotor vehicle image; using the cached image"
+                )
+                image = await self.hass.async_add_executor_job(cache_path.read_bytes)
+            self._cached_image = image
+            return image
         if cache_path.exists():
             image = await self.hass.async_add_executor_job(cache_path.read_bytes)
             self._cached_image = image
             return image
 
+        self._cache_refresh_attempted = True
         image = await self.hass.async_add_executor_job(
             self._download_static_vehicle_image,
             picture_key,
@@ -126,6 +146,7 @@ class LeapmotorVehicleImage(
         if picture_key != self._last_picture_key:
             self._last_picture_key = picture_key
             self._cached_image = None
+            self._cache_refresh_attempted = False
             self._attr_image_last_updated = datetime.now(UTC)
 
     def _handle_coordinator_update(self) -> None:

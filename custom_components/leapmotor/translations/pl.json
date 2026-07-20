@@ -172,7 +172,7 @@
         "name": "Moc ładowania"
       },
       "charging_current_a": {
-        "name": "Prąd ładowania"
+        "name": "Prąd akumulatora"
       },
       "charging_voltage_v": {
         "name": "Napięcie ładowania"

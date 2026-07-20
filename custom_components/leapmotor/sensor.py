@@ -33,7 +33,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_helpers import build_vehicle_display_name
+from .entity_helpers import build_vehicle_display_name, vehicle_feature_supported
 from .entity_migration import english_entity_slug
 
 PRESSURE_BAR = "bar"
@@ -1042,6 +1042,8 @@ def _whole_number_if_possible(value: Any) -> Any:
 
 def _should_create_sensor(vehicle_data: dict[str, Any], key: str) -> bool:
     """Return whether a sensor is supported by the current vehicle payload."""
+    if not vehicle_feature_supported(vehicle_data["vehicle"], key):
+        return False
     path = OPTIONAL_SENSOR_PATHS.get(key)
     if path is None:
         return True

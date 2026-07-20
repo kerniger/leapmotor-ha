@@ -223,7 +223,9 @@ Recommended entities:
   actively charging
 - `sensor.<vehicle>_charging_power`: charging power
 - `sensor.<vehicle>_charging_current` and
-  `sensor.<vehicle>_charging_voltage`: raw electrical values
+  `sensor.<vehicle>_charging_voltage`: raw electrical values. Battery current
+  is signed: negative means energy flows into the battery (charging or
+  regeneration), while positive means the battery is discharging.
 - `sensor.<vehicle>_odometer`: mileage
 
 For automation logic:

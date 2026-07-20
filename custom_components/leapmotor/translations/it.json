@@ -172,7 +172,7 @@
         "name": "Potenza di carica"
       },
       "charging_current_a": {
-        "name": "Corrente di carica"
+        "name": "Corrente della batteria"
       },
       "charging_voltage_v": {
         "name": "Tensione di carica"

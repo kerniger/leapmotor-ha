@@ -16,7 +16,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_helpers import build_vehicle_display_name
+from .entity_helpers import build_vehicle_display_name, vehicle_feature_supported
 from .entity_migration import english_entity_slug
 from .remote_helpers import format_remote_error
 
@@ -77,11 +77,15 @@ async def async_setup_entry(
     """Set up Leapmotor number entities."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
     entities: list[NumberEntity] = []
-    for vin in coordinator.data.get("vehicles", {}):
+    for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
         entities.append(LeapmotorChargeLimitNumber(coordinator, vin))
-        diagnostics = coordinator.data["vehicles"][vin].get("diagnostics", {})
+        diagnostics = vehicle_data.get("diagnostics", {})
+        vehicle = vehicle_data["vehicle"]
         for description in SEAT_COMFORT_NUMBERS:
-            if diagnostics.get(description.diagnostic_key) is not None:
+            if (
+                vehicle_feature_supported(vehicle, description.unique_suffix)
+                and diagnostics.get(description.diagnostic_key) is not None
+            ):
                 entities.append(LeapmotorSeatComfortNumber(coordinator, vin, description))
     async_add_entities(entities)
 

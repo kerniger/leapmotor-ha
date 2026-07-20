@@ -172,7 +172,7 @@
         "name": "Charging power"
       },
       "charging_current_a": {
-        "name": "Charging current"
+        "name": "Battery current"
       },
       "charging_voltage_v": {
         "name": "Charging voltage"

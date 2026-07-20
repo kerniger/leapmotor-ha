@@ -172,7 +172,7 @@
         "name": "Laadvermogen"
       },
       "charging_current_a": {
-        "name": "Laadstroom"
+        "name": "Accustroom"
       },
       "charging_voltage_v": {
         "name": "Laadspanning"

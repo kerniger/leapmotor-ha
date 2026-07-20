@@ -24,9 +24,10 @@ from .const import (
     REMOTE_CTL_WINDSHIELD_DEFROST,
     REMOTE_CTL_WINDOWS_CLOSE,
     REMOTE_CTL_WINDOWS_OPEN,
+    VEHICLE_ABILITY_UNLOCK_CHARGE_GUN,
 )
 from .coordinator import LeapmotorDataUpdateCoordinator
-from .entity_helpers import build_vehicle_display_name
+from .entity_helpers import build_vehicle_display_name, vehicle_ability_supported
 from .entity_migration import english_entity_slug
 from .remote_helpers import RemoteActionSpec, async_execute_remote_action
 
@@ -120,9 +121,19 @@ async def async_setup_entry(
     """Set up Leapmotor buttons."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
     entities: list[LeapmotorActionButton] = []
-    for vin in coordinator.data.get("vehicles", {}):
+    for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
         entities.append(LeapmotorRefreshButton(coordinator, vin))
         for spec in BUTTON_SPECS:
+            vehicle = vehicle_data["vehicle"]
+            if (
+                spec.action == REMOTE_CTL_UNLOCK_CHARGER
+                and vehicle_ability_supported(
+                    vehicle,
+                    VEHICLE_ABILITY_UNLOCK_CHARGE_GUN,
+                )
+                is False
+            ):
+                continue
             entities.append(LeapmotorActionButton(coordinator, vin, spec))
     async_add_entities(entities)
 
