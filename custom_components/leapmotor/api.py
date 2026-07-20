@@ -2926,6 +2926,19 @@ def _derive_vehicle_state(signal: dict[str, Any]) -> str | None:
     return None
 
 
+def _vehicle_is_driving(signal: dict[str, Any]) -> bool:
+    """Return whether gear or speed indicates an active drive session."""
+    gear = _safe_int(signal.get("1010"))
+    speed = _safe_float(signal.get("1319"))
+    return gear in (1, 3) or (speed is not None and speed > 0)
+
+
+def _vehicle_precludes_charging(signal: dict[str, Any]) -> bool:
+    """Return whether the vehicle state makes cable charging impossible."""
+    gear = _safe_int(signal.get("1010"))
+    return gear in (1, 2, 3) or _vehicle_is_driving(signal)
+
+
 def _is_locked(signal: dict[str, Any]) -> bool | None:
     """Return app-correlated door-lock state from the validated home-screen signal."""
     lock_status = _safe_int(signal.get("1298"))
@@ -2940,6 +2953,9 @@ def _is_locked(signal: dict[str, Any]) -> bool | None:
 
 def _is_charging(signal: dict[str, Any]) -> bool:
     """Return whether the vehicle is currently charging."""
+    if _vehicle_precludes_charging(signal):
+        return False
+
     remaining_charge_minutes = _safe_int(signal.get("1200"))
     charging_current_a = _safe_float(signal.get("1178"))
     charging_power_kw = _charging_power_kw(signal)
@@ -2974,6 +2990,9 @@ def _is_charging(signal: dict[str, Any]) -> bool:
 
 def _is_plugged_in(signal: dict[str, Any]) -> bool | None:
     """Return whether the charge cable is plugged in."""
+    if _vehicle_precludes_charging(signal):
+        return False
+
     plug = _safe_int(signal.get("47"))
     if plug is not None:
         return plug == 1
@@ -2985,16 +3004,22 @@ def _is_plugged_in(signal: dict[str, Any]) -> bool | None:
 
 def _is_regening(signal: dict[str, Any]) -> bool | None:
     """Return whether energy is flowing into the battery without a charge cable."""
-    plugged_in = _is_plugged_in(signal)
-    if plugged_in is None:
+    if not _vehicle_is_driving(signal):
+        if _derive_vehicle_state(signal) == "parked":
+            return False
         return None
-    if plugged_in:
-        return False
-    return _is_charging(signal)
+
+    charging_current_a = _safe_float(signal.get("1178"))
+    if charging_current_a is None:
+        return None
+    return charging_current_a <= -1.0
 
 
 def _charging_connection_state(signal: dict[str, Any]) -> str | None:
     """Return the observed charge-connection state."""
+    if _vehicle_precludes_charging(signal):
+        return "unplugged"
+
     if _is_charging(signal):
         return "charging"
     if _charge_is_finished(signal):
@@ -3051,6 +3076,9 @@ def _ac_operation_mode(signal: dict[str, Any]) -> str | None:
 
 def _charging_power_kw(signal: dict[str, Any]) -> float | None:
     """Return charging power without using GPS longitude-like signal 2191."""
+    if _vehicle_precludes_charging(signal):
+        return 0.0
+
     current = _safe_float(signal.get("1178"))
     voltage = _safe_float(signal.get("1177"))
     if current is None or voltage is None:
