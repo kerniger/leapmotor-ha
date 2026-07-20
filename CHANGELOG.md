@@ -2,8 +2,9 @@
 
 ## 0.6.32 - 2026-07-20
 
-- Prevent T03 regenerative braking and stale charge-state signals from being
-  reported as cable charging while the vehicle is in gear or moving.
+- Prevent regenerative braking and stale charge-state signals, observed on a
+  T03, from being reported as cable charging while any vehicle is in gear or
+  moving.
 - Keep charging status off, connection state unplugged, and charging power at
   zero during a drive while continuing to expose negative battery current as
   regenerative braking.
