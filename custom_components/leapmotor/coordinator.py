@@ -11,6 +11,7 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .abrp import build_abrp_telemetry, send_abrp_telemetry
@@ -24,8 +25,11 @@ from .const import (
     REMOTE_ACTION_COOLDOWN_SECONDS,
 )
 from .leap_api import LeapmotorApiError
+from .location import CoordinateResolution, resolve_coordinate
 
 _LOGGER = logging.getLogger(__name__)
+
+GPS_SIGN_STORAGE_VERSION = 1
 
 
 class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
@@ -58,6 +62,14 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         self._last_abrp_results: dict[str, dict[str, Any]] = {}
         self._last_vehicle_states: dict[str, str] = {}
         self._followup_refresh_tasks: dict[str, asyncio.Task[None]] = {}
+        self._location_signs: dict[str, dict[str, int]] = {}
+        self._location_sign_pending: dict[tuple[str, str], int] = {}
+        self._location_sign_store = Store[dict[str, dict[str, int]]](
+            hass,
+            GPS_SIGN_STORAGE_VERSION,
+            f"{DOMAIN}.gps_signs.{config_entry.entry_id}",
+        )
+        self._location_sign_save_task: asyncio.Task[None] | None = None
         self._integration_status: dict[str, Any] = {
             "last_update_status": "unknown",
             "last_update_success": None,
@@ -76,6 +88,27 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             "vehicle_count": 0,
         }
         self._pending_update_reason = "startup"
+
+    async def async_load_location_signs(self) -> None:
+        """Load remembered GPS hemisphere signs before the first poll."""
+        stored = await self._location_sign_store.async_load() or {}
+        if not isinstance(stored, dict):
+            stored = {}
+        self._location_signs = {
+            str(vin): {
+                axis: int(sign)
+                for axis, sign in signs.items()
+                if axis in {"latitude", "longitude"} and sign in {-1, 1}
+            }
+            for vin, signs in stored.items()
+            if isinstance(signs, dict)
+        }
+
+    async def async_flush_location_signs(self) -> None:
+        """Wait for a pending GPS sign write before unloading."""
+        task = self._location_sign_save_task
+        if task and not task.done():
+            await task
 
     def remote_action_cooldown_remaining(self, vin: str) -> int:
         """Return remaining remote-action cooldown seconds for one vehicle."""
@@ -330,38 +363,114 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                 location["location_source"] = "cloud_stale" if is_stale else "cloud"
 
     def _normalize_locations(self, data: dict[str, Any]) -> None:
-        """Correct known backend GPS sign issues using the HA home location as guard."""
+        """Resolve API coordinates and retain authoritative signs per VIN."""
         home_latitude = _safe_float(getattr(self.hass.config, "latitude", None))
         home_longitude = _safe_float(getattr(self.hass.config, "longitude", None))
-        for vehicle_data in (data.get("vehicles") or {}).values():
+        signs_changed = False
+        for vin, vehicle_data in (data.get("vehicles") or {}).items():
             location = vehicle_data.get("location") or {}
-            latitude = _safe_float(location.get("latitude"))
-            longitude = _safe_float(location.get("longitude"))
             location["raw_latitude"] = location.get("latitude")
             location["raw_longitude"] = location.get("longitude")
+
+            signed_latitude = location.pop("_signed_latitude", None)
+            signed_longitude = location.pop("_signed_longitude", None)
+            unsigned_latitude = location.pop("_unsigned_latitude", None)
+            unsigned_longitude = location.pop("_unsigned_longitude", None)
+            raw_latitude = _safe_float(
+                signed_latitude if signed_latitude is not None else unsigned_latitude
+            )
+            raw_longitude = _safe_float(
+                signed_longitude if signed_longitude is not None else unsigned_longitude
+            )
+
+            vehicle_signs = self._location_signs.setdefault(vin, {})
             if _should_flip_southern_latitude(
-                latitude,
-                longitude,
+                raw_latitude,
+                raw_longitude,
                 home_latitude,
                 home_longitude,
-            ):
-                location["latitude"] = -abs(latitude)
-                location["latitude_corrected"] = True
-                location["latitude_correction_source"] = "home_assistant_southern_hemisphere"
-            else:
-                location["latitude_corrected"] = False
+            ) and "latitude" not in vehicle_signs:
+                vehicle_signs["latitude"] = -1
+                signs_changed = True
 
             if _should_flip_western_longitude(
-                latitude,
-                longitude,
+                raw_latitude,
+                raw_longitude,
                 home_latitude,
                 home_longitude,
-            ):
-                location["longitude"] = -abs(longitude)
-                location["longitude_corrected"] = True
-                location["longitude_correction_source"] = "home_assistant_western_hemisphere"
-            else:
-                location["longitude_corrected"] = False
+            ) and "longitude" not in vehicle_signs:
+                vehicle_signs["longitude"] = -1
+                signs_changed = True
+
+            latitude = self._resolve_location_axis(
+                vin, "latitude", signed_latitude, unsigned_latitude
+            )
+            longitude = self._resolve_location_axis(
+                vin, "longitude", signed_longitude, unsigned_longitude
+            )
+            if latitude.sign is not None and vehicle_signs.get("latitude") != latitude.sign:
+                vehicle_signs["latitude"] = latitude.sign
+                signs_changed = True
+            if longitude.sign is not None and vehicle_signs.get("longitude") != longitude.sign:
+                vehicle_signs["longitude"] = longitude.sign
+                signs_changed = True
+
+            location["latitude"] = latitude.value
+            location["longitude"] = longitude.value
+            location["latitude_corrected"] = (
+                latitude.value is not None
+                and raw_latitude is not None
+                and latitude.value != raw_latitude
+            )
+            location["longitude_corrected"] = (
+                longitude.value is not None
+                and raw_longitude is not None
+                and longitude.value != raw_longitude
+            )
+            location["latitude_correction_source"] = latitude.source
+            location["longitude_correction_source"] = longitude.source
+
+        if signs_changed:
+            self._schedule_location_sign_save()
+
+    def _resolve_location_axis(
+        self,
+        vin: str,
+        axis: str,
+        signed_value: object,
+        unsigned_value: object,
+    ) -> CoordinateResolution:
+        """Resolve and track one coordinate axis for a vehicle."""
+        pending_key = (vin, axis)
+        result = resolve_coordinate(
+            signed_value=signed_value,
+            unsigned_value=unsigned_value,
+            remembered_sign=self._location_signs.get(vin, {}).get(axis),
+            pending_flip_count=self._location_sign_pending.get(pending_key, 0),
+        )
+        if result.pending_flip_count:
+            self._location_sign_pending[pending_key] = result.pending_flip_count
+        else:
+            self._location_sign_pending.pop(pending_key, None)
+        return result
+
+    def _schedule_location_sign_save(self) -> None:
+        """Persist changed signs without delaying a coordinator refresh."""
+        if self._location_sign_save_task and not self._location_sign_save_task.done():
+            return
+        self._location_sign_save_task = self.hass.async_create_task(
+            self._async_save_location_signs()
+        )
+
+    async def _async_save_location_signs(self) -> None:
+        """Save again if signs changed while a storage write was in progress."""
+        while True:
+            snapshot = {
+                vin: dict(signs) for vin, signs in self._location_signs.items()
+            }
+            await self._location_sign_store.async_save(snapshot)
+            if snapshot == self._location_signs:
+                return
 
     async def _async_push_abrp(self, data: dict[str, Any]) -> None:
         """Push vehicle telemetry to ABRP when configured."""

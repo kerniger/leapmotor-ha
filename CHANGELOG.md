@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.6.35 - 2026-08-13
+
+- Remember authoritative GPS hemisphere signs per VIN across Home Assistant
+  restarts, reuse them when signed signals are omitted, and guard isolated
+  positive sign-loss frames without blocking real equator/meridian crossings.
+- Read T03 window state from its live position signals when the model's binary
+  window flags remain at zero, while keeping B10/C10 flag-based behavior.
+- Treat non-zero door status codes as open instead of requiring exactly `1`.
+- Reject phantom charging while the vehicle is physically READY or the cable
+  state explicitly reports unplugged, while retaining the validated REEV
+  low-current and deferred-schedule handling.
+- Recognize cable state `1149=4` as connected but waiting for a scheduled
+  charging window, without treating the idle state alone as active charging.
+- Send the confirmed full climate payload required to switch off A/C on the
+  T03; other models retain the existing bare `operate=off` command.
+- Use the B10-specific 0-10 window command scale only on the B10; C10 and T03
+  continue to receive the native 0-100 value.
+- Add focused unit tests for GPS sign memory, charging plausibility, T03 window
+  state, model-specific climate commands, and window command scaling, and run
+  them in the validation workflow.
+- Thanks to `JoseRMorales`, `uannight`, `ProtossBlaster`, `derekzoli`, and
+  `markoceri` for the reports, captures, and cross-project research behind
+  these changes.
+
 ## 0.6.34 - 2026-08-04
 
 - Prefer measured REEV fuel volume signal `3263`, with the previous `2363`

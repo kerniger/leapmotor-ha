@@ -75,6 +75,13 @@ from .leap_api import (
     derive_operate_password,
     derive_session_device_id,
 )
+from .model_helpers import climate_off_payload, native_window_position
+from .signal_helpers import (
+    charge_connection_allows_charging,
+    nonzero_state,
+    vehicle_precludes_charging,
+    window_open_state,
+)
 from .p12 import derive_account_p12_password
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -304,16 +311,14 @@ class LeapmotorApiClient:
         """Open the windows via remote control."""
         if value is not None:
             vehicle = self._find_vehicle_by_vin(vin)
-            if vehicle.car_type in ("B10", "C10"):
-                value = round(value / 10.0)
+            value = native_window_position(vehicle.car_type, value)
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_OPEN, value=value)
 
     def close_windows(self, vin: str, value: int | None = None) -> dict[str, Any]:
         """Close the windows via remote control."""
         if value is not None:
             vehicle = self._find_vehicle_by_vin(vin)
-            if vehicle.car_type in ("B10", "C10"):
-                value = round(value / 10.0)
+            value = native_window_position(vehicle.car_type, value)
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_CLOSE, value=value)
 
     def ac_switch(self, vin: str) -> dict[str, Any]:
@@ -341,6 +346,14 @@ class LeapmotorApiClient:
 
     def ac_off(self, vin: str) -> dict[str, Any]:
         """Turn climate control fully off."""
+        vehicle = self._find_vehicle_by_vin(vin)
+        t03_payload = climate_off_payload(vehicle.car_type)
+        if t03_payload is not None:
+            return self._remote_control(
+                vin=vin,
+                action=REMOTE_CTL_AC_OFF,
+                cmd_content=t03_payload,
+            )
         return self._remote_control(vin=vin, action=REMOTE_CTL_AC_OFF)
 
     def set_climate(
@@ -2018,6 +2031,7 @@ def normalize_vehicle(
     )
     status_payload_keys = sorted(str(key) for key in status_data)
     support_raw_signals = _support_raw_signals(signal)
+    use_window_position = str(vehicle.car_type or "").strip().upper() == "T03"
 
     return {
         "vehicle": {
@@ -2073,8 +2087,28 @@ def normalize_vehicle(
         "location": {
             # Signals 2/3 retain the West/South hemisphere sign. The newer
             # 3724/3725 and legacy 2191/2190 variants contain absolute values.
-            "latitude": signal.get("3", signal.get("3725", signal.get("2190"))),
-            "longitude": signal.get("2", signal.get("3724", signal.get("2191"))),
+            "latitude": signal.get("3")
+            if signal.get("3") is not None
+            else (
+                signal.get("3725")
+                if signal.get("3725") is not None
+                else signal.get("2190")
+            ),
+            "longitude": signal.get("2")
+            if signal.get("2") is not None
+            else (
+                signal.get("3724")
+                if signal.get("3724") is not None
+                else signal.get("2191")
+            ),
+            "_signed_latitude": signal.get("3"),
+            "_signed_longitude": signal.get("2"),
+            "_unsigned_latitude": signal.get("3725")
+            if signal.get("3725") is not None
+            else signal.get("2190"),
+            "_unsigned_longitude": signal.get("3724")
+            if signal.get("3724") is not None
+            else signal.get("2191"),
             "privacy_gps": status_data.get("privacyGPS"),
             "privacy_data": status_data.get("privacyData"),
             "last_vehicle_timestamp": signal.get("sts"),
@@ -2151,10 +2185,10 @@ def normalize_vehicle(
             "vehicle_security_active": _positive_int(signal.get("1255")),
             "vehicle_ready": _one_is_on(signal.get("1258")),
             "on3_open": _one_is_on(signal.get("1258")),
-            "driver_door_open": _one_is_on(signal.get("1277")),
-            "passenger_door_open": _one_is_on(signal.get("1278")),
-            "rear_left_door_open": _one_is_on(signal.get("1279")),
-            "rear_right_door_open": _one_is_on(signal.get("1280")),
+            "driver_door_open": _not_zero(signal.get("1277")),
+            "passenger_door_open": _not_zero(signal.get("1278")),
+            "rear_left_door_open": _not_zero(signal.get("1279")),
+            "rear_right_door_open": _not_zero(signal.get("1280")),
             "trunk_open": _one_is_on(signal.get("1281")),
             "ptc_power_w": _safe_int(signal.get("1348")),
             "ptc_state": _safe_int(status_data.get("ptcState")),
@@ -2164,10 +2198,26 @@ def normalize_vehicle(
             "battery_thermal_request": _safe_int(signal.get("1186")),
             "battery_heating": _safe_int(signal.get("1186")) == 4 if signal.get("1186") is not None else None,
             "available_energy_kwh": _wh_to_kwh(status_data.get("dumpEnergy")),
-            "front_left_window_open": _not_zero(signal.get("1693")),
-            "front_right_window_open": _not_zero(signal.get("1694")),
-            "rear_left_window_open": _not_zero(signal.get("1695")),
-            "rear_right_window_open": _not_zero(signal.get("1696")),
+            "front_left_window_open": window_open_state(
+                signal.get("1693"),
+                signal.get("3727"),
+                use_position=use_window_position,
+            ),
+            "front_right_window_open": window_open_state(
+                signal.get("1694"),
+                signal.get("3728"),
+                use_position=use_window_position,
+            ),
+            "rear_left_window_open": window_open_state(
+                signal.get("1695"),
+                signal.get("1879"),
+                use_position=use_window_position,
+            ),
+            "rear_right_window_open": window_open_state(
+                signal.get("1696"),
+                signal.get("1880"),
+                use_position=use_window_position,
+            ),
             "skylight_open": _not_zero(signal.get("1724")),
             "sunshade_position": _safe_int(status_data.get("sunShade")),
             "windows_remote_supported": _safe_bool(status_data.get("isSupportWindowsRemoteControl")),
@@ -2861,9 +2911,7 @@ def _two_is_on(raw: Any) -> bool | None:
 
 
 def _not_zero(raw: Any) -> bool | None:
-    if raw is None:
-        return None
-    return str(raw) != "0"
+    return nonzero_state(raw)
 
 
 def _positive_int(raw: Any) -> bool | None:
@@ -2941,8 +2989,7 @@ def _vehicle_is_driving(signal: dict[str, Any]) -> bool:
 
 def _vehicle_precludes_charging(signal: dict[str, Any]) -> bool:
     """Return whether the vehicle state makes cable charging impossible."""
-    gear = _safe_int(signal.get("1010"))
-    return gear in (1, 2, 3) or _vehicle_is_driving(signal)
+    return vehicle_precludes_charging(signal)
 
 
 def _is_locked(signal: dict[str, Any]) -> bool | None:
@@ -2966,9 +3013,12 @@ def _is_charging(signal: dict[str, Any]) -> bool:
     charging_current_a = _safe_float(signal.get("1178"))
     charging_power_kw = _charging_power_kw(signal)
     connection_status = _safe_int(signal.get("1149"))
-    # REEV captures show 5 as a drive-time cable code. Reject it even when a
-    # stale gear/speed frame has not yet activated the movement guard above.
-    if connection_status == 5:
+    # The cable state is authoritative when present. This prevents transient
+    # pack current after READY/parking from becoming a charge while unplugged.
+    if not charge_connection_allows_charging(
+        connection_status,
+        signal.get("47"),
+    ):
         return False
     if charging_current_a is not None:
         # Confirmed charging sessions show a clearly non-zero current
@@ -3011,8 +3061,9 @@ def _is_plugged_in(signal: dict[str, Any]) -> bool | None:
     connection_status = _safe_int(signal.get("1149"))
     if connection_status is not None:
         # REEVs can cycle through state 3 during an uninterrupted charge.
-        # State 5 is observed while driving and is not a physical connection.
-        return connection_status in (1, 2, 3)
+        # State 4 is connected but deferred to a scheduled charging window;
+        # state 5 is observed while driving and is not a connection.
+        return connection_status in (1, 2, 3, 4)
     plug = _safe_int(signal.get("47"))
     if plug is not None:
         return plug == 1

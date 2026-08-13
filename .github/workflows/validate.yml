@@ -19,6 +19,9 @@ jobs:
       - name: Compile Python files
         run: python -m py_compile custom_components/leapmotor/*.py
 
+      - name: Run unit tests
+        run: python -m unittest discover -s tests
+
       - name: Validate JSON files
         run: |
           python - <<'PY'
