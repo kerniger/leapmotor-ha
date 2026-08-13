@@ -16,6 +16,9 @@ CONF_ECO_SCAN_INTERVAL = "eco_scan_interval"
 CONF_DEVICE_ID = "device_id"
 CONF_OPERATION_PASSWORD = "operation_password"
 CONF_SCAN_INTERVAL = "scan_interval"
+CONF_VIN = "vin"
+
+SUBENTRY_TYPE_VEHICLE = "vehicle"
 
 DEFAULT_ABRP_API_KEY = "".join(
     (

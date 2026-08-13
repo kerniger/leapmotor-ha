@@ -25,7 +25,7 @@
       },
       "init": {
         "title": "Leapmotor options",
-        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login and are stored as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem. Without a PIN, remote-control actions remain disabled.",
+        "description": "Change account-wide certificate and polling settings. Vehicle PIN and ABRP settings are configured separately for each vehicle.",
         "data": {
           "app_cert_file": "Upload app_cert.pem (certificate)",
           "app_key_file": "Upload app_key.pem (private key)",
@@ -80,6 +80,43 @@
     },
     "abort": {
       "already_configured": "This account is already configured."
+    }
+  },
+  "config_subentries": {
+    "vehicle": {
+      "entry_type": "Vehicle",
+      "initiate_flow": {
+        "user": "Add vehicle"
+      },
+      "step": {
+        "user": {
+          "title": "Select vehicle",
+          "data": {
+            "vin": "Vehicle"
+          }
+        },
+        "vehicle": {
+          "title": "Configure vehicle",
+          "description": "The PIN and ABRP token apply only to this vehicle.",
+          "data": {
+            "operation_password": "Vehicle PIN (optional, for control)",
+            "abrp_enabled": "Enable ABRP live data",
+            "abrp_token": "ABRP Generic token"
+          }
+        },
+        "reconfigure": {
+          "title": "Configure {vehicle}",
+          "description": "Change the PIN and ABRP token for this vehicle only.",
+          "data": {
+            "operation_password": "Vehicle PIN (optional, for control)",
+            "abrp_enabled": "Enable ABRP live data",
+            "abrp_token": "ABRP Generic token"
+          }
+        }
+      },
+      "abort": {
+        "all_vehicles_configured": "All vehicles in this account are already configured."
+      }
     }
   },
   "entity": {
@@ -572,7 +609,7 @@
     "step": {
       "init": {
         "title": "Leapmotor options",
-        "description": "Change certificate material, vehicle PIN, update interval, and optional ABRP live-data forwarding. App certificate/private key are required for login and are stored as /config/leapmotor/app_cert.pem and /config/leapmotor/app_key.pem. Without a PIN, remote-control actions remain disabled.",
+        "description": "Change account-wide certificate and polling settings. Vehicle PIN and ABRP settings are configured separately for each vehicle.",
         "data": {
           "app_cert_file": "Upload app_cert.pem (certificate)",
           "app_key_file": "Upload app_key.pem (private key)",

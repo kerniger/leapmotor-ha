@@ -84,7 +84,7 @@ async def async_execute_remote_action(
         raise HomeAssistantError(
             f"Remote action cooldown active. Try again in {cooldown} seconds."
         )
-    if not coordinator.client.operation_password:
+    if not coordinator.operation_password_configured(vin):
         raise HomeAssistantError(
             "Vehicle PIN is not configured. Read-only data works without a PIN, "
             "but remote-control actions require it."

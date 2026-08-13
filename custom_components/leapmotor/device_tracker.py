@@ -25,10 +25,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor device trackers."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities(
-        LeapmotorDeviceTracker(coordinator, vin)
-        for vin in coordinator.data.get("vehicles", {})
-    )
+    for vin in coordinator.data.get("vehicles", {}):
+        async_add_entities(
+            [LeapmotorDeviceTracker(coordinator, vin)],
+            config_subentry_id=coordinator.config_subentry_id_for_vin(vin),
+        )
 
 
 class LeapmotorDeviceTracker(

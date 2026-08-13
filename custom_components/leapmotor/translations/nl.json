@@ -82,6 +82,18 @@
       "already_configured": "Dit account is al geconfigureerd."
     }
   },
+  "config_subentries": {
+    "vehicle": {
+      "entry_type": "Voertuig",
+      "initiate_flow": {"user": "Voertuig toevoegen"},
+      "step": {
+        "user": {"title": "Voertuig selecteren", "data": {"vin": "Voertuig"}},
+        "vehicle": {"title": "Voertuig configureren", "description": "De pincode en het ABRP-token gelden alleen voor dit voertuig.", "data": {"operation_password": "Pincode voertuig (optioneel, voor bediening)", "abrp_enabled": "ABRP-livegegevens inschakelen", "abrp_token": "ABRP Generic-token"}},
+        "reconfigure": {"title": "{vehicle} configureren", "description": "Wijzig de pincode en het ABRP-token alleen voor dit voertuig.", "data": {"operation_password": "Pincode voertuig (optioneel, voor bediening)", "abrp_enabled": "ABRP-livegegevens inschakelen", "abrp_token": "ABRP Generic-token"}}
+      },
+      "abort": {"all_vehicles_configured": "Alle voertuigen van dit account zijn al geconfigureerd."}
+    }
+  },
   "entity": {
     "sensor": {
       "battery_percent": {

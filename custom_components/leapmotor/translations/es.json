@@ -82,6 +82,18 @@
       "already_configured": "Esta cuenta ya esta configurada."
     }
   },
+  "config_subentries": {
+    "vehicle": {
+      "entry_type": "Vehículo",
+      "initiate_flow": {"user": "Añadir vehículo"},
+      "step": {
+        "user": {"title": "Seleccionar vehículo", "data": {"vin": "Vehículo"}},
+        "vehicle": {"title": "Configurar vehículo", "description": "El PIN y el token de ABRP solo se aplican a este vehículo.", "data": {"operation_password": "PIN del vehículo (opcional, para control)", "abrp_enabled": "Activar datos en vivo de ABRP", "abrp_token": "Token genérico de ABRP"}},
+        "reconfigure": {"title": "Configurar {vehicle}", "description": "Cambia el PIN y el token de ABRP solo para este vehículo.", "data": {"operation_password": "PIN del vehículo (opcional, para control)", "abrp_enabled": "Activar datos en vivo de ABRP", "abrp_token": "Token genérico de ABRP"}}
+      },
+      "abort": {"all_vehicles_configured": "Todos los vehículos de esta cuenta ya están configurados."}
+    }
+  },
   "entity": {
     "sensor": {
       "battery_percent": {

@@ -29,7 +29,8 @@ research logs, or reverse-engineering workfiles.
   `0-3` level controls.
 - Native climate on/off switch on vehicles that expose the climate state.
 - Optional ABRP Generic Telemetry push and EVCC helper sensors.
-- Multi-vehicle support for main-account and shared vehicles.
+- VIN-scoped multi-vehicle support for main-account and shared vehicles,
+  including separate vehicle PIN and ABRP settings.
 - Redacted diagnostics export for support, including account identifiers and
   remote-control secrets.
 - Native HA unit metadata for standard measurements; EV consumption is exposed
@@ -67,6 +68,9 @@ the same account in Home Assistant and the mobile app can log the app out.
 
 ## Installation
 
+Version 0.7 requires Home Assistant 2025.3 or newer because vehicle
+configuration uses Home Assistant config subentries.
+
 ### HACS
 
 Fast path:
@@ -94,8 +98,11 @@ integration from `Settings -> Devices & services`.
 
 - Email/password are required.
 - App certificate/private key are required.
-- Vehicle PIN is optional for setup; without it the integration stays read-only.
-- ABRP live data is optional and only needs the ABRP Generic Token.
+- Vehicle PIN is optional for setup; without it the respective vehicle stays
+  read-only. In 0.7, each vehicle has its own PIN setting below the Leapmotor
+  account entry.
+- ABRP live data is optional and configured separately per vehicle using that
+  vehicle's ABRP Generic Token.
 - Update intervals are configured in minutes. Runtime diagnostics expose the
   resulting interval in seconds, so a configured value of `60` appears as
   `3600` seconds. Use `1` for one-minute polling.
@@ -104,6 +111,9 @@ integration from `Settings -> Devices & services`.
   eco polling if the normal one-minute interval should also apply while parked.
 - If multiple vehicles are available, entities are created per VIN and services
   can target a vehicle by `vin` or a Leapmotor `entity_id`.
+- Existing single-vehicle settings migrate automatically. On an existing
+  multi-vehicle account, the previous account-wide ABRP token is not copied to
+  every car; configure ABRP on the intended vehicle entries after upgrading.
 
 ## Notes
 
@@ -238,9 +248,11 @@ data:
 
 ## ABRP And EVCC
 
-ABRP telemetry is optional and disabled by default. Enable `ABRP live data`
-during setup and enter the ABRP Generic Token from the ABRP vehicle live-data
-setup. Users do not need to request or enter an ABRP API key.
+ABRP telemetry is optional and disabled by default. Open the configuration for
+the intended vehicle below the Leapmotor account, enable `ABRP live data`, and
+enter that car's ABRP Generic Token. Users do not need to request or enter an
+ABRP API key. Each token is kept VIN-scoped so telemetry from another vehicle
+cannot be sent to it.
 
 EVCC can consume the Leapmotor data through Home Assistant entities. Useful
 entities include SOC, range, plug state, active charging, `evcc_status`,

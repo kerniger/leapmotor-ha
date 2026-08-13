@@ -13,7 +13,7 @@ import voluptuous as vol
 from homeassistant.components.file_upload import process_uploaded_file
 from homeassistant import config_entries
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import selector
 
 from .api import (
@@ -38,13 +38,16 @@ from .const import (
     CONF_ECO_SCAN_INTERVAL,
     CONF_OPERATION_PASSWORD,
     CONF_SCAN_INTERVAL,
+    CONF_VIN,
     DEFAULT_ECO_SCAN_INTERVAL_MINUTES,
     DEFAULT_SCAN_INTERVAL_MINUTES,
     DOMAIN,
     STATIC_APP_CERT,
     STATIC_APP_KEY,
     STATIC_CERT_STORAGE_DIR,
+    SUBENTRY_TYPE_VEHICLE,
 )
+from .vehicle_config import vehicle_subentries
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -208,6 +211,16 @@ class LeapmotorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Leapmotor."""
 
     VERSION = 1
+    MINOR_VERSION = 1
+
+    @classmethod
+    @callback
+    def async_get_supported_subentry_types(
+        cls,
+        config_entry: config_entries.ConfigEntry,
+    ) -> dict[str, type[config_entries.ConfigSubentryFlow]]:
+        """Return the VIN-scoped configurations supported by this account."""
+        return {SUBENTRY_TYPE_VEHICLE: LeapmotorVehicleSubentryFlow}
 
     @staticmethod
     def async_get_options_flow(
@@ -331,38 +344,24 @@ class LeapmotorOptionsFlow(config_entries.OptionsFlow):
             except ValueError:
                 return self.async_show_form(
                     step_id="init",
-                    data_schema=self._options_schema(
-                        operation_password=self._current_operation_password()
-                    ),
+                    data_schema=self._options_schema(),
                     errors={"base": "certificate_import_error"},
                 )
             return self.async_create_entry(
                 title="",
                 data={
-                    CONF_OPERATION_PASSWORD: user_input.get(CONF_OPERATION_PASSWORD) or "",
                     CONF_SCAN_INTERVAL: user_input[CONF_SCAN_INTERVAL],
                     CONF_ECO_POLLING_ENABLED: bool(user_input.get(CONF_ECO_POLLING_ENABLED)),
                     CONF_ECO_SCAN_INTERVAL: user_input[CONF_ECO_SCAN_INTERVAL],
-                    CONF_ABRP_ENABLED: bool(user_input.get(CONF_ABRP_ENABLED)),
-                    CONF_ABRP_TOKEN: user_input.get(CONF_ABRP_TOKEN) or "",
                 },
             )
 
-        operation_password = self._current_operation_password()
         return self.async_show_form(
             step_id="init",
-            data_schema=self._options_schema(operation_password=operation_password),
+            data_schema=self._options_schema(),
         )
 
-    def _current_operation_password(self) -> str:
-        """Return the configured vehicle PIN, if any."""
-        return (
-            self._config_entry.options[CONF_OPERATION_PASSWORD]
-            if CONF_OPERATION_PASSWORD in self._config_entry.options
-            else self._config_entry.data.get(CONF_OPERATION_PASSWORD, "")
-        )
-
-    def _options_schema(self, operation_password: str = "") -> vol.Schema:
+    def _options_schema(self) -> vol.Schema:
         """Build the options schema."""
         scan_interval = self._config_entry.options.get(
             CONF_SCAN_INTERVAL,
@@ -386,7 +385,6 @@ class LeapmotorOptionsFlow(config_entries.OptionsFlow):
                 vol.Optional(CONF_APP_KEY_PEM, default=""): selector.TextSelector(
                     selector.TextSelectorConfig(multiline=True)
                 ),
-                vol.Optional(CONF_OPERATION_PASSWORD, default=operation_password or ""): str,
                 vol.Optional(CONF_SCAN_INTERVAL, default=scan_interval): vol.All(
                     vol.Coerce(int),
                     vol.Range(min=1, max=120),
@@ -404,23 +402,129 @@ class LeapmotorOptionsFlow(config_entries.OptionsFlow):
                     vol.Coerce(int),
                     vol.Range(min=5, max=240),
                 ),
-                vol.Optional(
-                    CONF_ABRP_ENABLED,
-                    default=bool(
-                        self._config_entry.options.get(
-                            CONF_ABRP_ENABLED,
-                            self._config_entry.data.get(CONF_ABRP_ENABLED, False),
-                        )
-                    ),
-                ): bool,
-                vol.Optional(
-                    CONF_ABRP_TOKEN,
-                    default=str(
-                        self._config_entry.options.get(
-                            CONF_ABRP_TOKEN,
-                            self._config_entry.data.get(CONF_ABRP_TOKEN, ""),
-                        )
-                    ),
-                ): str,
             }
         )
+
+
+class LeapmotorVehicleSubentryFlow(config_entries.ConfigSubentryFlow):
+    """Configure one vehicle belonging to a Leapmotor account."""
+
+    def __init__(self) -> None:
+        self._vin: str | None = None
+
+    async def async_step_user(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.SubentryFlowResult:
+        """Select an unconfigured vehicle from the loaded account."""
+        entry = self._get_entry()
+        coordinator = self.hass.data.get(DOMAIN, {}).get(entry.entry_id)
+        vehicles = (coordinator.data.get("vehicles") or {}) if coordinator else {}
+        configured = vehicle_subentries(entry)
+        available = {
+            vin: _vehicle_title(vin, vehicle_data)
+            for vin, vehicle_data in vehicles.items()
+            if vin not in configured
+        }
+        if not available:
+            return self.async_abort(reason="all_vehicles_configured")
+        if user_input is not None:
+            self._vin = str(user_input[CONF_VIN])
+            return await self.async_step_vehicle()
+        return self.async_show_form(
+            step_id="user",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_VIN): selector.SelectSelector(
+                        selector.SelectSelectorConfig(
+                            options=[
+                                {"value": vin, "label": title}
+                                for vin, title in available.items()
+                            ]
+                        )
+                    )
+                }
+            ),
+        )
+
+    async def async_step_vehicle(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.SubentryFlowResult:
+        """Collect settings for the selected vehicle."""
+        assert self._vin is not None
+        if user_input is not None:
+            data = _vehicle_settings_data(self._vin, user_input)
+            coordinator = self.hass.data[DOMAIN][self._entry_id]
+            title = _vehicle_title(
+                self._vin,
+                coordinator.data["vehicles"][self._vin],
+            )
+            return self.async_create_entry(
+                title=title,
+                data=data,
+                unique_id=self._vin,
+            )
+        return self.async_show_form(
+            step_id="vehicle",
+            data_schema=_vehicle_settings_schema(),
+        )
+
+    async def async_step_reconfigure(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.SubentryFlowResult:
+        """Update PIN and ABRP settings for one vehicle."""
+        entry = self._get_entry()
+        subentry = self._get_reconfigure_subentry()
+        vin = str(subentry.data[CONF_VIN])
+        if user_input is not None:
+            return self.async_update_and_abort(
+                entry,
+                subentry,
+                data=_vehicle_settings_data(vin, user_input),
+            )
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=_vehicle_settings_schema(subentry.data),
+            description_placeholders={"vehicle": subentry.title},
+        )
+
+
+def _vehicle_settings_schema(data: dict[str, Any] | None = None) -> vol.Schema:
+    """Build the VIN-scoped vehicle settings schema."""
+    current = data or {}
+    return vol.Schema(
+        {
+            vol.Optional(
+                CONF_OPERATION_PASSWORD,
+                default=str(current.get(CONF_OPERATION_PASSWORD) or ""),
+            ): str,
+            vol.Optional(
+                CONF_ABRP_ENABLED,
+                default=bool(current.get(CONF_ABRP_ENABLED, False)),
+            ): bool,
+            vol.Optional(
+                CONF_ABRP_TOKEN,
+                default=str(current.get(CONF_ABRP_TOKEN) or ""),
+            ): str,
+        }
+    )
+
+
+def _vehicle_settings_data(vin: str, data: dict[str, Any]) -> dict[str, Any]:
+    """Normalize one vehicle subentry payload."""
+    return {
+        CONF_VIN: vin,
+        CONF_OPERATION_PASSWORD: str(data.get(CONF_OPERATION_PASSWORD) or "").strip(),
+        CONF_ABRP_ENABLED: bool(data.get(CONF_ABRP_ENABLED)),
+        CONF_ABRP_TOKEN: str(data.get(CONF_ABRP_TOKEN) or "").strip(),
+    }
+
+
+def _vehicle_title(vin: str, vehicle_data: dict[str, Any]) -> str:
+    """Return a useful, privacy-conscious subentry title."""
+    vehicle = vehicle_data.get("vehicle") or {}
+    model = str(vehicle.get("car_type") or "Leapmotor")
+    nickname = str(vehicle.get("nickname") or "").strip()
+    return f"{nickname or model} (...{vin[-4:]})"

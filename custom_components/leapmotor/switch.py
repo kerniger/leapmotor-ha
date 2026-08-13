@@ -91,8 +91,8 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor switch entities."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    entities: list[SwitchEntity] = []
     for vin in coordinator.data.get("vehicles", {}):
+        entities: list[SwitchEntity] = []
         entities.append(LeapmotorChargingScheduleSwitch(coordinator, vin))
         entities.append(LeapmotorBatteryPreheatSwitch(coordinator, vin))
         diagnostics = coordinator.data["vehicles"][vin].get("diagnostics", {})
@@ -136,7 +136,10 @@ async def async_setup_entry(
                 on_action=REARVIEW_MIRROR_HEAT_ON_ACTION,
                 off_action=REARVIEW_MIRROR_HEAT_OFF_ACTION,
             ))
-    async_add_entities(entities)
+        async_add_entities(
+            entities,
+            config_subentry_id=coordinator.config_subentry_id_for_vin(vin),
+        )
 
 
 class LeapmotorChargingScheduleSwitch(
@@ -178,7 +181,7 @@ class LeapmotorChargingScheduleSwitch(
     @property
     def available(self) -> bool:
         """Return entity availability."""
-        return super().available and bool(self.coordinator.client.operation_password)
+        return super().available and self.coordinator.operation_password_configured(self.vin)
 
     @property
     def is_on(self) -> bool | None:
@@ -198,7 +201,9 @@ class LeapmotorChargingScheduleSwitch(
             "car_id": vehicle.get("car_id"),
             "car_type": vehicle.get("car_type"),
             "is_shared": vehicle.get("is_shared"),
-            "operation_password_configured": bool(self.coordinator.client.operation_password),
+            "operation_password_configured": self.coordinator.operation_password_configured(
+                self.vin
+            ),
             "charge_limit_percent": charging.get("charge_limit_percent"),
             "charging_schedule_start": charging.get("charging_planned_start"),
             "charging_schedule_end": charging.get("charging_planned_end"),
@@ -215,7 +220,7 @@ class LeapmotorChargingScheduleSwitch(
 
     async def _async_set_enabled(self, enabled: bool) -> None:
         """Set the charging schedule state."""
-        if not self.coordinator.client.operation_password:
+        if not self.coordinator.operation_password_configured(self.vin):
             raise HomeAssistantError(
                 "Vehicle PIN is not configured. Read-only data works without a PIN, "
                 "but charging schedule changes require it."
@@ -287,7 +292,7 @@ class LeapmotorBatteryPreheatSwitch(
     @property
     def available(self) -> bool:
         """Return entity availability."""
-        return super().available and bool(self.coordinator.client.operation_password)
+        return super().available and self.coordinator.operation_password_configured(self.vin)
 
     @property
     def is_on(self) -> bool | None:
@@ -307,7 +312,9 @@ class LeapmotorBatteryPreheatSwitch(
             "car_id": vehicle.get("car_id"),
             "car_type": vehicle.get("car_type"),
             "is_shared": vehicle.get("is_shared"),
-            "operation_password_configured": bool(self.coordinator.client.operation_password),
+            "operation_password_configured": self.coordinator.operation_password_configured(
+                self.vin
+            ),
             "battery_thermal_request": diagnostics.get("battery_thermal_request"),
         }
 
@@ -377,7 +384,7 @@ class LeapmotorRemoteStateSwitch(
     @property
     def available(self) -> bool:
         """Return entity availability."""
-        return super().available and bool(self.coordinator.client.operation_password)
+        return super().available and self.coordinator.operation_password_configured(self.vin)
 
     @property
     def is_on(self) -> bool | None:
@@ -401,7 +408,9 @@ class LeapmotorRemoteStateSwitch(
             "car_id": vehicle.get("car_id"),
             "car_type": vehicle.get("car_type"),
             "is_shared": vehicle.get("is_shared"),
-            "operation_password_configured": bool(self.coordinator.client.operation_password),
+            "operation_password_configured": self.coordinator.operation_password_configured(
+                self.vin
+            ),
             **{key: diagnostics.get(key) for key in self._state_keys},
         }
 

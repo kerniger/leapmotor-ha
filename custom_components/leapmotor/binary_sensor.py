@@ -365,14 +365,15 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor binary sensors."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    entities: list[LeapmotorBinarySensor] = []
     for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
-        entities.extend(
-            LeapmotorBinarySensor(coordinator, vin, description)
-            for description in BINARY_SENSOR_DESCRIPTIONS
-            if _should_create_binary_sensor(vehicle_data, description.key)
+        async_add_entities(
+            [
+                LeapmotorBinarySensor(coordinator, vin, description)
+                for description in BINARY_SENSOR_DESCRIPTIONS
+                if _should_create_binary_sensor(vehicle_data, description.key)
+            ],
+            config_subentry_id=coordinator.config_subentry_id_for_vin(vin),
         )
-    async_add_entities(entities)
 
 
 class LeapmotorBinarySensor(

@@ -102,6 +102,14 @@ async def async_get_config_entry_diagnostics(
                 "title": entry.title,
                 "data": dict(entry.data),
                 "options": dict(entry.options),
+                "vehicle_subentries": [
+                    {
+                        "title": subentry.title,
+                        "subentry_type": subentry.subentry_type,
+                        "data": dict(subentry.data),
+                    }
+                    for subentry in entry.subentries.values()
+                ],
             }
         ),
         "client": {
@@ -110,7 +118,14 @@ async def async_get_config_entry_diagnostics(
             "app_key_present": Path(static_key).exists() if static_key else None,
             "account_cert_loaded": bool(getattr(client, "account_cert_file", None)),
             "account_p12_password_source": getattr(client, "account_p12_password_source", None),
-            "operation_password_configured": bool(getattr(client, "operation_password", None)),
+            "operation_password_configured": bool(
+                getattr(client, "operation_password", None)
+                or any(getattr(client, "vehicle_operation_passwords", {}).values())
+            ),
+            "vehicle_operation_password_count": sum(
+                bool(value)
+                for value in getattr(client, "vehicle_operation_passwords", {}).values()
+            ),
             "language": getattr(client, "language", None),
             "last_api_results": _redact(getattr(client, "last_api_results", {})),
             "integration_status": integration_status,

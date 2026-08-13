@@ -76,8 +76,8 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor number entities."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    entities: list[NumberEntity] = []
     for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
+        entities: list[NumberEntity] = []
         entities.append(LeapmotorChargeLimitNumber(coordinator, vin))
         diagnostics = vehicle_data.get("diagnostics", {})
         vehicle = vehicle_data["vehicle"]
@@ -87,7 +87,10 @@ async def async_setup_entry(
                 and diagnostics.get(description.diagnostic_key) is not None
             ):
                 entities.append(LeapmotorSeatComfortNumber(coordinator, vin, description))
-    async_add_entities(entities)
+        async_add_entities(
+            entities,
+            config_subentry_id=coordinator.config_subentry_id_for_vin(vin),
+        )
 
 
 class LeapmotorChargeLimitNumber(
@@ -133,7 +136,7 @@ class LeapmotorChargeLimitNumber(
     @property
     def available(self) -> bool:
         """Return entity availability."""
-        return super().available and bool(self.coordinator.client.operation_password)
+        return super().available and self.coordinator.operation_password_configured(self.vin)
 
     @property
     def native_value(self) -> int | None:
@@ -155,12 +158,14 @@ class LeapmotorChargeLimitNumber(
             "car_id": vehicle.get("car_id"),
             "car_type": vehicle.get("car_type"),
             "is_shared": vehicle.get("is_shared"),
-            "operation_password_configured": bool(self.coordinator.client.operation_password),
+            "operation_password_configured": self.coordinator.operation_password_configured(
+                self.vin
+            ),
         }
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the charge limit."""
-        if not self.coordinator.client.operation_password:
+        if not self.coordinator.operation_password_configured(self.vin):
             raise HomeAssistantError(
                 "Vehicle PIN is not configured. Read-only data works without a PIN, "
                 "but charge-limit changes require it."
@@ -241,7 +246,7 @@ class LeapmotorSeatComfortNumber(
     @property
     def available(self) -> bool:
         """Return entity availability."""
-        return super().available and bool(self.coordinator.client.operation_password)
+        return super().available and self.coordinator.operation_password_configured(self.vin)
 
     @property
     def native_value(self) -> int | None:
@@ -263,13 +268,15 @@ class LeapmotorSeatComfortNumber(
             "car_id": vehicle.get("car_id"),
             "car_type": vehicle.get("car_type"),
             "is_shared": vehicle.get("is_shared"),
-            "operation_password_configured": bool(self.coordinator.client.operation_password),
+            "operation_password_configured": self.coordinator.operation_password_configured(
+                self.vin
+            ),
             "seat_position": self._description.position,
         }
 
     async def async_set_native_value(self, value: float) -> None:
         """Set the seat comfort level."""
-        if not self.coordinator.client.operation_password:
+        if not self.coordinator.operation_password_configured(self.vin):
             raise HomeAssistantError(
                 "Vehicle PIN is not configured. Read-only data works without a PIN, "
                 "but seat comfort changes require it."

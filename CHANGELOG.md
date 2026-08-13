@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.7.0-beta.1 - 2026-08-13
+
+- Model every discovered vehicle as a Home Assistant config subentry below the
+  shared Leapmotor account, while preserving existing VIN-based entity IDs and
+  device assignments during migration.
+- Store and resolve the vehicle PIN per VIN so accounts with different PINs can
+  safely control each car through the existing shared API session.
+- Configure ABRP independently per vehicle and prevent an old account-wide ABRP
+  token from receiving telemetry from multiple vehicles.
+- Move vehicle PIN and ABRP editing from account options to each vehicle's
+  configuration page; account options now contain only shared certificate and
+  polling settings.
+- Automatically migrate existing single-vehicle PIN and ABRP settings. For
+  multi-vehicle accounts, the legacy PIN is retained per vehicle while legacy
+  ABRP forwarding is disabled until a token is assigned to each intended car.
+- Add VIN-scoped diagnostics, localized subentry flows in all supported
+  languages, and regression tests for credential and ABRP isolation.
+- This is a beta release. Back up Home Assistant before installing it and
+  report migration or multi-vehicle behavior with redacted diagnostics. Home
+  Assistant 2025.3 or newer is required for config subentries.
+
 ## 0.6.35 - 2026-08-13
 
 - Remember authoritative GPS hemisphere signs per VIN across Home Assistant

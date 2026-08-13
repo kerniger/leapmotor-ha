@@ -120,8 +120,8 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor buttons."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    entities: list[LeapmotorActionButton] = []
     for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
+        entities: list[ButtonEntity] = []
         entities.append(LeapmotorRefreshButton(coordinator, vin))
         for spec in BUTTON_SPECS:
             vehicle = vehicle_data["vehicle"]
@@ -135,7 +135,10 @@ async def async_setup_entry(
             ):
                 continue
             entities.append(LeapmotorActionButton(coordinator, vin, spec))
-    async_add_entities(entities)
+        async_add_entities(
+            entities,
+            config_subentry_id=coordinator.config_subentry_id_for_vin(vin),
+        )
 
 
 class LeapmotorActionButton(CoordinatorEntity[LeapmotorDataUpdateCoordinator], ButtonEntity):
@@ -177,7 +180,7 @@ class LeapmotorActionButton(CoordinatorEntity[LeapmotorDataUpdateCoordinator], B
     @property
     def available(self) -> bool:
         """Return button availability."""
-        return super().available and bool(self.coordinator.client.operation_password)
+        return super().available and self.coordinator.operation_password_configured(self.vin)
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
@@ -187,7 +190,9 @@ class LeapmotorActionButton(CoordinatorEntity[LeapmotorDataUpdateCoordinator], B
         return {
             "vin": self.vin,
             "action": self.spec.action,
-            "operation_password_configured": bool(self.coordinator.client.operation_password),
+            "operation_password_configured": self.coordinator.operation_password_configured(
+                self.vin
+            ),
             "last_remote_action": remote.get("action"),
             "last_remote_status": remote.get("status"),
             "last_remote_success": remote.get("success"),

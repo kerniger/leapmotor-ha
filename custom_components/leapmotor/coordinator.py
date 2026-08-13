@@ -17,8 +17,6 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 from .abrp import build_abrp_telemetry, send_abrp_telemetry
 from .api import LeapmotorApiClient
 from .const import (
-    CONF_ABRP_ENABLED,
-    CONF_ABRP_TOKEN,
     DEFAULT_ABRP_API_KEY,
     DEFAULT_STATE_STALE_SECONDS,
     DOMAIN,
@@ -26,6 +24,11 @@ from .const import (
 )
 from .leap_api import LeapmotorApiError
 from .location import CoordinateResolution, resolve_coordinate
+from .vehicle_config import (
+    abrp_config_for_vehicle,
+    operation_password_for_vehicle,
+    vehicle_subentries,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -88,6 +91,27 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             "vehicle_count": 0,
         }
         self._pending_update_reason = "startup"
+
+    def refresh_vehicle_configuration(self) -> None:
+        """Apply current VIN-scoped settings to the shared API client."""
+        vins = set(vehicle_subentries(self.config_entry))
+        if self.data:
+            vins.update((self.data.get("vehicles") or {}).keys())
+        self.client.set_vehicle_operation_passwords(
+            {
+                vin: operation_password_for_vehicle(self.config_entry, vin)
+                for vin in vins
+            }
+        )
+
+    def operation_password_configured(self, vin: str) -> bool:
+        """Return whether remote control is configured for one vehicle."""
+        return bool(operation_password_for_vehicle(self.config_entry, vin))
+
+    def config_subentry_id_for_vin(self, vin: str) -> str | None:
+        """Return the Home Assistant subentry owning one vehicle."""
+        subentry = vehicle_subentries(self.config_entry).get(vin)
+        return subentry.subentry_id if subentry else None
 
     async def async_load_location_signs(self) -> None:
         """Load remembered GPS hemisphere signs before the first poll."""
@@ -474,14 +498,24 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 
     async def _async_push_abrp(self, data: dict[str, Any]) -> None:
         """Push vehicle telemetry to ABRP when configured."""
-        if not self._config_value(CONF_ABRP_ENABLED, False):
-            return
         api_key = DEFAULT_ABRP_API_KEY
-        token = str(self._config_value(CONF_ABRP_TOKEN, "") or "")
-        if not api_key.strip() or not token.strip():
+        if not api_key.strip():
             return
 
-        for vin, vehicle_data in (data.get("vehicles") or {}).items():
+        vehicles = data.get("vehicles") or {}
+        for vin, vehicle_data in vehicles.items():
+            enabled, token = abrp_config_for_vehicle(
+                self.config_entry,
+                vin,
+                vehicle_count=len(vehicles),
+            )
+            if not enabled or not token:
+                self._last_abrp_results[vin] = {
+                    "enabled": enabled,
+                    "status": "disabled" if not enabled else "missing_token",
+                    "success": None,
+                }
+                continue
             telemetry = build_abrp_telemetry(vehicle_data)
             started_at = time.time()
             try:
@@ -516,12 +550,6 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                 "missing": result.get("missing"),
                 "telemetry_keys": sorted(telemetry),
             }
-
-    def _config_value(self, key: str, default: Any = None) -> Any:
-        """Return an option value with config-entry data as migration fallback."""
-        if key in self.config_entry.options:
-            return self.config_entry.options[key]
-        return self.config_entry.data.get(key, default)
 
     def _stabilize_vehicle_states(self, data: dict[str, Any]) -> None:
         """Keep the last valid parked/driving state across weak startup polls."""

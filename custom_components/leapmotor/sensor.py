@@ -865,14 +865,15 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor sensors."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    entities: list[LeapmotorSensor] = []
     for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
-        entities.extend(
-            LeapmotorSensor(coordinator, vin, description)
-            for description in SENSOR_DESCRIPTIONS
-            if _should_create_sensor(vehicle_data, description.key)
+        async_add_entities(
+            [
+                LeapmotorSensor(coordinator, vin, description)
+                for description in SENSOR_DESCRIPTIONS
+                if _should_create_sensor(vehicle_data, description.key)
+            ],
+            config_subentry_id=coordinator.config_subentry_id_for_vin(vin),
         )
-    async_add_entities(entities)
 
 
 class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorEntity):

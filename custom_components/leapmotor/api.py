@@ -115,6 +115,7 @@ class LeapmotorApiClient:
         self.username = username
         self.password = password
         self.operation_password = operation_password.strip() if operation_password else None
+        self.vehicle_operation_passwords: dict[str, str | None] = {}
         self.account_p12_password = account_p12_password
         self.base_url = base_url.rstrip("/")
         self.transport = CurlTransport(self.base_url)
@@ -137,6 +138,19 @@ class LeapmotorApiClient:
         cert_dir = Path(static_cert_dir) if static_cert_dir else Path(__file__).resolve().parent
         self.static_cert = str(cert_dir / STATIC_APP_CERT)
         self.static_key = str(cert_dir / STATIC_APP_KEY)
+
+    def set_vehicle_operation_passwords(self, passwords: dict[str, str | None]) -> None:
+        """Set VIN-scoped vehicle PINs used by remote-control requests."""
+        self.vehicle_operation_passwords = {
+            str(vin): (str(password).strip() or None) if password else None
+            for vin, password in passwords.items()
+        }
+
+    def operation_password_for_vin(self, vin: str) -> str | None:
+        """Return the VIN-scoped PIN or the legacy account-wide PIN."""
+        if vin in self.vehicle_operation_passwords:
+            return self.vehicle_operation_passwords[vin]
+        return self.operation_password
 
     def close(self) -> None:
         """Close HTTP resources and remove temporary account cert files."""
@@ -1210,7 +1224,7 @@ class LeapmotorApiClient:
         if not self.token:
             self.login()
         self._ensure_account_cert_files()
-        if not self.operation_password:
+        if not self.operation_password_for_vin(vin):
             raise LeapmotorAuthError(
                 "No vehicle PIN configured. Read-only data works without a PIN, "
                 "but remote-control actions require it."
@@ -1261,7 +1275,8 @@ class LeapmotorApiClient:
         if not self.token:
             self.login()
         self._ensure_account_cert_files()
-        if not self.operation_password:
+        operation_password = self.operation_password_for_vin(vin)
+        if not operation_password:
             raise LeapmotorAuthError(
                 "No vehicle PIN configured. Read-only data works without a PIN, "
                 "but remote-control actions require it."
@@ -1269,7 +1284,7 @@ class LeapmotorApiClient:
         if vehicle is None:
             vehicle = self._find_vehicle_by_vin(vin)
 
-        operate_password = derive_operate_password(self.operation_password, self.token)
+        operate_password = derive_operate_password(operation_password, self.token)
         self._ensure_remote_cert_sync()
 
         verify_headers = self._build_operpwd_verify_headers(vin=vin, operation_password=operate_password)

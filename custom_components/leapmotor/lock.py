@@ -41,9 +41,11 @@ async def async_setup_entry(
 ) -> None:
     """Set up Leapmotor lock entities."""
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities(
-        LeapmotorVehicleLock(coordinator, vin) for vin in coordinator.data.get("vehicles", {})
-    )
+    for vin in coordinator.data.get("vehicles", {}):
+        async_add_entities(
+            [LeapmotorVehicleLock(coordinator, vin)],
+            config_subentry_id=coordinator.config_subentry_id_for_vin(vin),
+        )
 
 
 class LeapmotorVehicleLock(CoordinatorEntity[LeapmotorDataUpdateCoordinator], LockEntity):
@@ -102,7 +104,9 @@ class LeapmotorVehicleLock(CoordinatorEntity[LeapmotorDataUpdateCoordinator], Lo
             "lock_state_source": self.vehicle_data["status"].get("lock_state_source", "cloud"),
             "lock_state_age_seconds": self.vehicle_data["status"].get("lock_state_age_seconds"),
             "lock_state_is_stale": self.vehicle_data["status"].get("lock_state_is_stale"),
-            "operation_password_configured": bool(self.coordinator.client.operation_password),
+            "operation_password_configured": self.coordinator.operation_password_configured(
+                self.vin
+            ),
             "last_remote_action": remote.get("action"),
             "last_remote_status": remote.get("status"),
             "last_remote_success": remote.get("success"),

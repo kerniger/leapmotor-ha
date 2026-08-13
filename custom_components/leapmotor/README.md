@@ -131,7 +131,7 @@ Normal setup path:
   the app out when the integration authenticates
 - provide local files as `/config/leapmotor/app_cert.pem` and
   `/config/leapmotor/app_key.pem`, or upload/paste them during setup/options
-- optionally enable ABRP live data and enter your ABRP Generic token
+- optionally enable ABRP live data per vehicle and enter its ABRP Generic token
 - configure the integration in Home Assistant
 
 The component itself contains both parts needed at runtime: the Home Assistant
@@ -148,9 +148,10 @@ normal user install path.
   empty only if `/config/leapmotor/app_key.pem` already exists.
 - App certificate/private key PEM: fallback paste fields if file upload is not
   convenient.
-- Vehicle PIN: optional; leave empty for read-only mode. Remote-control actions
-  usually require this PIN and stay unavailable without it. Sending a
-  destination does not require the PIN, matching the observed app flow.
+- Vehicle PIN: optional and configured per vehicle; leave empty for read-only
+  mode. Remote-control actions usually require this PIN and stay unavailable
+  without it. Sending a destination does not require the PIN, matching the
+  observed app flow.
 - Update interval: default `5` minutes. All interval fields are in minutes;
   runtime diagnostics report the resulting value in seconds (`60` minutes is
   shown as `3600` seconds). Use `1` for one-minute polling.
@@ -158,11 +159,13 @@ normal user install path.
   interval only while every vehicle is locked, parked, and unplugged.
 - Eco update interval: default `15` minutes, minimum `5` minutes. Disable eco
   polling if the normal one-minute interval should also apply while parked.
-- ABRP live data: optional
-- ABRP Generic token: optional; only required when ABRP live data is enabled
+- ABRP live data: optional and enabled independently for each vehicle
+- ABRP Generic token: optional; each vehicle requires its own token when ABRP
+  live data is enabled
 
-After setup, the Vehicle PIN, update interval, eco polling, and ABRP options can
-be changed from the integration options without recreating the entry.
+After setup, shared certificate and polling settings are changed in the account
+options. Open the corresponding vehicle below the account entry to change its
+Vehicle PIN and ABRP settings without recreating the integration.
 
 ## State Freshness
 

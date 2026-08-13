@@ -25,7 +25,7 @@
       },
       "init": {
         "title": "Leapmotor Optionen",
-        "description": "Zertifikatsmaterial, Fahrzeug-PIN, Aktualisierungsintervall und optionale ABRP Live-Daten nachträglich anpassen. App-Zertifikat/Private-Key sind für den Login erforderlich und werden als /config/leapmotor/app_cert.pem und /config/leapmotor/app_key.pem gespeichert. Ohne PIN bleiben Steuerfunktionen deaktiviert.",
+        "description": "Kontoweite Zertifikats- und Abrufeinstellungen ändern. Fahrzeug-PIN und ABRP werden separat für jedes Fahrzeug konfiguriert.",
         "data": {
           "app_cert_file": "app_cert.pem hochladen (Zertifikat)",
           "app_key_file": "app_key.pem hochladen (Private Key)",
@@ -80,6 +80,43 @@
     },
     "abort": {
       "already_configured": "Dieses Konto ist bereits eingerichtet."
+    }
+  },
+  "config_subentries": {
+    "vehicle": {
+      "entry_type": "Fahrzeug",
+      "initiate_flow": {
+        "user": "Fahrzeug hinzufügen"
+      },
+      "step": {
+        "user": {
+          "title": "Fahrzeug auswählen",
+          "data": {
+            "vin": "Fahrzeug"
+          }
+        },
+        "vehicle": {
+          "title": "Fahrzeug konfigurieren",
+          "description": "PIN und ABRP-Token gelten nur für dieses Fahrzeug.",
+          "data": {
+            "operation_password": "Fahrzeug-PIN (optional, für Steuerung)",
+            "abrp_enabled": "ABRP-Livedaten aktivieren",
+            "abrp_token": "ABRP Generic Token"
+          }
+        },
+        "reconfigure": {
+          "title": "{vehicle} konfigurieren",
+          "description": "PIN und ABRP-Token nur für dieses Fahrzeug ändern.",
+          "data": {
+            "operation_password": "Fahrzeug-PIN (optional, für Steuerung)",
+            "abrp_enabled": "ABRP-Livedaten aktivieren",
+            "abrp_token": "ABRP Generic Token"
+          }
+        }
+      },
+      "abort": {
+        "all_vehicles_configured": "Alle Fahrzeuge dieses Kontos sind bereits konfiguriert."
+      }
     }
   },
   "entity": {
@@ -572,7 +609,7 @@
     "step": {
       "init": {
         "title": "Leapmotor Optionen",
-        "description": "Zertifikatsmaterial, Fahrzeug-PIN, Aktualisierungsintervall und optionale ABRP Live-Daten nachträglich anpassen. App-Zertifikat/Private-Key sind für den Login erforderlich und werden als /config/leapmotor/app_cert.pem und /config/leapmotor/app_key.pem gespeichert. Ohne PIN bleiben Steuerfunktionen deaktiviert.",
+        "description": "Kontoweite Zertifikats- und Abrufeinstellungen ändern. Fahrzeug-PIN und ABRP werden separat für jedes Fahrzeug konfiguriert.",
         "data": {
           "app_cert_file": "app_cert.pem hochladen (Zertifikat)",
           "app_key_file": "app_key.pem hochladen (Private Key)",

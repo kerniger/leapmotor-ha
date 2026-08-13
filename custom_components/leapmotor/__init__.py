@@ -7,27 +7,33 @@ from functools import partial
 import json
 import logging
 from pathlib import Path
+from types import MappingProxyType
 import uuid
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import ConfigEntry, ConfigSubentry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import device_registry as dr
 import voluptuous as vol
 
 from .api import LeapmotorApiClient
 from .button import BUTTON_SPECS
 from .const import (
     CONF_ACCOUNT_P12_PASSWORD,
+    CONF_ABRP_ENABLED,
+    CONF_ABRP_TOKEN,
     CONF_DEVICE_ID,
     CONF_ECO_POLLING_ENABLED,
     CONF_ECO_SCAN_INTERVAL,
     CONF_OPERATION_PASSWORD,
     CONF_SCAN_INTERVAL,
+    CONF_VIN,
     DEFAULT_SCAN_INTERVAL_MINUTES,
     DEFAULT_ECO_SCAN_INTERVAL_MINUTES,
     DOMAIN,
     STATIC_CERT_STORAGE_DIR,
+    SUBENTRY_TYPE_VEHICLE,
 )
 from .coordinator import LeapmotorDataUpdateCoordinator
 from .entity_migration import async_remove_obsolete_entities
@@ -38,6 +44,7 @@ from .remote_helpers import (
     format_remote_error,
     resolve_target_vin,
 )
+from .vehicle_config import legacy_config_value, vehicle_subentries
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -313,6 +320,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
     await coordinator.async_load_location_signs()
     await coordinator.async_config_entry_first_refresh()
+    _async_ensure_vehicle_subentries(hass, entry, coordinator.data.get("vehicles") or {})
+    coordinator.refresh_vehicle_configuration()
     await async_remove_obsolete_entities(hass)
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
@@ -322,6 +331,75 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     await async_remove_obsolete_entities(hass)
     return True
+
+
+def _async_ensure_vehicle_subentries(
+    hass: HomeAssistant,
+    entry: ConfigEntry,
+    vehicles: dict[str, dict],
+) -> None:
+    """Create VIN-scoped settings and migrate existing devices in place."""
+    configured = vehicle_subentries(entry)
+    migrating_legacy_settings = not configured
+    legacy_pin = str(legacy_config_value(entry, CONF_OPERATION_PASSWORD, "") or "")
+    legacy_abrp_enabled = bool(legacy_config_value(entry, CONF_ABRP_ENABLED, False))
+    legacy_abrp_token = str(legacy_config_value(entry, CONF_ABRP_TOKEN, "") or "")
+    device_registry = dr.async_get(hass)
+
+    for vin, vehicle_data in vehicles.items():
+        subentry = configured.get(vin)
+        if subentry is None:
+            vehicle = vehicle_data.get("vehicle") or {}
+            model = str(vehicle.get("car_type") or "Leapmotor")
+            nickname = str(vehicle.get("nickname") or "").strip()
+            title = f"{nickname or model} (...{vin[-4:]})"
+            single_vehicle = len(vehicles) == 1
+            subentry = ConfigSubentry(
+                data=MappingProxyType(
+                    {
+                        CONF_VIN: vin,
+                        CONF_OPERATION_PASSWORD: legacy_pin
+                        if migrating_legacy_settings
+                        else "",
+                        CONF_ABRP_ENABLED: legacy_abrp_enabled
+                        if migrating_legacy_settings and single_vehicle
+                        else False,
+                        CONF_ABRP_TOKEN: legacy_abrp_token
+                        if migrating_legacy_settings and single_vehicle
+                        else "",
+                    }
+                ),
+                subentry_type=SUBENTRY_TYPE_VEHICLE,
+                title=title,
+                unique_id=vin,
+            )
+            hass.config_entries.async_add_subentry(entry, subentry)
+            configured[vin] = subentry
+
+        if hasattr(device_registry, "async_get_device_by_identifier"):
+            device = device_registry.async_get_device_by_identifier(
+                (DOMAIN, vin), entry.entry_id
+            )
+            if device:
+                device_registry.async_update_device(
+                    device.id,
+                    new_config_entry_id=entry.entry_id,
+                    new_config_subentry_id=subentry.subentry_id,
+                )
+            continue
+
+        # Home Assistant before 2026.8 stored main/subentry ownership as a set.
+        if device := device_registry.async_get_device(identifiers={(DOMAIN, vin)}):
+            device_registry.async_update_device(
+                device.id,
+                add_config_entry_id=entry.entry_id,
+                add_config_subentry_id=subentry.subentry_id,
+            )
+            device_registry.async_update_device(
+                device.id,
+                remove_config_entry_id=entry.entry_id,
+                remove_config_subentry_id=None,
+            )
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
