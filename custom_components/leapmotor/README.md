@@ -28,6 +28,8 @@ Available data includes:
 - Consumption-screen data from the official app flow:
   cumulative energy, last-7-days mileage/energy, six-week average consumption,
   and last-week driving/climate/other energy split
+- Normalized daily mileage/energy attributes with an explicit completeness flag;
+  incomplete cloud detail is not published as a seven-day energy total
 - Vehicle lock as a native Home Assistant lock entity for remote lock/unlock
   actions
 - Vehicle state as a readable status sensor

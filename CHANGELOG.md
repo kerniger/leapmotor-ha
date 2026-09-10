@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.7.0 - 2026-09-10
+
+- Promote VIN-scoped multi-vehicle configuration to the stable release: each
+  vehicle has its own PIN and ABRP token below the shared account entry.
+- Preserve existing entity IDs and migrate single-vehicle PIN and ABRP settings
+  automatically. Existing multi-vehicle accounts must configure ABRP per vehicle;
+  their old shared token is not reused across cars.
+- Fix the default T03 window opening command and use model-specific percentage
+  conversion for B05/B10/C10 and T03 (#68).
+- Expose normalized daily mileage/energy details and coverage attributes. Mark
+  seven-day energy unavailable when cloud details are incomplete (#67).
+- Remember successful status endpoint paths per VIN for the client lifetime,
+  with one C10 fallback attempt on unsupported model paths.
+- Check release tags against the manifest before uploading HACS assets and on
+  tagged CI builds. Install API test dependencies explicitly in CI.
+- Requires Home Assistant 2025.3 or newer. Single-vehicle operation has been
+  exercised; simultaneous multi-vehicle operation is covered by isolation tests
+  but has not been verified with two physical vehicles by the maintainer.
+- Thanks to markoceri, ProtossBlaster / Leapmotor Mate, and the issue reporters
+  for the shared research and feedback.
+
 ## 0.7.0-beta.1 - 2026-08-13
 
 - Model every discovered vehicle as a Home Assistant config subentry below the

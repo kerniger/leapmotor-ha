@@ -134,11 +134,11 @@ sunshade_close:
         text:
 windows_open:
   name: Open windows
-  description: Open the windows. Requires the configured Vehicle PIN. Optionally set a partial position from 0 to 100; omit for fully open.
+  description: Open the windows. Requires the configured Vehicle PIN. Optionally set a position from 0 to 100; omit for a 20% ventilation gap.
   fields:
     value:
       name: Position
-      description: Optional window position, 0 to 100. Omit for fully open.
+      description: Optional window position, 0 to 100. Omit for a 20% ventilation gap.
       example: 30
       selector:
         number:

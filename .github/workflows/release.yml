@@ -17,6 +17,12 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
 
+      - name: Verify release tag matches manifest version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: >
+          python3 scripts/check_release_version.py "$RELEASE_TAG"
+
       - name: Build HACS release ZIP
         run: bash scripts/build_release_zip.sh /tmp/leapmotor-ha.zip
 

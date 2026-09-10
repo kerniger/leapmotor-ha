@@ -13,6 +13,8 @@ research logs, or reverse-engineering workfiles.
 
 - Vehicle state, battery, range, odometer, charging, doors, windows, lock, GPS
   tracker, tire pressure, diagnostics, and mileage/energy history.
+- Last-seven-days mileage and energy sensors expose normalized daily details and
+  mark energy unavailable when the cloud returns an incomplete daily series.
 - Vehicle READY/ON3 diagnostic based on signal `1258`.
 - Native Home Assistant entities for sensors, binary sensors, lock, buttons,
   number, switch, image, and device tracker.

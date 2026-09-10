@@ -1017,6 +1017,25 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
                 }
             )
         if self.entity_description.key in {
+            "last_7_days_mileage_km",
+            "last_7_days_energy_kwh",
+        }:
+            history = self.vehicle_data["history"]
+            attributes.update(
+                {
+                    "energy_complete": history.get("last_7_days_energy_complete"),
+                    "detail_days": history.get("last_7_days_detail_days"),
+                    "detail_mileage_km": history.get(
+                        "last_7_days_detail_mileage_km"
+                    ),
+                    "covered_mileage_km": history.get(
+                        "last_7_days_energy_covered_mileage_km"
+                    ),
+                    "period_mileage_km": history.get("last_7_days_mileage_km"),
+                    "daily_detail": history.get("last_7_days_detail"),
+                }
+            )
+        if self.entity_description.key in {
             "last_week_driving_energy_percent",
             "last_week_climate_energy_percent",
             "last_week_other_energy_percent",

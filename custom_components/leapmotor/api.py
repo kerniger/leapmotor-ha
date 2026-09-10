@@ -75,7 +75,14 @@ from .leap_api import (
     derive_operate_password,
     derive_session_device_id,
 )
-from .model_helpers import climate_off_payload, native_window_position
+from .history_helpers import summarize_mileage_energy_detail
+from .model_helpers import (
+    VehicleStatusPathResolver,
+    climate_off_payload,
+    native_window_open_position,
+    native_window_position,
+    vehicle_status_path,
+)
 from .signal_helpers import (
     charge_connection_allows_charging,
     nonzero_state,
@@ -135,6 +142,7 @@ class LeapmotorApiClient:
         self.account_p12_password_source: str | None = None
         self.remote_cert_synced = False
         self.last_api_results: dict[str, dict[str, Any]] = {}
+        self.status_path_resolver = VehicleStatusPathResolver()
         cert_dir = Path(static_cert_dir) if static_cert_dir else Path(__file__).resolve().parent
         self.static_cert = str(cert_dir / STATIC_APP_CERT)
         self.static_key = str(cert_dir / STATIC_APP_KEY)
@@ -323,9 +331,8 @@ class LeapmotorApiClient:
 
     def open_windows(self, vin: str, value: int | None = None) -> dict[str, Any]:
         """Open the windows via remote control."""
-        if value is not None:
-            vehicle = self._find_vehicle_by_vin(vin)
-            value = native_window_position(vehicle.car_type, value)
+        vehicle = self._find_vehicle_by_vin(vin)
+        value = native_window_open_position(vehicle.car_type, value)
         return self._remote_control(vin=vin, action=REMOTE_CTL_WINDOWS_OPEN, value=value)
 
     def close_windows(self, vin: str, value: int | None = None) -> dict[str, Any]:
@@ -998,7 +1005,7 @@ class LeapmotorApiClient:
 
     def get_vehicle_status(self, vehicle: Vehicle) -> dict[str, Any]:
         """Fetch read-only status for one vehicle."""
-        car_type_path = _vehicle_status_car_type_path(vehicle.car_type)
+        car_type_path = self.status_path_resolver.path_for(vehicle.vin, vehicle.car_type)
         body = f"vin={requests.utils.quote(vehicle.vin, safe='')}"
         try:
             status = self._get_vehicle_status_raw(
@@ -1009,7 +1016,11 @@ class LeapmotorApiClient:
             )
         except LeapmotorApiError:
             result = self.last_api_results.get("vehicle status") or {}
-            if car_type_path == "c10" or result.get("http_status") != 404:
+            if not self.status_path_resolver.should_try_c10_fallback(
+                vehicle.vin,
+                car_type_path,
+                result.get("http_status"),
+            ):
                 raise
             _LOGGER.info(
                 "Leapmotor status path /%s is unavailable for model %s; trying /c10",
@@ -1023,6 +1034,7 @@ class LeapmotorApiClient:
                 body=body,
                 label="vehicle status c10 fallback",
             )
+        self.status_path_resolver.remember(vehicle.vin, car_type_path)
         status["_status_endpoint_path"] = car_type_path
         if (
             vehicle.is_shared
@@ -2037,7 +2049,10 @@ def normalize_vehicle(
     if fuel_liters_raw is None:
         fuel_liters_raw = signal.get("2363")
     fuel_liters = _safe_float(fuel_liters_raw)
-    last_7_days_energy = _sum_detail_field(mileage_data.get("detail"), "accumulatedEnergyConsume")
+    recent_history = summarize_mileage_energy_detail(
+        mileage_data.get("detail"),
+        mileage_data.get("totalAccumulatedMileage"),
+    )
     last_week_split = _energy_breakdown_percentages(breakdown_data)
     today_split = _energy_breakdown_percentages(today_data)
     status_endpoint_path = str(
@@ -2153,7 +2168,14 @@ def normalize_vehicle(
             "total_energy_kwh": _safe_float(mileage_data.get("totalEnergy")),
             "last_7_days_mileage_km": mileage_data.get("totalAccumulatedMileage"),
             "last_7_days_mileage_mi": _safe_float(mileage_data.get("totalAccumulatedMileageMile")),
-            "last_7_days_energy_kwh": last_7_days_energy,
+            "last_7_days_energy_kwh": recent_history["energy_kwh"],
+            "last_7_days_energy_complete": recent_history["energy_complete"],
+            "last_7_days_detail_days": recent_history["detail_days"],
+            "last_7_days_detail_mileage_km": recent_history["detail_mileage_km"],
+            "last_7_days_energy_covered_mileage_km": recent_history[
+                "covered_mileage_km"
+            ],
+            "last_7_days_detail": recent_history["daily_detail"],
             "average_consumption_6w_kwh_100km": _safe_float(rank_result.get("hundredKmEC")),
             "average_consumption_6w_mi_kwh": _safe_float(rank_result.get("hundredMiKwhEC")),
             "consumption_rank": rank_result.get("rank"),
@@ -2364,12 +2386,7 @@ def _support_raw_signals(signal: dict[str, Any]) -> dict[str, Any]:
 
 def _vehicle_status_car_type_path(car_type: str | None) -> str:
     """Return the backend status path segment for a vehicle model."""
-    normalized = str(car_type or "C10").strip().lower()
-    if normalized in {"b05", "b10", "b11"}:
-        # The international backend reports these B-series model names in the
-        # vehicle list, but their status endpoint is shared with C10.
-        return "c10"
-    return normalized or "c10"
+    return vehicle_status_path(car_type)
 
 
 def _normalize_charge_plan(plan: Any) -> dict[str, Any]:
@@ -2813,23 +2830,6 @@ def _berlin_now() -> datetime:
         return datetime.now(ZoneInfo("Europe/Berlin"))
     except Exception:
         return datetime.now().astimezone()
-
-
-def _sum_detail_field(detail: Any, field: str) -> float | None:
-    """Sum one numeric field from an API detail list."""
-    if not isinstance(detail, list):
-        return None
-    total = 0.0
-    found = False
-    for item in detail:
-        if not isinstance(item, dict):
-            continue
-        value = _safe_float(item.get(field))
-        if value is None:
-            continue
-        total += value
-        found = True
-    return total if found else None
 
 
 def _energy_breakdown_percentages(data: dict[str, Any]) -> dict[str, float | None]:
