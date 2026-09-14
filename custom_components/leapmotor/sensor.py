@@ -1024,6 +1024,11 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
             attributes.update(
                 {
                     "energy_complete": history.get("last_7_days_energy_complete"),
+                    "energy_source": "accumulatedEnergyConsume",
+                    "energy_scope": "presumed_driving_only",
+                    "energy_scope_confirmed": False,
+                    "energy_precision": "as_reported_by_cloud",
+                    "energy_complete_scope": "fields_and_mileage_coverage",
                     "detail_days": history.get("last_7_days_detail_days"),
                     "detail_mileage_km": history.get(
                         "last_7_days_detail_mileage_km"

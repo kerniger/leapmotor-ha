@@ -255,7 +255,7 @@
         "name": "Chilometri ultimi 7 giorni"
       },
       "last_7_days_energy_kwh": {
-        "name": "Energia ultimi 7 giorni"
+        "name": "Energia di guida ultimi 7 giorni (presunta)"
       },
       "average_consumption_6w_kwh_100km": {
         "name": "Consumo medio 6 settimane (kWh/100 km)"

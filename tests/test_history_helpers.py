@@ -83,6 +83,10 @@ class MileageEnergyDetailTests(unittest.TestCase):
         self.assertEqual(result["covered_mileage_km"], 84.0)
         self.assertEqual(result["detail_days"], 2)
         self.assertEqual(result["daily_detail"][0]["date"], "2026-08-29")
+        self.assertEqual(result["daily_detail"][0]["driving_energy_kwh"], 2.0)
+        self.assertEqual(result["daily_detail"][1]["driving_energy_kwh"], 14.5)
+        for day in result["daily_detail"]:
+            self.assertEqual(day["driving_energy_kwh"], day["energy_kwh"])
 
     def test_missing_energy_makes_total_unavailable(self) -> None:
         result = history.summarize_mileage_energy_detail(

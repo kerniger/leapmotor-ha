@@ -280,7 +280,7 @@
         "name": "Last 7 days mileage"
       },
       "last_7_days_energy_kwh": {
-        "name": "Last 7 days energy consumption"
+        "name": "Last 7 days driving energy (presumed)"
       },
       "average_consumption_6w_kwh_100km": {
         "name": "6 week average consumption (kWh/100 km)"

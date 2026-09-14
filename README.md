@@ -16,9 +16,18 @@ research logs, or reverse-engineering workfiles.
 - Last-seven-days mileage and energy sensors expose normalized daily details and
   mark energy unavailable when the cloud returns an incomplete daily series.
   The window includes today and the preceding six calendar days. `energy_complete`
-  validates field and mileage coverage only, not physical energy accuracy. B10
-  users have reported daily cloud energy substantially below metered use (#67);
-  the meaning of that field remains under investigation. Weekly consumption
+  validates field and mileage coverage only, not physical energy accuracy.
+  Daily `driving_energy_kwh` exposes `accumulatedEnergyConsume`, provisionally
+  interpreted as driving energy excluding climate/accessories (#67). The sensor
+  name marks this interpretation as presumed; attributes expose
+  `energy_scope: presumed_driving_only` and `energy_scope_confirmed: false`.
+  Existing entity IDs and the daily `energy_kwh` compatibility alias are retained.
+  An aligned B10 week reports 38 kWh in daily values versus 40.5 kWh driving
+  energy and 53.1 kWh including climate/other energy. This supports the hypothesis
+  but does not establish the field's meaning on every model. B10 daily values
+  were whole kWh; rounding/truncation is unconfirmed and cloud decimals are
+  preserved when present. Do not interpret these values or a derived kWh/100 km
+  as total vehicle consumption. Weekly consumption
   rates are normalized to numbers; the captured weekly response contains no
   corresponding weekly distance or energy totals.
 - Vehicle READY/ON3 diagnostic based on signal `1258`.

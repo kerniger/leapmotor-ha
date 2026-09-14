@@ -255,7 +255,7 @@
         "name": "Kilometers laatste 7 dagen"
       },
       "last_7_days_energy_kwh": {
-        "name": "Energieverbruik laatste 7 dagen"
+        "name": "Rijenergie laatste 7 dagen (vermoedelijk)"
       },
       "average_consumption_6w_kwh_100km": {
         "name": "Gemiddeld verbruik 6 weken (kWh/100 km)"

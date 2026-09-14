@@ -280,7 +280,7 @@
         "name": "Fahrleistung letzte 7 Tage"
       },
       "last_7_days_energy_kwh": {
-        "name": "Energieverbrauch letzte 7 Tage"
+        "name": "Fahrenergie letzte 7 Tage (vermutet)"
       },
       "average_consumption_6w_kwh_100km": {
         "name": "Durchschnittsverbrauch 6 Wochen (kWh/100 km)"

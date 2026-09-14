@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.2 - 2026-09-14
+
+- Label the seven-day energy sensor as presumed driving energy in all supported
+  languages; preserve entity identity and existing values (#67).
+- Add `daily_detail.driving_energy_kwh`; retain `energy_kwh` as a compatibility
+  alias. Expose the cloud source, provisional energy scope, and coverage meaning
+  on both seven-day sensors.
+- Document the aligned B10 comparison (38 kWh daily, 40.5 kWh driving, 53.1 kWh
+  total). Driving-only energy is a working hypothesis, not confirmed API semantics.
+  Preserve cloud precision; neither integer truncation nor a correction factor
+  is assumed. These values must not be presented as total vehicle consumption.
+- Thanks to fapgomes and the car's owner for the comparison and correction.
+
 ## 0.7.1 - 2026-09-14
 
 - Correct the mileage/energy request to cover seven calendar days (today and

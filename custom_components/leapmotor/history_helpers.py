@@ -68,7 +68,10 @@ def summarize_mileage_energy_detail(
                 "odometer_km": _finite_float(item.get("currentMileage")),
                 "mileage_km": mileage_km,
                 "mileage_mi": _finite_float(item.get("accumulatedMileageMile")),
-                "energy_kwh": energy_kwh,
+                # Working interpretation from aligned B10 week data (#67).
+                # Preserve cloud precision; truncation is not established.
+                "driving_energy_kwh": energy_kwh,
+                "energy_kwh": energy_kwh,  # Legacy compatibility alias.
             }
         )
 

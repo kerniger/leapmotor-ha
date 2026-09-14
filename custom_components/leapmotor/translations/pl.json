@@ -255,7 +255,7 @@
         "name": "Przebieg z ostatnich 7 dni"
       },
       "last_7_days_energy_kwh": {
-        "name": "Energia z ostatnich 7 dni"
+        "name": "Energia jazdy z ostatnich 7 dni (przypuszczalna)"
       },
       "average_consumption_6w_kwh_100km": {
         "name": "Średnie zużycie 6 tygodni (kWh/100 km)"

@@ -154,7 +154,7 @@
       "rear_right_window_position_percent": { "name": "Posição do vidro traseiro direito" },
       "total_energy_kwh": { "name": "Consumo total de energia" },
       "last_7_days_mileage_km": { "name": "Quilometragem dos últimos 7 dias" },
-      "last_7_days_energy_kwh": { "name": "Consumo de energia dos últimos 7 dias" },
+      "last_7_days_energy_kwh": { "name": "Energia de condução dos últimos 7 dias (presumida)" },
       "average_consumption_6w_kwh_100km": { "name": "Consumo médio de 6 semanas (kWh/100 km)" },
       "average_consumption_6w_mi_kwh": { "name": "Consumo médio de 6 semanas (mi/kWh)" },
       "last_week_driving_energy_percent": { "name": "Energia de condução da última semana" },
