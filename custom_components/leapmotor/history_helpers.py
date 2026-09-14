@@ -3,7 +3,31 @@
 from __future__ import annotations
 
 import math
+from datetime import datetime, timedelta
 from typing import Any
+
+
+def seven_day_window_ms(now: datetime) -> tuple[int, int]:
+    """Return today and the six preceding local calendar days, inclusive."""
+    today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    start = today - timedelta(days=6)
+    end = today + timedelta(days=1) - timedelta(seconds=1)
+    return int(start.timestamp() * 1000), int(end.timestamp() * 1000)
+
+
+def normalize_weekly_consumption(rows: object) -> list[dict[str, Any]]:
+    """Coerce cloud consumption rates while preserving other returned fields."""
+    if not isinstance(rows, list):
+        return []
+    return [
+        {
+            **row,
+            "hundredKmEC": _finite_float(row.get("hundredKmEC")),
+            "hundredMiKwhEC": _finite_float(row.get("hundredMiKwhEC")),
+        }
+        for row in rows
+        if isinstance(row, dict)
+    ]
 
 
 def summarize_mileage_energy_detail(

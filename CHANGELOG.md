@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.7.1 - 2026-09-14
+
+- Correct the mileage/energy request to cover seven calendar days (today and
+  the preceding six days), rather than eight. Today remains a partial day (#67).
+- Normalize weekly consumption rates to numbers, including numeric strings;
+  missing or invalid rates become null. Preserve other returned weekly fields.
+- Clarify that `energy_complete` checks field and mileage coverage, not physical
+  accuracy. The reported B10 daily-energy discrepancy remains under investigation.
+- Add regression coverage for the date window across daylight-saving changes
+  and mixed-type weekly consumption responses. All 44 tests pass.
+- Thanks to fapgomes for the detailed measurements and verification in #67.
+
 ## 0.7.0 - 2026-09-10
 
 - Promote VIN-scoped multi-vehicle configuration to the stable release: each

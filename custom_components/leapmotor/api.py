@@ -75,7 +75,11 @@ from .leap_api import (
     derive_operate_password,
     derive_session_device_id,
 )
-from .history_helpers import summarize_mileage_energy_detail
+from .history_helpers import (
+    normalize_weekly_consumption,
+    seven_day_window_ms,
+    summarize_mileage_energy_detail,
+)
 from .model_helpers import (
     VehicleStatusPathResolver,
     climate_off_payload,
@@ -2037,7 +2041,7 @@ def normalize_vehicle(
     mileage_data = (mileage_json or {}).get("data") or {}
     rank_data = (consumption_rank_json or {}).get("data") or {}
     rank_result = rank_data.get("rankResult") or {}
-    weekly_ec = rank_data.get("weeklyEC") or []
+    weekly_ec = normalize_weekly_consumption(rank_data.get("weeklyEC"))
     breakdown_data = (consumption_breakdown_json or {}).get("data") or {}
     today_data = (consumption_today_json or {}).get("data") or {}
     picture_data = (picture_json or {}).get("data") or {}
@@ -2790,12 +2794,8 @@ def _tire_pressures_bar(car_type: str | None, signal: dict[str, Any]) -> dict[st
 
 
 def _last_seven_day_window_ms() -> tuple[int, int]:
-    """Return the local app-style window used for 7-day mileage/energy detail."""
-    now = _berlin_now()
-    today = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    start = today - timedelta(days=7)
-    end = today + timedelta(days=1) - timedelta(seconds=1)
-    return int(start.timestamp() * 1000), int(end.timestamp() * 1000)
+    """Return seven local calendar days, including the current partial day."""
+    return seven_day_window_ms(_berlin_now())
 
 
 def _previous_week_window_seconds() -> tuple[int, int]:

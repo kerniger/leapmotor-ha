@@ -15,6 +15,12 @@ research logs, or reverse-engineering workfiles.
   tracker, tire pressure, diagnostics, and mileage/energy history.
 - Last-seven-days mileage and energy sensors expose normalized daily details and
   mark energy unavailable when the cloud returns an incomplete daily series.
+  The window includes today and the preceding six calendar days. `energy_complete`
+  validates field and mileage coverage only, not physical energy accuracy. B10
+  users have reported daily cloud energy substantially below metered use (#67);
+  the meaning of that field remains under investigation. Weekly consumption
+  rates are normalized to numbers; the captured weekly response contains no
+  corresponding weekly distance or energy totals.
 - Vehicle READY/ON3 diagnostic based on signal `1258`.
 - Native Home Assistant entities for sensors, binary sensors, lock, buttons,
   number, switch, image, and device tracker.

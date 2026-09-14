@@ -6,6 +6,8 @@ import importlib.util
 from pathlib import Path
 import sys
 import unittest
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 MODULE_PATH = (
     Path(__file__).parents[1]
@@ -18,6 +20,35 @@ assert SPEC and SPEC.loader
 history = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = history
 SPEC.loader.exec_module(history)
+
+
+class HistoryWindowTests(unittest.TestCase):
+    def test_seven_calendar_days_including_today_across_dst(self) -> None:
+        tz = ZoneInfo("Europe/Berlin")
+        for now in (datetime(2026, 9, 11, 12, tzinfo=tz),
+                    datetime(2026, 3, 30, 12, tzinfo=tz),
+                    datetime(2026, 10, 26, 12, tzinfo=tz)):
+            with self.subTest(now=now):
+                start_ms, end_ms = history.seven_day_window_ms(now)
+                start = datetime.fromtimestamp(start_ms / 1000, tz)
+                end = datetime.fromtimestamp(end_ms / 1000, tz)
+                self.assertEqual(start.date(), now.date() - timedelta(days=6))
+                self.assertEqual(end.date(), now.date())
+                self.assertEqual((start.hour, start.minute, start.second), (0, 0, 0))
+                self.assertEqual((end.hour, end.minute, end.second), (23, 59, 59))
+
+    def test_weekly_rates_normalized_without_losing_other_fields(self) -> None:
+        rows = [{"weekStart": "2026-08-24", "hundredKmEC": 14.2,
+                 "hundredMiKwhEC": "4.3", "extra": 10},
+                {"hundredKmEC": 0, "hundredMiKwhEC": 0.0},
+                {"hundredKmEC": "NaN", "hundredMiKwhEC": "invalid"}]
+        result = history.normalize_weekly_consumption(rows)
+        self.assertEqual(result[0]["hundredMiKwhEC"], 4.3)
+        self.assertEqual(result[0]["extra"], 10)
+        self.assertEqual(result[1]["hundredMiKwhEC"], 0.0)
+        self.assertIsNone(result[2]["hundredKmEC"])
+        self.assertIsNone(result[2]["hundredMiKwhEC"])
+        self.assertEqual(rows[0]["hundredMiKwhEC"], "4.3")
 
 
 class MileageEnergyDetailTests(unittest.TestCase):
