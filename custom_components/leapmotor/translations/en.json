@@ -376,7 +376,7 @@
         "name": "Raw lock status code"
       },
       "ptc_state": {
-        "name": "PTC state"
+        "name": "PTC state (raw code)"
       },
       "ptc_power_setting_value": {
         "name": "PTC power setting"
@@ -394,7 +394,7 @@
         "name": "Climate fan volume setting"
       },
       "climate_air_direction": {
-        "name": "Climate air direction"
+        "name": "Climate air direction (raw code)"
       },
       "climate_cooling_heating_mode": {
         "name": "Climate cooling/heating mode"
@@ -411,7 +411,7 @@
       "ac_operation_mode": {
         "name": "AC operation mode",
         "state": {
-          "auto": "Auto",
+          "auto": "Automatic",
           "manual": "Manual"
         }
       },

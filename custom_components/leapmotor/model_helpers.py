@@ -79,3 +79,12 @@ def native_window_open_position(
         WINDOW_OPEN_PERCENT if position_percent is None else position_percent
     )
     return native_window_position(car_type, requested_percent)
+
+
+def charging_plan_control_supported(car_type: object) -> bool:
+    """Allow the existing command 190 path except the unverified T03 path.
+
+    T03 reports confirm charge-limit writes have no effect even while awake.
+    This is a restriction of our command path, not a hardware capability claim.
+    """
+    return str(car_type or "").strip().upper() != "T03"

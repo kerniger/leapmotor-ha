@@ -39,6 +39,12 @@ Read the [CN setup, limitations and rollback guide](https://github.com/kerniger/
 For feedback, include model/year, HA version and the failing step or missing
 entities. Never post session JSON, credentials, VINs or raw locations.
 
+## September maintenance fixes
+
+See the [0.7.3 / 0.8.0b2 changes and remaining investigations](docs/issue-fixes-20260923.md),
+including T03 charge-control restrictions, unknown T03 daily-energy units and
+raw diagnostic sensor defaults.
+
 ## Features — EU / Rest of the World
 
 - Vehicle state, battery, range, odometer, charging, doors, windows, lock, GPS
@@ -53,13 +59,15 @@ entities. Never post session JSON, credentials, VINs or raw locations.
   `energy_scope: presumed_driving_only` and `energy_scope_confirmed: false`.
   Existing entity IDs and the daily `energy_kwh` compatibility alias are retained.
   An aligned B10 week reports 38 kWh in daily values versus 40.5 kWh driving
-  energy and 53.1 kWh including climate/other energy. This supports the hypothesis
-  but does not establish the field's meaning on every model. B10 daily values
+  energy and 53.1 kWh including climate/other energy. Later short-trip data do
+  not fully reconcile that hypothesis; the field's meaning remains unconfirmed. B10 daily values
   were whole kWh; rounding/truncation is unconfirmed and cloud decimals are
   preserved when present. Do not interpret these values or a derived kWh/100 km
   as total vehicle consumption. Weekly consumption
   rates are normalized to numbers; the captured weekly response contains no
-  corresponding weekly distance or energy totals.
+  corresponding weekly distance or energy totals. T03 daily energy has an
+  unverified unit and is withheld from kWh values; raw values remain in
+  `daily_detail.energy_raw` with `energy_unavailable_reason: unverified_unit`.
 - Vehicle READY/ON3 diagnostic based on signal `1258`.
 - Native Home Assistant entities for sensors, binary sensors, lock, buttons,
   number, switch, image, and device tracker.
@@ -67,7 +75,9 @@ entities. Never post session JSON, credentials, VINs or raw locations.
   unlock, climate, windows, trunk, sunshade, charge limit, and send destination
   to navigation.
 - Charging schedule switch for enabling/disabling the existing schedule while
-  preserving start time, end time, recurrence, and charge limit.
+  preserving start time, end time, recurrence, and charge limit. Charge-limit
+  and charging-schedule writes are not supported for T03 by this integration;
+  use the vehicle controls. Read-only charge-limit values remain available.
 - One-touch vehicle preparation services for immediate and scheduled climate,
   front-seat comfort, steering-wheel heat, mirror heat, and optional navigation
   sync on supported vehicles.

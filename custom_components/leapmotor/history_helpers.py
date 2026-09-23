@@ -33,8 +33,13 @@ def normalize_weekly_consumption(rows: object) -> list[dict[str, Any]]:
 def summarize_mileage_energy_detail(
     detail: object,
     period_mileage_km: object,
+    *,
+    car_type: object = None,
 ) -> dict[str, Any]:
     """Normalize daily history and return energy only when coverage is complete."""
+    # T03 samples (#67) contradict the kWh contract. Preserve source values,
+    # but do not guess a Wh conversion from their magnitude.
+    energy_unit = None if str(car_type or "").strip().upper() == "T03" else "kWh"
     expected_mileage = _finite_float(period_mileage_km)
     source_rows = detail if isinstance(detail, list) else []
     daily_detail: list[dict[str, Any]] = []
@@ -50,13 +55,14 @@ def summarize_mileage_energy_detail(
             continue
 
         mileage_km = _finite_float(item.get("accumulatedMileage"))
-        energy_kwh = _finite_float(item.get("accumulatedEnergyConsume"))
-        if mileage_km is None or energy_kwh is None:
+        energy_raw = _finite_float(item.get("accumulatedEnergyConsume"))
+        energy_kwh = energy_raw if energy_unit else None
+        if mileage_km is None or energy_raw is None:
             rows_valid = False
 
         if mileage_km is not None:
             detail_mileage += mileage_km
-        if mileage_km is not None and energy_kwh is not None:
+        if mileage_km is not None and energy_raw is not None:
             covered_mileage += mileage_km
         if energy_kwh is not None:
             energy_total += energy_kwh
@@ -71,6 +77,8 @@ def summarize_mileage_energy_detail(
                 # Working interpretation from aligned B10 week data (#67).
                 # Preserve cloud precision; truncation is not established.
                 "driving_energy_kwh": energy_kwh,
+                "energy_raw": energy_raw,
+                "energy_unit": energy_unit,
                 "energy_kwh": energy_kwh,  # Legacy compatibility alias.
             }
         )
@@ -88,7 +96,12 @@ def summarize_mileage_energy_detail(
         "covered_mileage_km": round(covered_mileage, 1) if daily_detail else None,
         "period_mileage_km": expected_mileage,
         "energy_complete": energy_complete,
-        "energy_kwh": round(energy_total, 1) if energy_complete else None,
+        "energy_unit": energy_unit,
+        "energy_unavailable_reason": (
+            "unverified_unit" if energy_unit is None
+            else "incomplete_data" if not energy_complete else None
+        ),
+        "energy_kwh": round(energy_total, 1) if energy_complete and energy_unit else None,
     }
 
 

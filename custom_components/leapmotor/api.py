@@ -81,6 +81,7 @@ from .history_helpers import (
     summarize_mileage_energy_detail,
 )
 from .model_helpers import (
+    charging_plan_control_supported,
     VehicleStatusPathResolver,
     climate_off_payload,
     native_window_open_position,
@@ -612,6 +613,11 @@ class LeapmotorApiClient:
     ) -> dict[str, Any]:
         """Update the charging plan command payload while preserving existing values."""
         vehicle = self._find_vehicle_by_vin(vin)
+        if not charging_plan_control_supported(vehicle.car_type):
+            raise LeapmotorApiError(
+                "Charging-plan control (charge limit and schedule) is not supported "
+                "by this integration for T03. Set it in the vehicle; readback remains available."
+            )
         try:
             status_json = self.get_vehicle_status(vehicle)
         except LeapmotorApiError as exc:
@@ -629,23 +635,17 @@ class LeapmotorApiClient:
                 _normalize_charge_plan(self.get_charge_schedule(vin)),
             )
 
-        if charge_plan_enabled is not None and not _charge_plan_is_complete(charge_plan):
+        if not _charge_plan_is_complete(charge_plan):
             raise LeapmotorApiError(
-                "Current charging plan is incomplete, cannot safely enable or disable it."
+                "Current charging plan is incomplete, cannot safely modify it."
             )
 
         start_time = charge_plan.get("beginTime")
         end_time = charge_plan.get("endTime")
         cycles = charge_plan.get("cycles")
         current_charge_limit = _safe_int(charge_plan.get("percent"))
-        if not start_time:
-            start_time = "00:00"
-        if not end_time:
-            end_time = "08:00"
-        if not cycles:
-            cycles = "1,2,3,4,5,6,7"
         if charge_limit_percent is None:
-            charge_limit_percent = current_charge_limit if current_charge_limit is not None else 80
+            charge_limit_percent = current_charge_limit
         charge_enable = (
             int(bool(charge_plan_enabled))
             if charge_plan_enabled is not None
@@ -2038,6 +2038,9 @@ def normalize_vehicle(
     signal = _status_data_signal(status_data)
     config = status_data.get("config") or {}
     charge_plan = config.get("3") or _charge_plan_from_named_status(status_data)
+    charge_plan = charge_plan if isinstance(charge_plan, dict) else {}
+    schedule_enabled = _safe_int(charge_plan.get("isEnable"))
+    schedule_enabled = schedule_enabled if schedule_enabled in (0, 1) else None
     mileage_data = (mileage_json or {}).get("data") or {}
     rank_data = (consumption_rank_json or {}).get("data") or {}
     rank_result = rank_data.get("rankResult") or {}
@@ -2056,6 +2059,7 @@ def normalize_vehicle(
     recent_history = summarize_mileage_energy_detail(
         mileage_data.get("detail"),
         mileage_data.get("totalAccumulatedMileage"),
+        car_type=vehicle.car_type,
     )
     last_week_split = _energy_breakdown_percentages(breakdown_data)
     today_split = _energy_breakdown_percentages(today_data)
@@ -2158,8 +2162,10 @@ def normalize_vehicle(
             "charging_current_a": _safe_float(signal.get("1178")),
             "charging_voltage_v": _safe_float(signal.get("1177")),
             "dc_cable_connected": _not_zero(signal.get("1197")),
-            "charging_planned_enabled": charge_plan.get("isEnable"),
-            "charging_planned_start": charge_plan.get("beginTime"),
+            "charging_planned_enabled": schedule_enabled,
+            "charging_planned_start": (
+                charge_plan.get("beginTime") if schedule_enabled is not None else None
+            ),
             "charging_planned_end": charge_plan.get("endTime"),
             "charging_planned_cycles": charge_plan.get("cycles"),
             "charging_planned_circulation": charge_plan.get("circulation"),
@@ -2174,6 +2180,8 @@ def normalize_vehicle(
             "last_7_days_mileage_mi": _safe_float(mileage_data.get("totalAccumulatedMileageMile")),
             "last_7_days_energy_kwh": recent_history["energy_kwh"],
             "last_7_days_energy_complete": recent_history["energy_complete"],
+            "last_7_days_energy_unit": recent_history["energy_unit"],
+            "last_7_days_energy_unavailable_reason": recent_history["energy_unavailable_reason"],
             "last_7_days_detail_days": recent_history["detail_days"],
             "last_7_days_detail_mileage_km": recent_history["detail_mileage_km"],
             "last_7_days_energy_covered_mileage_km": recent_history[
@@ -2219,6 +2227,8 @@ def normalize_vehicle(
             "status_payload_keys": status_payload_keys,
             "status_signal_count": len(signal),
             "status_has_config": bool(config),
+            "charging_plan_control_supported": charging_plan_control_supported(vehicle.car_type),
+            "charging_plan_start_raw": charge_plan.get("beginTime"),
             "charge_plug_signal": signal.get("47"),
             "raw_signal_47": signal.get("47"),
             "raw_signal_1149": signal.get("1149"),
@@ -2411,7 +2421,8 @@ def _normalize_charge_plan(plan: Any) -> dict[str, Any]:
 def _charge_plan_is_complete(plan: dict[str, Any]) -> bool:
     """Return whether a plan contains the fields needed for safe preservation."""
     return bool(
-        plan.get("beginTime")
+        _safe_int(plan.get("isEnable")) in (0, 1)
+        and plan.get("beginTime")
         and plan.get("endTime")
         and plan.get("cycles")
         and _safe_int(plan.get("percent")) is not None

@@ -42,6 +42,9 @@ _SENSITIVE_KEYS = {
     "proxy_url",
     "deviceId",
     "accountId",
+    "nickname",
+    "remote_ctl_id",
+    "remoteCtlId",
 }
 _SENSITIVE_KEY_NAMES = {key.casefold() for key in _SENSITIVE_KEYS}
 _EMAIL_PATTERN = re.compile(
@@ -105,7 +108,7 @@ async def async_get_config_entry_diagnostics(
     static_cert = getattr(client, "static_cert", None)
     static_key = getattr(client, "static_key", None)
     integration_status = coordinator.integration_status if coordinator else None
-    return {
+    return _redact({
         "support_summary": _support_summary(
             vehicles=vehicles,
             integration_status=integration_status,
@@ -113,12 +116,12 @@ async def async_get_config_entry_diagnostics(
         ),
         "entry": _redact(
             {
-                "title": entry.title,
+                "title": _REDACTED,
                 "data": dict(entry.data),
                 "options": dict(entry.options),
                 "vehicle_subentries": [
                     {
-                        "title": subentry.title,
+                        "title": _REDACTED,
                         "subentry_type": subentry.subentry_type,
                         "data": dict(subentry.data),
                     }
@@ -145,7 +148,7 @@ async def async_get_config_entry_diagnostics(
             "integration_status": integration_status,
         },
         "vehicles": vehicles,
-    }
+    })
 
 
 def _support_summary(
@@ -190,10 +193,14 @@ def _redact(value: Any) -> Any:
         return {
             key: _REDACTED
             if str(key).casefold() in _SENSITIVE_KEY_NAMES
+            else _redact_vin(item)
+            if str(key).casefold() == "vin"
+            else _redact_identifier(item)
+            if str(key).casefold() in {"car_id", "carid", "user_id", "userid"}
             else _redact(item)
             for key, item in value.items()
         }
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         return [_redact(item) for item in value]
     if isinstance(value, str):
         return _EMAIL_PATTERN.sub(_REDACTED, value)
