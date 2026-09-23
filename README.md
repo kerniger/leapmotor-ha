@@ -9,7 +9,37 @@ This repository is the cleaned public version of the project. It does not
 contain client certificates, private keys, captured tokens, account data,
 research logs, or reverse-engineering workfiles.
 
-## Features
+## China support: 0.8.0b1 prerelease
+
+**[Download the EU/CN beta 0.8.0b1](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.8.0b1)**
+
+The beta adds **China / Rest of the World** to setup within the existing
+Leapmotor integration. Existing EU entries retain their configuration and entity
+identities. **0.7.2 remains the stable release; CN support is experimental.**
+
+| Region | Available in the beta |
+| --- | --- |
+| Rest of the World (EU backend) | Existing telemetry, remote controls and integrations described below |
+| China | Read-only telemetry and binary sensors, manual refresh, phone/SMS setup or expert session import, optional per-entry proxy |
+
+China does not yet support vehicle controls, lock status, windows, climate
+control, navigation, location tracking, history, ABRP, EVCC or vehicle images.
+Entities depend on the signals returned by each vehicle. B05/T03 behavior has
+synthetic test coverage; live CN validation of this combined release is still
+outstanding. A previous standalone CN gateway connection failure remains
+unresolved, so successful cloud connectivity is not guaranteed.
+
+**Install:** Back up Home Assistant, open Leapmotor in HACS, choose
+**Redownload**, enable prerelease versions if needed, select **0.8.0b1**, and
+restart Home Assistant. Alternatively, use the release asset `leapmotor-ha.zip`.
+The standalone `leapmotor_cn` beta is not migrated automatically; disable its
+entry before setting up the same CN account in the shared integration.
+
+Read the [CN setup, limitations and rollback guide](https://github.com/kerniger/leapmotor-ha/blob/v0.8.0b1/docs/cn/README.md).
+For feedback, include model/year, HA version and the failing step or missing
+entities. Never post session JSON, credentials, VINs or raw locations.
+
+## Features — EU / Rest of the World
 
 - Vehicle state, battery, range, odometer, charging, doors, windows, lock, GPS
   tracker, tire pressure, diagnostics, and mileage/energy history.
@@ -64,9 +94,10 @@ research logs, or reverse-engineering workfiles.
   state.
 - Leapmotor can change the API at any time.
 
-## Requirements
+## Requirements — EU / Rest of the World
 
-The current login path requires Leapmotor app client certificate material:
+CN setup uses the separate phone/SMS or session-import flow described above.
+The EU login path requires Leapmotor app client certificate material:
 
 - `/config/leapmotor/app_cert.pem`
 - `/config/leapmotor/app_key.pem`
