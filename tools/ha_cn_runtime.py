@@ -303,11 +303,11 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         button_id = "button.leapmotor_china_b05_refresh"
         self.assertIsNotNone(self.hass.states.get(button_id))
         coordinator = self.hass.data["leapmotor_cn"][entry.entry_id]
-        
+
         initial_calls = len(self.calls)
         await self.hass.services.async_call("button", "press", {"entity_id": button_id}, blocking=True)
         await self.hass.async_block_till_done()
-        
+
         # Verify a refresh was triggered (i.e. more calls to the API)
         self.assertGreater(len(self.calls), initial_calls)
         self.assertTrue(coordinator.last_update_success)
