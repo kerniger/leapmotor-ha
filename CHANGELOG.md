@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.8.0b2 - 2026-09-23
+
+Includes the same EU fixes as 0.7.3 while retaining experimental read-only CN support. CN live connectivity, SMS login and session renewal remain unverified for the combined beta.
+
+- Redact nested VINs, vehicle/account titles, nicknames and remote-control session IDs in both diagnostics export paths (#69).
+- Correct available battery energy to `energy_storage` + `measurement`, preserving entity identity, values and statistics semantics (#71).
+- Stop exposing ineffective T03 charge-limit and charging-schedule controls; reject direct writes clearly while retaining charge-limit readback (#70/#72).
+- Require complete current charging plans before writes. Keep missing schedule state unknown and preserve unverified start times as diagnostics (#72).
+- Withhold T03 daily/rolling kWh values while their unit is unverified; preserve raw energy values and mileage. No guessed factor-of-1000 conversion (#67, mitigation).
+- Label PTC/air-direction values as raw diagnostics, disable new entities by default and expose known AC modes as translated enums. Preserve existing registry choices (#73).
+- Retain the previously confirmed model-specific window ventilation fix (#68).
+
+The T03 energy unit, B10 energy scope and wake-up SOC transients remain under investigation. See [upgrade details and limitations](docs/issue-fixes-20260923.md).
+
 ## 0.8.0b1 - 2026-09-23
 
 - Add China / Rest of the World selection within the existing Leapmotor integration. Existing entries without a region keep the EU setup and entity identities.

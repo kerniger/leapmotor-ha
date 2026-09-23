@@ -1,4 +1,4 @@
-# Leapmotor China beta (0.8.0b1)
+# Leapmotor China beta (0.8.0b2)
 
 The unified Home Assistant integration uses the existing `leapmotor` domain.
 Existing entries without a region continue to use the EU backend.
@@ -6,7 +6,7 @@ Existing entries without a region continue to use the EU backend.
 ## Install the prerelease
 
 Create a Home Assistant backup first. In HACS, open Leapmotor, choose
-**Redownload**, enable prerelease versions if needed, and select **0.8.0b1**.
+**Redownload**, enable prerelease versions if needed, and select **0.8.0b2**.
 Restart Home Assistant after installation. For manual installation, extract
 the release asset `leapmotor-ha.zip` into `custom_components/leapmotor` and
 restart Home Assistant.
@@ -70,5 +70,5 @@ python tools/ha_region_runtime.py -v
 Build the HACS release archive locally:
 
 ```sh
-bash scripts/build_release_zip.sh /tmp/leapmotor-ha-0.8.0b1.zip
+bash scripts/build_release_zip.sh /tmp/leapmotor-ha-0.8.0b2.zip
 ```
