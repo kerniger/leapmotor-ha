@@ -282,7 +282,7 @@
         "name": "Code brut verrouillage"
       },
       "ptc_state": {
-        "name": "PTC state"
+        "name": "État PTC (code brut)"
       },
       "ptc_power_setting_value": {
         "name": "PTC power setting"
@@ -300,7 +300,7 @@
         "name": "Climate fan volume setting"
       },
       "climate_air_direction": {
-        "name": "Climate air direction"
+        "name": "Direction de l’air (code brut)"
       },
       "climate_cooling_heating_mode": {
         "name": "Climate cooling/heating mode"

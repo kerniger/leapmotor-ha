@@ -282,7 +282,7 @@
         "name": "Ruwe vergrendelingscode"
       },
       "ptc_state": {
-        "name": "PTC state"
+        "name": "PTC-status (ruwe code)"
       },
       "ptc_power_setting_value": {
         "name": "PTC power setting"
@@ -300,7 +300,7 @@
         "name": "Climate fan volume setting"
       },
       "climate_air_direction": {
-        "name": "Climate air direction"
+        "name": "Luchtrichting (ruwe code)"
       },
       "climate_cooling_heating_mode": {
         "name": "Climate cooling/heating mode"

@@ -16,6 +16,7 @@ from .const import DOMAIN, REMOTE_CTL_AC_OFF, REMOTE_CTL_AC_ON
 from .coordinator import LeapmotorDataUpdateCoordinator
 from .entity_helpers import build_vehicle_display_name, vehicle_feature_supported
 from .entity_migration import english_entity_slug
+from .model_helpers import charging_plan_control_supported
 from .remote_helpers import RemoteActionSpec, async_execute_remote_action, format_remote_error
 
 
@@ -93,7 +94,10 @@ async def async_setup_entry(
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
     for vin in coordinator.data.get("vehicles", {}):
         entities: list[SwitchEntity] = []
-        entities.append(LeapmotorChargingScheduleSwitch(coordinator, vin))
+        if charging_plan_control_supported(
+            coordinator.data["vehicles"][vin]["vehicle"].get("car_type")
+        ):
+            entities.append(LeapmotorChargingScheduleSwitch(coordinator, vin))
         entities.append(LeapmotorBatteryPreheatSwitch(coordinator, vin))
         diagnostics = coordinator.data["vehicles"][vin].get("diagnostics", {})
         vehicle = coordinator.data["vehicles"][vin]["vehicle"]
@@ -187,9 +191,9 @@ class LeapmotorChargingScheduleSwitch(
     def is_on(self) -> bool | None:
         """Return whether the charging schedule is enabled."""
         value = self.vehicle_data["charging"].get("charging_planned_enabled")
-        if value is None:
+        if value not in (False, True, 0, 1, "0", "1"):
             return None
-        return bool(value)
+        return value in (True, 1, "1")
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:

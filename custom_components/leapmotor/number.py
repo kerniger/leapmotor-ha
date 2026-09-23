@@ -18,6 +18,7 @@ from .const import DOMAIN
 from .coordinator import LeapmotorDataUpdateCoordinator
 from .entity_helpers import build_vehicle_display_name, vehicle_feature_supported
 from .entity_migration import english_entity_slug
+from .model_helpers import charging_plan_control_supported
 from .remote_helpers import format_remote_error
 
 
@@ -78,7 +79,8 @@ async def async_setup_entry(
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
     for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
         entities: list[NumberEntity] = []
-        entities.append(LeapmotorChargeLimitNumber(coordinator, vin))
+        if charging_plan_control_supported(vehicle_data["vehicle"].get("car_type")):
+            entities.append(LeapmotorChargeLimitNumber(coordinator, vin))
         diagnostics = vehicle_data.get("diagnostics", {})
         vehicle = vehicle_data["vehicle"]
         for description in SEAT_COMFORT_NUMBERS:

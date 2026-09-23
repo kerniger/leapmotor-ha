@@ -325,7 +325,7 @@
         "name": "Verriegelung Rohwert"
       },
       "ptc_state": {
-        "name": "PTC-Status"
+        "name": "PTC-Status (Rohcode)"
       },
       "ptc_power_setting_value": {
         "name": "PTC-Leistungseinstellung"
@@ -343,7 +343,7 @@
         "name": "Klima Lueftereinstellung"
       },
       "climate_air_direction": {
-        "name": "Klima Luftverteilung"
+        "name": "Klima-Luftrichtung (Rohcode)"
       },
       "climate_cooling_heating_mode": {
         "name": "Klima Kuehl-/Heizmodus"
@@ -360,7 +360,7 @@
       "ac_operation_mode": {
         "name": "Klima Betriebsmodus",
         "state": {
-          "auto": "Auto",
+          "auto": "Automatisch",
           "manual": "Manuell"
         }
       },
