@@ -21,6 +21,10 @@
         "data_description": {
           "eco_polling_enabled": "Das langsamere Eco-Intervall nur verwenden, wenn alle Fahrzeuge eindeutig verriegelt, geparkt und nicht angesteckt sind.",
           "eco_scan_interval": "Polling-Intervall im Eco-Modus. Es wird automatisch mindestens auf das normale Aktualisierungsintervall begrenzt."
+        },
+        "menu_options": {
+          "eu": "Restliche Welt",
+          "cn": "China"
         }
       },
       "init": {
@@ -66,6 +70,46 @@
           "eco_polling_enabled": "Das langsamere Eco-Intervall nur verwenden, wenn alle Fahrzeuge eindeutig verriegelt, geparkt und nicht angesteckt sind.",
           "eco_scan_interval": "Polling-Intervall im Eco-Modus. Es wird automatisch mindestens auf das normale Aktualisierungsintervall begrenzt."
         }
+      },
+      "cn": {
+        "title": "Leapmotor China",
+        "description": "Experimentell: zunächst nur Lesedaten. Keine Fahrzeugsteuerung.",
+        "menu_options": {
+          "cn_phone": "Telefonnummer und SMS",
+          "cn_import": "Sitzung importieren (Experten)"
+        }
+      },
+      "cn_phone": {
+        "title": "China: Telefonnummer",
+        "description": "Festlandnummer, optional mit +86 oder 0086. Dieser Schritt sendet noch keine SMS. Optional: http://benutzer:passwort@host:port. Leer bedeutet direkte Verbindung. Bei Proxy-Ausfall gibt es keinen direkten Ausweichversuch.",
+        "data": {
+          "phone": "Telefonnummer",
+          "scan_interval": "Aktualisierungsintervall in Minuten",
+          "proxy_url": "Proxy-URL (optional)"
+        }
+      },
+      "cn_send_sms": {
+        "title": "SMS-Code anfordern",
+        "description": "Nur durch Aktivieren und Bestätigen wird eine SMS angefordert. Bei unklarem Ergebnis bitte zuerst den Empfang prüfen; keine automatische Wiederholung.",
+        "data": {
+          "send_sms": "Jetzt ausdrücklich eine SMS anfordern"
+        }
+      },
+      "cn_code": {
+        "title": "SMS-Code eingeben",
+        "description": "Code als Text eingeben, einschließlich führender Nullen. Dieser Schritt fordert keine neue SMS an.",
+        "data": {
+          "sms_code": "SMS-Code"
+        }
+      },
+      "cn_import": {
+        "title": "China: Sitzung importieren",
+        "description": "Expertenoption. Sitzungsdaten enthalten geheime Zugangsdaten; nicht weitergeben. Optional: http://benutzer:passwort@host:port. Leer bedeutet direkte Verbindung. Bei Proxy-Ausfall gibt es keinen direkten Ausweichversuch.",
+        "data": {
+          "cn_session": "Sitzung (JSON)",
+          "scan_interval": "Aktualisierungsintervall in Minuten",
+          "proxy_url": "Proxy-URL (optional)"
+        }
       }
     },
     "error": {
@@ -76,10 +120,17 @@
       "no_vehicle": "Dieses Konto hat kein verknüpftes Fahrzeug.",
       "unknown": "Unerwarteter Fehler.",
       "missing_app_cert": "App-Zertifikat/Private-Key fehlen. Beide PEM-Werte einfügen oder app_cert.pem und app_key.pem unter /config/leapmotor ablegen.",
-      "certificate_import_error": "Zertifikatsimport fehlgeschlagen. PEM-Zertifikat und Private-Key prüfen."
+      "certificate_import_error": "Zertifikatsimport fehlgeschlagen. PEM-Zertifikat und Private-Key prüfen.",
+      "invalid_phone": "Ungültige chinesische Festlandnummer.",
+      "sms_request_failed": "SMS-Anfrage fehlgeschlagen oder Ergebnis unklar. Empfang prüfen; vor einem erneuten Versuch mindestens 60 Sekunden warten.",
+      "session_save_failed": "Sitzung konnte nicht gespeichert werden.",
+      "invalid_proxy": "Ungültige HTTP(S)-Proxy-URL."
     },
     "abort": {
-      "already_configured": "Dieses Konto ist bereits eingerichtet."
+      "already_configured": "Dieses Konto ist bereits eingerichtet.",
+      "wrong_account": "Bitte dasselbe Konto erneut anmelden.",
+      "reauth_not_supported": "Erneute Anmeldung wird für diese Region hier nicht unterstützt.",
+      "reauth_successful": "Erneute Anmeldung erfolgreich."
     }
   },
   "config_subentries": {
@@ -558,6 +609,9 @@
       },
       "ac_off": {
         "name": "Klima ausschalten"
+      },
+      "refresh": {
+        "name": "Aktualisieren"
       }
     },
     "lock": {
@@ -626,7 +680,17 @@
           "eco_polling_enabled": "Das langsamere Eco-Intervall nur verwenden, wenn alle Fahrzeuge eindeutig verriegelt, geparkt und nicht angesteckt sind.",
           "eco_scan_interval": "Polling-Intervall im Eco-Modus. Es wird automatisch mindestens auf das normale Aktualisierungsintervall begrenzt."
         }
+      },
+      "cn_init": {
+        "title": "CN-Proxy",
+        "description": "Optional: http://benutzer:passwort@host:port. Leer bedeutet direkte Verbindung. Bei Proxy-Ausfall gibt es keinen direkten Ausweichversuch.",
+        "data": {
+          "proxy_url": "Proxy-URL (optional)"
+        }
       }
+    },
+    "error": {
+      "invalid_proxy": "Ungültige HTTP(S)-Proxy-URL."
     }
   },
   "services": {

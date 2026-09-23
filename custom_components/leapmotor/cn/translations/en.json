@@ -1,0 +1,79 @@
+{
+  "title": "Leapmotor China Beta",
+  "config": {
+    "step": {
+      "cn": {
+        "title": "Leapmotor China",
+        "description": "Experimental: read-only vehicle data. No vehicle controls.",
+        "menu_options": {
+          "cn_phone": "Phone number and SMS",
+          "cn_import": "Import session (expert)"
+        }
+      },
+      "cn_phone": {
+        "title": "China: phone number",
+        "description": "Mainland number, optionally prefixed with +86 or 0086. This step does not send an SMS. Optional: http://username:password@host:port. Empty means direct connection. Proxy failures never fall back to direct access.",
+        "data": {
+          "phone": "Phone number",
+          "scan_interval": "Update interval in minutes",
+          "proxy_url": "Proxy URL (optional)"
+        }
+      },
+      "cn_send_sms": {
+        "title": "Request SMS code",
+        "description": "Check the box and submit to request an SMS. If the result is uncertain, check for delivery first; there is no automatic retry.",
+        "data": {
+          "send_sms": "Explicitly request an SMS now"
+        }
+      },
+      "cn_code": {
+        "title": "Enter SMS code",
+        "description": "Enter the code including leading zeroes. This step never requests another SMS.",
+        "data": {
+          "sms_code": "SMS code"
+        }
+      },
+      "cn_import": {
+        "title": "China: import session",
+        "description": "Expert option. Session data contains secret credentials; do not share it. Optional: http://username:password@host:port. Empty means direct connection. Proxy failures never fall back to direct access.",
+        "data": {
+          "cn_session": "Session (JSON)",
+          "scan_interval": "Update interval in minutes",
+          "proxy_url": "Proxy URL (optional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Authentication failed.",
+      "account_cert_error": "Login succeeded, but the account certificate could not be opened.",
+      "cannot_connect": "Connection or API refresh failed.",
+      "api_refresh_failed": "Login worked, but the initial vehicle data refresh failed.",
+      "no_vehicle": "Login worked, but no vehicle is available for this account.",
+      "unknown": "Unexpected error.",
+      "invalid_phone": "Invalid mainland China phone number.",
+      "sms_request_failed": "SMS request failed or outcome uncertain. Check delivery; wait at least 60 seconds before retrying.",
+      "session_save_failed": "Could not save the session.",
+      "invalid_proxy": "Invalid HTTP(S) proxy URL."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "wrong_account": "Reauthenticate with the same account.",
+      "reauth_not_supported": "This reauthentication flow is not available for this region.",
+      "reauth_successful": "Reauthentication successful."
+    }
+  },
+  "options": {
+    "step": {
+      "cn_init": {
+        "title": "CN proxy",
+        "description": "Optional: http://username:password@host:port. Empty means direct connection. Proxy failures never fall back to direct access.",
+        "data": {
+          "proxy_url": "Proxy URL (optional)"
+        }
+      }
+    },
+    "error": {
+      "invalid_proxy": "Invalid HTTP(S) proxy URL."
+    }
+  }
+}

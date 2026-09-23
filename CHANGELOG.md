@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.0b1 - 2026-09-23
+
+- Add China / Rest of the World selection within the existing Leapmotor integration. Existing entries without a region keep the EU setup and entity identities.
+- Add CN phone/SMS login, expert session import, per-entry proxy settings, durable session renewal, signal-gated sensors and manual refresh. SMS requires explicit confirmation.
+- Keep CN read-only: reject CN targets in shared remote services and redact CN diagnostics. Unverified lock status is not exposed.
+- CN is experimental; B05 and T03 coverage is synthetic, not a claim of live vehicle validation or EU feature parity. See [CN setup and limitations](docs/cn/README.md).
+
 ## 0.7.2 - 2026-09-14
 
 - Label the seven-day energy sensor as presumed driving energy in all supported

@@ -276,6 +276,11 @@ PLATFORMS: list[Platform] = [
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Leapmotor from a config entry."""
     entry_data = dict(entry.data)
+    from .cn.const import CONF_REGION, REGION_CN
+    if entry_data.get(CONF_REGION) == REGION_CN:
+        from .cn import async_setup_entry as cn_async_setup_entry
+        return await cn_async_setup_entry(hass, entry)
+
     if not entry_data.get(CONF_DEVICE_ID):
         entry_data[CONF_DEVICE_ID] = uuid.uuid4().hex
         hass.config_entries.async_update_entry(entry, data=entry_data)
@@ -404,6 +409,11 @@ def _async_ensure_vehicle_subentries(
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    from .cn.const import CONF_REGION, REGION_CN
+    if entry.data.get(CONF_REGION) == REGION_CN:
+        from .cn import async_unload_entry as cn_async_unload_entry
+        return await cn_async_unload_entry(hass, entry)
+
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         coordinator = hass.data[DOMAIN].pop(entry.entry_id)
@@ -420,6 +430,14 @@ async def async_reload_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     await hass.config_entries.async_reload(entry.entry_id)
 
 
+async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Remove a config entry."""
+    from .cn.const import CONF_REGION, REGION_CN
+    if entry.data.get(CONF_REGION) == REGION_CN:
+        from .cn import async_remove_entry as cn_async_remove_entry
+        await cn_async_remove_entry(hass, entry)
+
+
 async def _async_register_services(hass: HomeAssistant) -> None:
     """Register Leapmotor domain services once."""
 
@@ -428,6 +446,40 @@ async def _async_register_services(hass: HomeAssistant) -> None:
     specs["unlock"] = UNLOCK_ACTION
     specs["cancel_climate_schedule"] = CANCEL_CLIMATE_SCHEDULE_ACTION
     specs["cancel_prepare_car_schedule"] = CANCEL_PREPARE_CAR_SCHEDULE_ACTION
+
+    from .cn.const import CONF_REGION as _CONF_REGION, REGION_CN as _REGION_CN, DOMAIN_CN as _DOMAIN_CN
+
+    def _is_cn_target(target_vin: str | None, entity_id: str | None) -> bool:
+        """Return True if the explicit target is a CN entity or CN VIN.
+
+        EU service handlers must refuse to act on CN targets; CN vehicles have
+        no ``vin`` attribute so a silent fallback to the default EU car is wrong.
+        """
+        if entity_id:
+            from homeassistant.helpers import entity_registry as _er
+            entry_obj = _er.async_get(hass).async_get(entity_id)
+            if entry_obj and entry_obj.config_entry_id:
+                cfg_entry = hass.config_entries.async_get_entry(entry_obj.config_entry_id)
+                if cfg_entry and cfg_entry.data.get(_CONF_REGION) == _REGION_CN:
+                    return True
+        if target_vin:
+            cn_data = hass.data.get(_DOMAIN_CN) or {}
+            for cn_coord in cn_data.values():
+                if target_vin in (cn_coord.data or {}).get("vehicles", {}):
+                    return True
+        return False
+
+    def _register_eu_service(domain, service, handler, **kwargs):
+        """Apply region isolation to every EU service before resolving a car."""
+        async def guarded(call):
+            if _is_cn_target(call.data.get("vin"), call.data.get("entity_id")):
+                raise HomeAssistantError(
+                    "This service targets a China (CN) vehicle. "
+                    "EU remote services cannot act on CN entries."
+                )
+            await handler(call)
+
+        hass.services.async_register(domain, service, guarded, **kwargs)
 
     def resolve_call_target(call: ServiceCall) -> tuple[LeapmotorDataUpdateCoordinator, str]:
         """Resolve one Leapmotor service call to coordinator and VIN."""
@@ -453,6 +505,7 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         raise HomeAssistantError(
             "No matching Leapmotor vehicle found. Specify a VIN if multiple vehicles are configured."
         )
+
 
     async def handle_remote(service_action: str, call: ServiceCall) -> None:
         domain_data = hass.data.get(DOMAIN) or {}
@@ -753,70 +806,70 @@ async def _async_register_services(hass: HomeAssistant) -> None:
         return _handler
 
     for service_name in ("lock", "unlock", *(spec.service_name for spec in BUTTON_SPECS)):
-        hass.services.async_register(
+        _register_eu_service(
             DOMAIN,
             service_name,
             make_handler(service_name),
             schema=_SERVICE_SCHEMAS.get(service_name, SERVICE_FIELDS),
         )
         _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, service_name)
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "set_climate",
         handle_set_climate,
         schema=SET_CLIMATE_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_climate")
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "set_climate_schedule",
         handle_set_climate_schedule,
         schema=SET_CLIMATE_SCHEDULE_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_climate_schedule")
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "cancel_climate_schedule",
         make_handler("cancel_climate_schedule"),
         schema=SERVICE_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "cancel_climate_schedule")
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "prepare_car",
         handle_prepare_car,
         schema=PREPARE_CAR_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "prepare_car")
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "set_prepare_car_schedule",
         handle_set_prepare_car_schedule,
         schema=PREPARE_CAR_SCHEDULE_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_prepare_car_schedule")
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "cancel_prepare_car_schedule",
         make_handler("cancel_prepare_car_schedule"),
         schema=SERVICE_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "cancel_prepare_car_schedule")
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "set_charge_limit",
         handle_set_charge_limit,
         schema=SET_CHARGE_LIMIT_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "set_charge_limit")
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "send_destination",
         handle_send_destination,
         schema=SEND_DESTINATION_FIELDS,
     )
     _LOGGER.debug("Registered Leapmotor service %s.%s", DOMAIN, "send_destination")
-    hass.services.async_register(
+    _register_eu_service(
         DOMAIN,
         "export_diagnostics",
         handle_export_diagnostics,

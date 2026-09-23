@@ -26,6 +26,8 @@ from .leap_api import (
     LeapmotorMissingAppCertError,
     LeapmotorNoVehicleError,
 )
+from .cn.config_flow import LeapmotorCNConfigFlowMixin, CNOptionsFlow
+from .cn.const import CONF_REGION, REGION_CN, CONF_CN_SESSION, CONF_PROXY_URL
 from .const import (
     CONF_ABRP_ENABLED,
     CONF_ABRP_TOKEN,
@@ -207,11 +209,15 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     }
 
 
-class LeapmotorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class LeapmotorConfigFlow(LeapmotorCNConfigFlowMixin, config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Leapmotor."""
 
     VERSION = 1
     MINOR_VERSION = 1
+
+    def __init__(self) -> None:
+        """Initialize."""
+        super().__init__()
 
     @classmethod
     @callback
@@ -220,6 +226,8 @@ class LeapmotorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> dict[str, type[config_entries.ConfigSubentryFlow]]:
         """Return the VIN-scoped configurations supported by this account."""
+        if config_entry.data.get(CONF_REGION) == REGION_CN:
+            return {}
         return {SUBENTRY_TYPE_VEHICLE: LeapmotorVehicleSubentryFlow}
 
     @staticmethod
@@ -227,9 +235,21 @@ class LeapmotorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Create the options flow."""
+        if config_entry.data.get(CONF_REGION) == REGION_CN:
+            return CNOptionsFlow()
         return LeapmotorOptionsFlow(config_entry)
 
     async def async_step_user(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """Start setup: show the China / Rest of the World region menu."""
+        return self.async_show_menu(
+            step_id="user",
+            menu_options=["eu", "cn"]
+        )
+
+    async def async_step_eu(
         self,
         user_input: dict[str, Any] | None = None,
     ) -> config_entries.ConfigFlowResult:

@@ -21,6 +21,10 @@
         "data_description": {
           "eco_polling_enabled": "Use the slower eco interval only while every vehicle is clearly locked, parked, and unplugged.",
           "eco_scan_interval": "Polling interval used in eco mode. It is automatically clamped to at least the normal update interval."
+        },
+        "menu_options": {
+          "eu": "Rest of the World",
+          "cn": "China"
         }
       },
       "init": {
@@ -66,6 +70,46 @@
           "eco_polling_enabled": "Use the slower eco interval only while every vehicle is clearly locked, parked, and unplugged.",
           "eco_scan_interval": "Polling interval used in eco mode. It is automatically clamped to at least the normal update interval."
         }
+      },
+      "cn": {
+        "title": "Leapmotor China",
+        "description": "Experimental: read-only vehicle data. No vehicle controls.",
+        "menu_options": {
+          "cn_phone": "Phone number and SMS",
+          "cn_import": "Import session (expert)"
+        }
+      },
+      "cn_phone": {
+        "title": "China: phone number",
+        "description": "Mainland number, optionally prefixed with +86 or 0086. This step does not send an SMS. Optional: http://username:password@host:port. Empty means direct connection. Proxy failures never fall back to direct access.",
+        "data": {
+          "phone": "Phone number",
+          "scan_interval": "Update interval in minutes",
+          "proxy_url": "Proxy URL (optional)"
+        }
+      },
+      "cn_send_sms": {
+        "title": "Request SMS code",
+        "description": "Check the box and submit to request an SMS. If the result is uncertain, check for delivery first; there is no automatic retry.",
+        "data": {
+          "send_sms": "Explicitly request an SMS now"
+        }
+      },
+      "cn_code": {
+        "title": "Enter SMS code",
+        "description": "Enter the code including leading zeroes. This step never requests another SMS.",
+        "data": {
+          "sms_code": "SMS code"
+        }
+      },
+      "cn_import": {
+        "title": "China: import session",
+        "description": "Expert option. Session data contains secret credentials; do not share it. Optional: http://username:password@host:port. Empty means direct connection. Proxy failures never fall back to direct access.",
+        "data": {
+          "cn_session": "Session (JSON)",
+          "scan_interval": "Update interval in minutes",
+          "proxy_url": "Proxy URL (optional)"
+        }
       }
     },
     "error": {
@@ -76,10 +120,17 @@
       "no_vehicle": "This account has no linked vehicle.",
       "unknown": "Unexpected error.",
       "missing_app_cert": "Missing app certificate/private key. Paste both PEM values or place app_cert.pem and app_key.pem in /config/leapmotor.",
-      "certificate_import_error": "Certificate import failed. Check the PEM certificate and private key."
+      "certificate_import_error": "Certificate import failed. Check the PEM certificate and private key.",
+      "invalid_phone": "Invalid mainland China phone number.",
+      "sms_request_failed": "SMS request failed or outcome uncertain. Check delivery; wait at least 60 seconds before retrying.",
+      "session_save_failed": "Could not save the session.",
+      "invalid_proxy": "Invalid HTTP(S) proxy URL."
     },
     "abort": {
-      "already_configured": "This account is already configured."
+      "already_configured": "This account is already configured.",
+      "wrong_account": "Reauthenticate with the same account.",
+      "reauth_not_supported": "This reauthentication flow is not available for this region.",
+      "reauth_successful": "Reauthentication successful."
     }
   },
   "config_subentries": {
@@ -558,6 +609,9 @@
       },
       "ac_off": {
         "name": "Climate off"
+      },
+      "refresh": {
+        "name": "Refresh"
       }
     },
     "lock": {
@@ -626,7 +680,17 @@
           "eco_polling_enabled": "Use the slower eco interval only while every vehicle is clearly locked, parked, and unplugged.",
           "eco_scan_interval": "Polling interval used in eco mode. It is automatically clamped to at least the normal update interval."
         }
+      },
+      "cn_init": {
+        "title": "CN proxy",
+        "description": "Optional: http://username:password@host:port. Empty means direct connection. Proxy failures never fall back to direct access.",
+        "data": {
+          "proxy_url": "Proxy URL (optional)"
+        }
       }
+    },
+    "error": {
+      "invalid_proxy": "Invalid HTTP(S) proxy URL."
     }
   },
   "services": {

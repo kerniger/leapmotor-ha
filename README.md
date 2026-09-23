@@ -1,5 +1,7 @@
 # leapmotor-ha
 
+The 0.8.0b1 beta adds a China / Rest of the World setup menu. See [China beta setup and limitations](docs/cn/README.md).
+
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/)
 [![Open your Home Assistant instance and add this repository to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kerniger&repository=leapmotor-ha&category=integration)
 

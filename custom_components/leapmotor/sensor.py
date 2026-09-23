@@ -864,6 +864,11 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up Leapmotor sensors."""
+    from .cn.const import CONF_REGION, REGION_CN
+    if entry.data.get(CONF_REGION) == REGION_CN:
+        from .cn.sensor import async_setup_entry as cn_async_setup_entry
+        return await cn_async_setup_entry(hass, entry, async_add_entities)
+
     coordinator: LeapmotorDataUpdateCoordinator = hass.data[DOMAIN][entry.entry_id]
     for vin, vehicle_data in coordinator.data.get("vehicles", {}).items():
         async_add_entities(

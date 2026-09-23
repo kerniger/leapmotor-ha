@@ -35,6 +35,13 @@ _SENSITIVE_KEYS = {
     "car_picture_whole",
     "url",
     "abrp_token",
+    # CN-specific credentials (defense-in-depth; CN entries never reach this path)
+    "cn_session",
+    "accessToken",
+    "signKeyBase64",
+    "proxy_url",
+    "deviceId",
+    "accountId",
 }
 _SENSITIVE_KEY_NAMES = {key.casefold() for key in _SENSITIVE_KEYS}
 _EMAIL_PATTERN = re.compile(
@@ -47,6 +54,13 @@ async def async_get_config_entry_diagnostics(
     entry: ConfigEntry,
 ) -> dict[str, Any]:
     """Return sanitized diagnostics for support."""
+    # CN entries must be handled exclusively by cn.diagnostics to prevent
+    # credential leaks through the EU diagnostics path.
+    from .cn.const import CONF_REGION, REGION_CN
+    if entry.data.get(CONF_REGION) == REGION_CN:
+        from .cn.diagnostics import async_get_config_entry_diagnostics as cn_diag
+        return await cn_diag(hass, entry)
+
     coordinator = hass.data.get(DOMAIN, {}).get(entry.entry_id)
     vehicles = {}
     if coordinator and coordinator.data:

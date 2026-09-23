@@ -10,3 +10,6 @@ Gemini_Generated_Image_*.png
 custom_components/leapmotor/app_cert.pem
 custom_components/leapmotor/app_key.pem
 custom_components/leapmotor/*.p12
+
+# Local release artifacts
+build/
