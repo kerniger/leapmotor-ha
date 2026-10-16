@@ -9,13 +9,13 @@ This repository is the cleaned public version of the project. It does not
 contain client certificates, private keys, captured tokens, account data,
 research logs, or reverse-engineering workfiles.
 
-## China support: 0.8.0b2 prerelease
+## China support: 0.8.0b3 prerelease
 
-**[Download the EU/CN beta 0.8.0b2](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.8.0b2)**
+**[Download the EU/CN beta 0.8.0b3](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.8.0b3)**
 
 The beta adds **China / Rest of the World** to setup within the existing
 Leapmotor integration. Existing EU entries retain their configuration and entity
-identities. **0.7.3 is the stable release; CN support is experimental.**
+identities. **0.7.4 is the stable release; CN support is experimental.**
 
 | Region | Available in the beta |
 | --- | --- |
@@ -30,14 +30,24 @@ outstanding. A previous standalone CN gateway connection failure remains
 unresolved, so successful cloud connectivity is not guaranteed.
 
 **Install:** Back up Home Assistant, open Leapmotor in HACS, choose
-**Redownload**, enable prerelease versions if needed, select **0.8.0b2**, and
+**Redownload**, enable prerelease versions if needed, select **0.8.0b3**, and
 restart Home Assistant. Alternatively, use the release asset `leapmotor-ha.zip`.
 The standalone `leapmotor_cn` beta is not migrated automatically; disable its
 entry before setting up the same CN account in the shared integration.
 
-Read the [CN setup, limitations and rollback guide](https://github.com/kerniger/leapmotor-ha/blob/v0.8.0b2/docs/cn/README.md).
+Read the [CN setup, limitations and rollback guide](https://github.com/kerniger/leapmotor-ha/blob/v0.8.0b3/docs/cn/README.md).
 For feedback, include model/year, HA version and the failing step or missing
 entities. Never post session JSON, credentials, VINs or raw locations.
+
+## October maintenance fixes
+
+[Stable 0.7.4](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.7.4) and
+[EU/CN beta 0.8.0b3](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.8.0b3)
+add password recovery/reconfiguration, HA-local history dates, T03 daily Wh-to-kWh
+conversion, and connected-idle/EVCC B for the observed T03 wallbox pause.
+T03 charge-limit provenance and raw diagnostics help investigate remaining
+limit/SOC inconsistencies. T03 charging-plan writes and the exact daily-energy
+scope remain unverified. See the release notes for validation and limitations.
 
 ## September maintenance fixes
 
