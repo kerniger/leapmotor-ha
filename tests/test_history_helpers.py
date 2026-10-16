@@ -133,3 +133,34 @@ class MileageEnergyDetailTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LocalHistoryDateTests(unittest.TestCase):
+    def test_local_dates_cover_both_sides_of_utc_and_dst(self):
+        for zone, dates in (("Europe/Rome", [(2026, 9, 23), (2026, 3, 29), (2026, 10, 25)]),
+                            ("America/Los_Angeles", [(2026, 9, 23)]),
+                            ("Pacific/Auckland", [(2026, 9, 23)])):
+            tz = ZoneInfo(zone)
+            for year, month, day in dates:
+                midnight = datetime(year, month, day, tzinfo=tz)
+                row = {"xDay": int(midnight.timestamp() * 1000), "day": "cloud-utc-date",
+                       "accumulatedMileage": 13, "accumulatedEnergyConsume": 1250}
+                result = history.summarize_mileage_energy_detail([row], 13, car_type="T03", local_timezone=tz)
+                self.assertEqual(result["daily_detail"][0]["date"], midnight.date().isoformat())
+                self.assertEqual(result["daily_detail"][0]["source_date"], "cloud-utc-date")
+                self.assertEqual(result["daily_detail"][0]["energy_kwh"], 1.25)
+
+    def test_bad_timestamps_keep_source_label(self):
+        for value in (None, "bad", "NaN", 0, 1e100):
+            result = history.summarize_mileage_energy_detail(
+                [{"xDay": value, "day": "2026-09-23"}], 0,
+                local_timezone=ZoneInfo("Europe/Rome"))
+            self.assertEqual(result["daily_detail"][0]["date"], "2026-09-23")
+            self.assertIsNone(result["energy_kwh"])
+
+    def test_t03_incomplete_coverage_still_blocks_total(self):
+        result = history.summarize_mileage_energy_detail(
+            [{"accumulatedMileage": 13, "accumulatedEnergyConsume": 1250}], 20, car_type="T03")
+        self.assertFalse(result["energy_complete"])
+        self.assertIsNone(result["energy_kwh"])
+        self.assertEqual(result["energy_unavailable_reason"], "incomplete_data")

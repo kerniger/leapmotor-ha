@@ -66,6 +66,20 @@
           "eco_polling_enabled": "Gebruik het langzamere eco-interval alleen wanneer alle voertuigen duidelijk vergrendeld, geparkeerd en niet aangesloten zijn.",
           "eco_scan_interval": "Pollinginterval in eco-modus. Dit wordt automatisch minimaal gelijk aan het normale update-interval gezet."
         }
+      },
+      "reauth_confirm": {
+        "title": "Leapmotor-wachtwoord bijwerken",
+        "description": "Voer het wachtwoord voor {username} in. Voertuigen en instellingen blijven behouden.",
+        "data": {
+          "password": "Wachtwoord"
+        }
+      },
+      "reconfigure": {
+        "title": "Leapmotor-wachtwoord bijwerken",
+        "description": "Voer het wachtwoord voor {username} in. Voertuigen en instellingen blijven behouden.",
+        "data": {
+          "password": "Wachtwoord"
+        }
       }
     },
     "error": {
@@ -79,7 +93,9 @@
       "no_vehicle": "Dit account heeft geen gekoppeld voertuig."
     },
     "abort": {
-      "already_configured": "Dit account is al geconfigureerd."
+      "already_configured": "Dit account is al geconfigureerd.",
+      "reauth_successful": "Accountwachtwoord bijgewerkt.",
+      "reconfigure_successful": "Accountwachtwoord bijgewerkt."
     }
   },
   "config_subentries": {

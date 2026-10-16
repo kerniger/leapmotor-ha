@@ -71,6 +71,20 @@
           "eco_scan_interval": "Polling interval used in eco mode. It is automatically clamped to at least the normal update interval."
         }
       },
+      "reauth_confirm": {
+        "title": "Update Leapmotor password",
+        "description": "Enter the password for {username}. The existing vehicles and settings are retained.",
+        "data": {
+          "password": "Password"
+        }
+      },
+      "reconfigure": {
+        "title": "Update Leapmotor password",
+        "description": "Enter the password for {username}. The existing vehicles and settings are retained.",
+        "data": {
+          "password": "Password"
+        }
+      },
       "cn": {
         "title": "Leapmotor China",
         "description": "Experimental: read-only vehicle data. No vehicle controls.",
@@ -130,7 +144,8 @@
       "already_configured": "This account is already configured.",
       "wrong_account": "Reauthenticate with the same account.",
       "reauth_not_supported": "This reauthentication flow is not available for this region.",
-      "reauth_successful": "Reauthentication successful."
+      "reauth_successful": "Reauthentication successful.",
+      "reconfigure_successful": "Credentials updated."
     }
   },
   "config_subentries": {

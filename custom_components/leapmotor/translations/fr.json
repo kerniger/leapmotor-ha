@@ -66,6 +66,20 @@
           "eco_polling_enabled": "Utilise l intervalle eco plus lent uniquement lorsque tous les vehicules sont clairement verrouilles, gares et non branches.",
           "eco_scan_interval": "Intervalle de polling en mode eco. Il est automatiquement limite au minimum a l intervalle normal de mise a jour."
         }
+      },
+      "reauth_confirm": {
+        "title": "Mettre à jour le mot de passe Leapmotor",
+        "description": "Saisissez le mot de passe de {username}. Les véhicules et réglages sont conservés.",
+        "data": {
+          "password": "Mot de passe"
+        }
+      },
+      "reconfigure": {
+        "title": "Mettre à jour le mot de passe Leapmotor",
+        "description": "Saisissez le mot de passe de {username}. Les véhicules et réglages sont conservés.",
+        "data": {
+          "password": "Mot de passe"
+        }
       }
     },
     "error": {
@@ -79,7 +93,9 @@
       "no_vehicle": "Ce compte n a aucun vehicule associe."
     },
     "abort": {
-      "already_configured": "Ce compte est deja configure."
+      "already_configured": "Ce compte est deja configure.",
+      "reauth_successful": "Mot de passe du compte mis à jour.",
+      "reconfigure_successful": "Mot de passe du compte mis à jour."
     }
   },
   "config_subentries": {

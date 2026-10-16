@@ -11,6 +11,7 @@ from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -22,7 +23,12 @@ from .const import (
     DOMAIN,
     REMOTE_ACTION_COOLDOWN_SECONDS,
 )
-from .leap_api import LeapmotorApiError
+from .leap_api import (
+    LeapmotorAccountCertError,
+    LeapmotorApiError,
+    LeapmotorAuthError,
+    LeapmotorMissingAppCertError,
+)
 from .location import CoordinateResolution, resolve_coordinate
 from .vehicle_config import (
     abrp_config_for_vehicle,
@@ -152,11 +158,14 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         try:
             data = await self.hass.async_add_executor_job(self.client.fetch_data)
         except LeapmotorApiError as exc:
+            error_code = self._classify_error(str(exc))
+            if error_code == "invalid_auth" and not isinstance(exc, LeapmotorAuthError):
+                error_code = "api_error"
             self._integration_status = {
                 "last_update_status": "error",
                 "last_update_success": False,
                 "last_update_error": str(exc),
-                "last_update_error_code": self._classify_error(str(exc)),
+                "last_update_error_code": error_code,
                 "last_update_started_at": started_at,
                 "last_update_completed_at": time.time(),
                 "last_successful_update_at": self._integration_status.get("last_successful_update_at"),
@@ -171,6 +180,10 @@ class LeapmotorDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                 "polling_mode": self._polling_mode,
                 "vehicle_count": self._integration_status.get("vehicle_count", 0),
             }
+            if isinstance(exc, LeapmotorAuthError) and not isinstance(
+                exc, (LeapmotorAccountCertError, LeapmotorMissingAppCertError)
+            ):
+                raise ConfigEntryAuthFailed(str(exc)) from exc
             raise UpdateFailed(str(exc)) from exc
         self._stabilize_vehicle_states(data)
         self._apply_state_freshness(data)

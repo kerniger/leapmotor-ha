@@ -66,6 +66,17 @@ class RegionTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(execute.await_args.args[1], 'SYNTHETIC-EU')
         leapmotor._async_unregister_services(self.hass)
 
+    async def test_cn_account_recovery_keeps_the_phone_flow_without_sending_sms(self):
+        entry = await self.import_entry()
+        calls_before = list(self.calls)
+        for source in ("reauth", "reconfigure"):
+            result = await self.hass.config_entries.flow.async_init(
+                "leapmotor", context={"source": source, "entry_id": entry.entry_id},
+                data=dict(entry.data) if source == "reauth" else None)
+            self.assertEqual(result["step_id"], "cn_phone")
+            self.assertEqual(self.calls, calls_before)
+            self.hass.config_entries.flow.async_abort(result["flow_id"])
+
     async def test_entry_without_region_uses_existing_eu_lifecycle(self):
         from custom_components import leapmotor
         entry = Mock(entry_id='synthetic-eu', data={'username': 'synthetic', 'password': 'synthetic', 'device_id': 'synthetic'}, options={})
