@@ -94,7 +94,7 @@ class NormalizationTests(unittest.TestCase):
                 {"accumulatedMileage": distance, "accumulatedEnergyConsume": value}]}}
             history = self.normalize(" t03 ", {}, mileage_json=mileage)["history"]
             self.assertTrue(history["last_7_days_energy_complete"])
-            self.assertEqual(history["last_7_days_energy_kwh"], round(value / 1000, 1))
+            self.assertEqual(history["last_7_days_energy_kwh"], round(value / 1000, 3))
             self.assertIsNone(history["last_7_days_energy_unavailable_reason"])
             self.assertEqual(history["last_7_days_energy_unit"], "kWh")
             self.assertEqual(history["last_7_days_energy_source_unit"], "Wh")
@@ -194,6 +194,7 @@ class OctoberHistoryIntegrationTests(unittest.TestCase):
         self.assertEqual(row["date"], "2026-09-23")
         self.assertEqual(row["source_date"], "source-date")
         self.assertEqual(row["energy_kwh"], 1.25)
+        self.assertEqual(result["last_7_days_energy_kwh"], 1.25)
 
     def test_charge_limit_provenance_preserves_raw_values(self):
         vehicle = api.Vehicle("SYNTHETIC", None, "T03", None, False)
