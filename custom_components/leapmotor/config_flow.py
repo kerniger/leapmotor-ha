@@ -184,6 +184,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         operation_password=data.get(CONF_OPERATION_PASSWORD) or None,
         device_id=data.get(CONF_DEVICE_ID),
         static_cert_dir=app_certificate_dir(hass),
+        history_timezone=hass.config.time_zone,
     )
     try:
         try:
@@ -270,6 +271,59 @@ class LeapmotorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> config_entries.ConfigFlowResult:
         """Handle account credentials after certificate material is available."""
         return await self._async_handle_account_step(user_input, step_id="account")
+
+    async def async_step_reauth(
+        self, entry_data: dict[str, Any],
+    ) -> config_entries.ConfigFlowResult:
+        """Recover the existing account without removing its vehicles or history."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """Allow credentials to be replaced proactively from the account menu."""
+        return await self._async_update_credentials(user_input, "reconfigure")
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """Ask for a replacement password for the same account."""
+        return await self._async_update_credentials(user_input, "reauth_confirm")
+
+    async def _async_update_credentials(
+        self, user_input: dict[str, Any] | None, step_id: str,
+    ) -> config_entries.ConfigFlowResult:
+        entry = (self._get_reauth_entry() if step_id == "reauth_confirm"
+                 else self._get_reconfigure_entry())
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            # Keep the username, device ID, vehicle subentries, PINs and options.
+            data = {**entry.data, CONF_PASSWORD: user_input[CONF_PASSWORD]}
+            try:
+                await validate_input(self.hass, data)
+            except LeapmotorMissingAppCertError:
+                errors["base"] = "missing_app_cert"
+            except LeapmotorAccountCertError:
+                errors["base"] = "account_cert_error"
+            except LeapmotorNoVehicleError:
+                errors["base"] = "no_vehicle"
+            except LeapmotorAuthError:
+                errors["base"] = "invalid_auth"
+            except LeapmotorApiError:
+                errors["base"] = "api_refresh_failed"
+            except Exception:  # noqa: BLE001
+                _LOGGER.exception("Unexpected error validating replacement credentials")
+                errors["base"] = "unknown"
+            else:
+                return self.async_update_reload_and_abort(
+                    entry, data_updates={CONF_PASSWORD: user_input[CONF_PASSWORD]},
+                )
+        return self.async_show_form(
+            step_id=step_id,
+            data_schema=vol.Schema({vol.Required(CONF_PASSWORD): str}),
+            description_placeholders={"username": entry.data[CONF_USERNAME]},
+            errors=errors,
+        )
 
     async def _async_handle_account_step(
         self,

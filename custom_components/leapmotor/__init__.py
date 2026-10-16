@@ -304,6 +304,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         operation_password=operation_password or None,
         device_id=entry_data[CONF_DEVICE_ID],
         static_cert_dir=hass.config.path(STATIC_CERT_STORAGE_DIR),
+        history_timezone=hass.config.time_zone,
     )
     coordinator = LeapmotorDataUpdateCoordinator(
         hass=hass,

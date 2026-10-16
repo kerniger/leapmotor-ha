@@ -945,6 +945,12 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
             "car_type": vehicle.get("car_type"),
             "is_shared": vehicle.get("is_shared"),
         }
+        if self.entity_description.key == "charge_limit_percent":
+            charging = self.vehicle_data["charging"]
+            attributes.update({
+                "source": charging.get("charge_limit_source"),
+                "reliability": charging.get("charge_limit_reliability"),
+            })
         if self.entity_description.key == "vehicle_state":
             status = self.vehicle_data["status"]
             attributes.update(
@@ -1032,6 +1038,8 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
                     "energy_scope": "presumed_driving_only",
                     "energy_scope_confirmed": False,
                     "energy_unit": history.get("last_7_days_energy_unit"),
+                    "energy_source_unit": history.get("last_7_days_energy_source_unit"),
+                    "history_timezone": history.get("last_7_days_timezone"),
                     "energy_unavailable_reason": history.get("last_7_days_energy_unavailable_reason"),
                     "energy_precision": "as_reported_by_cloud",
                     "energy_complete_scope": "fields_and_mileage_coverage",

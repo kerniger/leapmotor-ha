@@ -66,6 +66,20 @@
           "eco_polling_enabled": "Das langsamere Eco-Intervall nur verwenden, wenn alle Fahrzeuge eindeutig verriegelt, geparkt und nicht angesteckt sind.",
           "eco_scan_interval": "Polling-Intervall im Eco-Modus. Es wird automatisch mindestens auf das normale Aktualisierungsintervall begrenzt."
         }
+      },
+      "reauth_confirm": {
+        "title": "Leapmotor-Passwort aktualisieren",
+        "description": "Passwort für {username} eingeben. Fahrzeuge und Einstellungen bleiben erhalten.",
+        "data": {
+          "password": "Passwort"
+        }
+      },
+      "reconfigure": {
+        "title": "Leapmotor-Passwort aktualisieren",
+        "description": "Passwort für {username} eingeben. Fahrzeuge und Einstellungen bleiben erhalten.",
+        "data": {
+          "password": "Passwort"
+        }
       }
     },
     "error": {
@@ -79,7 +93,9 @@
       "certificate_import_error": "Zertifikatsimport fehlgeschlagen. PEM-Zertifikat und Private-Key prüfen."
     },
     "abort": {
-      "already_configured": "Dieses Konto ist bereits eingerichtet."
+      "already_configured": "Dieses Konto ist bereits eingerichtet.",
+      "reauth_successful": "Kontopasswort aktualisiert.",
+      "reconfigure_successful": "Kontopasswort aktualisiert."
     }
   },
   "config_subentries": {
