@@ -106,7 +106,10 @@ def summarize_mileage_energy_detail(
         "energy_unavailable_reason": (
             "incomplete_data" if not energy_complete else None
         ),
-        "energy_kwh": round(energy_total, 1) if energy_complete else None,
+        "energy_kwh": (
+            round(energy_total, 3 if source_unit == "Wh" else 1)
+            if energy_complete else None
+        ),
     }
 
 
