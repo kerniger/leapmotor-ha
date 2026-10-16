@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 from typing import Any
 
 
@@ -35,11 +35,12 @@ def summarize_mileage_energy_detail(
     period_mileage_km: object,
     *,
     car_type: object = None,
+    local_timezone: tzinfo | None = None,
 ) -> dict[str, Any]:
     """Normalize daily history and return energy only when coverage is complete."""
-    # T03 samples (#67) contradict the kWh contract. Preserve source values,
-    # but do not guess a Wh conversion from their magnitude.
-    energy_unit = None if str(car_type or "").strip().upper() == "T03" else "kWh"
+    # T03 aligned daily/today readings in #67 establish Wh (1250 -> 1.25 kWh).
+    # Other models keep their existing contract; never infer units from magnitude.
+    source_unit = "Wh" if str(car_type or "").strip().upper() == "T03" else "kWh"
     expected_mileage = _finite_float(period_mileage_km)
     source_rows = detail if isinstance(detail, list) else []
     daily_detail: list[dict[str, Any]] = []
@@ -56,7 +57,9 @@ def summarize_mileage_energy_detail(
 
         mileage_km = _finite_float(item.get("accumulatedMileage"))
         energy_raw = _finite_float(item.get("accumulatedEnergyConsume"))
-        energy_kwh = energy_raw if energy_unit else None
+        energy_kwh = energy_raw
+        if energy_raw is not None and source_unit == "Wh":
+            energy_kwh = energy_raw / 1000
         if mileage_km is None or energy_raw is None:
             rows_valid = False
 
@@ -69,7 +72,8 @@ def summarize_mileage_energy_detail(
 
         daily_detail.append(
             {
-                "date": item.get("day"),
+                "date": _local_day(item, local_timezone),
+                "source_date": item.get("day"),
                 "timestamp": item.get("xDay"),
                 "odometer_km": _finite_float(item.get("currentMileage")),
                 "mileage_km": mileage_km,
@@ -78,7 +82,8 @@ def summarize_mileage_energy_detail(
                 # Preserve cloud precision; truncation is not established.
                 "driving_energy_kwh": energy_kwh,
                 "energy_raw": energy_raw,
-                "energy_unit": energy_unit,
+                "energy_unit": "kWh",
+                "energy_source_unit": source_unit,
                 "energy_kwh": energy_kwh,  # Legacy compatibility alias.
             }
         )
@@ -96,12 +101,12 @@ def summarize_mileage_energy_detail(
         "covered_mileage_km": round(covered_mileage, 1) if daily_detail else None,
         "period_mileage_km": expected_mileage,
         "energy_complete": energy_complete,
-        "energy_unit": energy_unit,
+        "energy_unit": "kWh",
+        "energy_source_unit": source_unit,
         "energy_unavailable_reason": (
-            "unverified_unit" if energy_unit is None
-            else "incomplete_data" if not energy_complete else None
+            "incomplete_data" if not energy_complete else None
         ),
-        "energy_kwh": round(energy_total, 1) if energy_complete and energy_unit else None,
+        "energy_kwh": round(energy_total, 1) if energy_complete else None,
     }
 
 
@@ -114,3 +119,14 @@ def _finite_float(value: object) -> float | None:
     except (TypeError, ValueError):
         return None
     return result if math.isfinite(result) else None
+
+
+def _local_day(item: dict[str, Any], local_timezone: tzinfo | None) -> object:
+    """Use the history request timezone for epoch milliseconds; preserve a fallback."""
+    timestamp = _finite_float(item.get("xDay"))
+    if local_timezone is not None and timestamp is not None and timestamp > 0:
+        try:
+            return datetime.fromtimestamp(timestamp / 1000, local_timezone).date().isoformat()
+        except (ValueError, OverflowError, OSError):
+            pass
+    return item.get("day")

@@ -66,6 +66,20 @@
           "eco_polling_enabled": "Utiliza o intervalo económico mais lento apenas quando todos os veículos estão claramente trancados, estacionados e desligados da tomada.",
           "eco_scan_interval": "Intervalo de consulta utilizado no modo económico. É automaticamente limitado para nunca ser inferior ao intervalo de atualização normal."
         }
+      },
+      "reauth_confirm": {
+        "title": "Atualizar palavra-passe Leapmotor",
+        "description": "Introduza a palavra-passe de {username}. Os veículos e as definições são mantidos.",
+        "data": {
+          "password": "Palavra-passe"
+        }
+      },
+      "reconfigure": {
+        "title": "Atualizar palavra-passe Leapmotor",
+        "description": "Introduza a palavra-passe de {username}. Os veículos e as definições são mantidos.",
+        "data": {
+          "password": "Palavra-passe"
+        }
       }
     },
     "error": {
@@ -79,7 +93,9 @@
       "certificate_import_error": "A importação do certificado falhou. Verifique o certificado PEM e a chave privada."
     },
     "abort": {
-      "already_configured": "Esta conta já está configurada."
+      "already_configured": "Esta conta já está configurada.",
+      "reauth_successful": "Palavra-passe da conta atualizada.",
+      "reconfigure_successful": "Palavra-passe da conta atualizada."
     }
   },
   "config_subentries": {

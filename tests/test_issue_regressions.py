@@ -88,17 +88,19 @@ class NormalizationTests(unittest.TestCase):
             self.assertEqual(result["charging"]["charging_planned_enabled"], int(enabled))
             self.assertEqual(result["charging"]["charging_planned_start"], "00:00")
 
-    def test_t03_unverified_energy_unit_does_not_pollute_kwh(self):
+    def test_t03_daily_energy_uses_model_specific_wh_conversion(self):
         for value, distance in ((2744, 22), (11912, 96), (0, 0)):
             mileage = {"data": {"totalAccumulatedMileage": distance, "detail": [
                 {"accumulatedMileage": distance, "accumulatedEnergyConsume": value}]}}
             history = self.normalize(" t03 ", {}, mileage_json=mileage)["history"]
             self.assertTrue(history["last_7_days_energy_complete"])
-            self.assertIsNone(history["last_7_days_energy_kwh"])
-            self.assertEqual(history["last_7_days_energy_unavailable_reason"], "unverified_unit")
+            self.assertEqual(history["last_7_days_energy_kwh"], round(value / 1000, 1))
+            self.assertIsNone(history["last_7_days_energy_unavailable_reason"])
+            self.assertEqual(history["last_7_days_energy_unit"], "kWh")
+            self.assertEqual(history["last_7_days_energy_source_unit"], "Wh")
             self.assertEqual(history["last_7_days_detail"][0]["energy_raw"], value)
-            self.assertIsNone(history["last_7_days_detail"][0]["energy_kwh"])
-            self.assertIsNone(history["last_7_days_detail"][0]["driving_energy_kwh"])
+            self.assertEqual(history["last_7_days_detail"][0]["energy_kwh"], value / 1000)
+            self.assertEqual(history["last_7_days_detail"][0]["driving_energy_kwh"], value / 1000)
             self.assertEqual(history["last_7_days_mileage_km"], distance)
 
     def test_b10_energy_keeps_original_scale_and_precision(self):
@@ -120,3 +122,90 @@ class NormalizationTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class OctoberChargingTests(unittest.TestCase):
+    def normalize(self, model="T03", **signals):
+        return api.normalize_vehicle(api.Vehicle("SYNTHETIC", None, model, None, False),
+                                     {"data": {"signal": signals}}, None)["charging"]
+
+    def test_t03_wallbox_pause_is_connected_idle_without_claiming_dc(self):
+        result = self.normalize(**{"47": 0, "1149": 0, "1178": 0, "1197": 1, "1200": 0})
+        self.assertTrue(result["is_plugged_in"])
+        self.assertEqual(result["connection_state"], "plugged_in")
+        self.assertFalse(result["is_charging"])
+        self.assertIsNone(result["dc_cable_connected"])
+
+    def test_pause_exception_requires_every_reported_field(self):
+        baseline = {"1149": 0, "1178": 0, "1197": 1, "1200": 0}
+        for key, bad_value in (("1197", 0), ("1197", 2), ("1178", 4), ("1200", 10),
+                               ("1010", 1), ("1319", 50)):
+            with self.subTest(key=key, value=bad_value):
+                self.assertFalse(self.normalize(**{**baseline, key: bad_value})["is_plugged_in"])
+        for key in baseline:
+            with self.subTest(missing=key):
+                self.assertIsNot(self.normalize(**{k: v for k, v in baseline.items() if k != key})["is_plugged_in"], True)
+
+    def test_other_models_keep_authoritative_connection_and_dc_state(self):
+        for model in ("B10", "C10", "B05"):
+            result = self.normalize(model, **{"1149": 0, "1178": 0, "1197": 1, "1200": 0})
+            self.assertFalse(result["is_plugged_in"])
+            self.assertEqual(result["connection_state"], "unplugged")
+            self.assertTrue(result["dc_cable_connected"])
+
+    def test_t03_unplug_pause_resume_sequence(self):
+        for signals, expected in (
+            ({"1149": 0, "1197": 0, "1178": 0, "1200": 0}, (False, False, "unplugged")),
+            ({"1149": 2, "1197": 0, "1178": -8, "1200": 120}, (True, True, "charging")),
+            ({"1149": 0, "1197": 1, "1178": 0, "1200": 0}, (True, False, "plugged_in")),
+            ({"1149": 2, "1197": 0, "1178": -8, "1200": 60}, (True, True, "charging")),
+            ({"1149": 0, "1197": 0, "1178": 0, "1200": 0}, (False, False, "unplugged")),
+        ):
+            result = self.normalize(**signals)
+            self.assertEqual(tuple(result[k] for k in ("is_plugged_in", "is_charging", "connection_state")), expected)
+
+    def test_login_service_errors_do_not_ask_for_a_new_password(self):
+        client = api.LeapmotorApiClient(username="synthetic", password="synthetic")
+        self.addCleanup(client.close)
+        for http, code in ((503, 302010108), (429, 1), (200, 17)):
+            with self.subTest(http=http, code=code):
+                with self.assertRaises(api.LeapmotorApiError) as raised:
+                    client._parse_api_body(http, json.dumps({"code": code}), "login")
+                self.assertNotIsInstance(raised.exception, api.LeapmotorAuthError)
+        with self.assertRaises(api.LeapmotorAuthError):
+            client._parse_api_body(200, json.dumps({"code": 302010108}), "login")
+
+
+class OctoberHistoryIntegrationTests(unittest.TestCase):
+    def test_client_passes_configured_zone_to_normalization(self):
+        client = api.LeapmotorApiClient(username="synthetic", password="synthetic",
+                                       history_timezone="America/Los_Angeles")
+        self.addCleanup(client.close)
+        vehicle = api.Vehicle("SYNTHETIC", None, "T03", None, False)
+        client.get_vehicle_list = Mock(return_value=[vehicle])
+        client.get_vehicle_status = Mock(return_value={"data": {}})
+        client._fetch_account_notifications = Mock(return_value=[])
+        client._fetch_optional_read = Mock(side_effect=lambda label, *args: (
+            {"data": {"totalAccumulatedMileage": 13, "detail": [{
+                "xDay": 1790146800000, "day": "source-date", "accumulatedMileage": 13,
+                "accumulatedEnergyConsume": 1250}]}} if label == "mileage energy detail" else None))
+        result = client._fetch_authenticated_data()["vehicles"]["SYNTHETIC"]["history"]
+        row = result["last_7_days_detail"][0]
+        self.assertEqual(row["date"], "2026-09-23")
+        self.assertEqual(row["source_date"], "source-date")
+        self.assertEqual(row["energy_kwh"], 1.25)
+
+    def test_charge_limit_provenance_preserves_raw_values(self):
+        vehicle = api.Vehicle("SYNTHETIC", None, "T03", None, False)
+        result = api.normalize_vehicle(vehicle, {"data": {
+            "config": {"3": {"percent": 90}}, "chargesocSetting": 80,
+            "soc": 0, "dumpEnergy": 32690, "signal": {"1204": 85}}}, None)
+        self.assertEqual(result["charging"]["charge_limit_percent"], 90)
+        self.assertEqual(result["charging"]["charge_limit_source"], "config_3")
+        self.assertEqual(result["charging"]["charge_limit_reliability"], "unverified")
+        diagnostics = result["diagnostics"]
+        self.assertEqual(diagnostics["charge_limit_plan_raw"], 90)
+        self.assertEqual(diagnostics["charge_limit_named_status_raw"], 80)
+        self.assertEqual(diagnostics["battery_soc_named_raw"], 0)
+        self.assertEqual(diagnostics["battery_soc_signal_raw"], 85)
+        self.assertEqual(diagnostics["available_energy_raw_wh"], 32690)

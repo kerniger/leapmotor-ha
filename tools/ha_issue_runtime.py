@@ -12,7 +12,7 @@ import sys
 import tempfile
 import types
 import unittest
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 from homeassistant import auth, config_entries, loader
 from homeassistant.core import HomeAssistant
@@ -131,6 +131,92 @@ class IssueRuntimeTests(unittest.IsolatedAsyncioTestCase):
         registry = entity_registry.async_get(self.hass)
         self.assertIsNotNone(registry.async_get_entity_id("number", "leapmotor", f"{VIN}_charge_limit_setting"))
         self.assertIsNotNone(registry.async_get_entity_id("switch", "leapmotor", f"{VIN}_charging_schedule"))
+
+    async def test_t03_wallbox_pause_reaches_evcc_and_cable_entities(self):
+        entry = await self.load_entry()
+        coordinator = self.hass.data["leapmotor"][entry.entry_id]
+        registry = entity_registry.async_get(self.hass)
+        vehicle = self.api.Vehicle(VIN, None, "T03", None, False)
+        for signals, expected in (
+            ({"1149": 2, "1178": -8, "1197": 0, "1200": 120}, ("C", "on", "off")),
+            ({"1149": 0, "1178": 0, "1197": 1, "1200": 0}, ("B", "on", "unknown")),
+            ({"1149": 2, "1178": -8, "1197": 0, "1200": 60}, ("C", "on", "off")),
+            ({"1149": 0, "1178": 0, "1197": 0, "1200": 0}, ("A", "off", "off")),
+        ):
+            data = self.api.normalize_vehicle(vehicle, {"data": {"signal": signals}}, None)
+            self.client.fetch_data.return_value = {"vehicles": {VIN: data}}
+            await coordinator.async_refresh()
+            await self.hass.async_block_till_done()
+            for domain, key, state in zip(
+                ("sensor", "binary_sensor", "binary_sensor"),
+                ("evcc_status", "is_plugged_in", "dc_cable_connected"), expected,
+            ):
+                entity_id = registry.async_get_entity_id(domain, "leapmotor", f"{VIN}_{key}")
+                self.assertEqual(self.hass.states.get(entity_id).state, state)
+
+    async def test_rejected_credentials_start_reauth_and_preserve_entry_on_success(self):
+        entry = await self.load_entry()
+        coordinator = self.hass.data["leapmotor"][entry.entry_id]
+        before_data, before_options = dict(entry.data), dict(entry.options)
+        before_subentries = dict(entry.subentries)
+        self.client.fetch_data.side_effect = self.api.LeapmotorAuthError("Leapmotor login failed: Incorrect account or password")
+        await coordinator.async_refresh()
+        await self.hass.async_block_till_done()
+        self.assertFalse(coordinator.last_update_success)
+        self.assertEqual(coordinator.integration_status["last_update_error_code"], "invalid_auth")
+        flows = self.hass.config_entries.flow.async_progress()
+        self.assertEqual(len(flows), 1)
+        flow_id = flows[0]["flow_id"]
+        self.assertEqual(flows[0]["step_id"], "reauth_confirm")
+        with patch("custom_components.leapmotor.config_flow.validate_input",
+                   side_effect=self.api.LeapmotorAuthError("incorrect password")):
+            failed = await self.hass.config_entries.flow.async_configure(flow_id, {"password": "bad"})
+        self.assertEqual(failed["errors"], {"base": "invalid_auth"})
+        self.assertEqual(dict(entry.data), before_data)
+        self.client.fetch_data.side_effect = None
+        with patch("custom_components.leapmotor.config_flow.validate_input", new=AsyncMock(return_value={})) as validate:
+            result = await self.hass.config_entries.flow.async_configure(flow_id, {"password": "replacement"})
+        self.assertEqual(result["reason"], "reauth_successful")
+        await self.hass.async_block_till_done()
+        self.assertEqual(dict(entry.data), {**before_data, "password": "replacement"})
+        self.assertEqual(dict(entry.options), before_options)
+        self.assertEqual(dict(entry.subentries), before_subentries)
+        self.assertEqual(validate.call_args.args[1]["username"], before_data["username"])
+        self.assertEqual(validate.call_args.args[1]["device_id"], before_data["device_id"])
+        self.assertEqual(entry.state, config_entries.ConfigEntryState.LOADED)
+
+    async def test_certificate_and_transient_failures_do_not_start_password_reauth(self):
+        entry = await self.load_entry()
+        coordinator = self.hass.data["leapmotor"][entry.entry_id]
+        for error in (self.api.LeapmotorMissingAppCertError("missing app certificate"),
+                      self.api.LeapmotorAccountCertError("account certificate failed"),
+                      self.api.LeapmotorApiError("service unavailable")):
+            with self.subTest(error=type(error).__name__):
+                self.client.fetch_data.side_effect = error
+                await coordinator.async_refresh()
+                await self.hass.async_block_till_done()
+                self.assertFalse(coordinator.last_update_success)
+                self.assertEqual(self.hass.config_entries.flow.async_progress(), [])
+
+    async def test_account_reconfigure_updates_password_and_rejects_certificate_failure(self):
+        entry = await self.load_entry()
+        result = await self.hass.config_entries.flow.async_init(
+            "leapmotor", context={"source": "reconfigure", "entry_id": entry.entry_id})
+        self.assertEqual(result["step_id"], "reconfigure")
+        flow_id = result["flow_id"]
+        for error, expected in ((self.api.LeapmotorMissingAppCertError("missing"), "missing_app_cert"),
+                                (self.api.LeapmotorAccountCertError("bad certificate"), "account_cert_error"),
+                                (self.api.LeapmotorApiError("offline"), "api_refresh_failed")):
+            with patch("custom_components.leapmotor.config_flow.validate_input", side_effect=error):
+                result = await self.hass.config_entries.flow.async_configure(flow_id, {"password": "replacement"})
+            self.assertEqual(result["errors"], {"base": expected})
+            self.assertEqual(entry.data["password"], "private-password")
+        with patch("custom_components.leapmotor.config_flow.validate_input", new=AsyncMock(return_value={})):
+            result = await self.hass.config_entries.flow.async_configure(flow_id, {"password": "replacement"})
+        self.assertEqual(result["reason"], "reconfigure_successful")
+        await self.hass.async_block_till_done()
+        self.assertEqual(entry.data["password"], "replacement")
+        self.assertEqual(entry.state, config_entries.ConfigEntryState.LOADED)
 
     async def test_sensor_classes_raw_defaults_and_user_override_survive_reload(self):
         entry = await self.load_entry()

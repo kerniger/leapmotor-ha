@@ -71,6 +71,20 @@
           "eco_scan_interval": "Polling-Intervall im Eco-Modus. Es wird automatisch mindestens auf das normale Aktualisierungsintervall begrenzt."
         }
       },
+      "reauth_confirm": {
+        "title": "Leapmotor-Passwort aktualisieren",
+        "description": "Passwort für {username} eingeben. Fahrzeuge und Einstellungen bleiben erhalten.",
+        "data": {
+          "password": "Passwort"
+        }
+      },
+      "reconfigure": {
+        "title": "Leapmotor-Passwort aktualisieren",
+        "description": "Passwort für {username} eingeben. Fahrzeuge und Einstellungen bleiben erhalten.",
+        "data": {
+          "password": "Passwort"
+        }
+      },
       "cn": {
         "title": "Leapmotor China",
         "description": "Experimentell: zunächst nur Lesedaten. Keine Fahrzeugsteuerung.",
@@ -130,7 +144,8 @@
       "already_configured": "Dieses Konto ist bereits eingerichtet.",
       "wrong_account": "Bitte dasselbe Konto erneut anmelden.",
       "reauth_not_supported": "Erneute Anmeldung wird für diese Region hier nicht unterstützt.",
-      "reauth_successful": "Erneute Anmeldung erfolgreich."
+      "reauth_successful": "Erneute Anmeldung erfolgreich.",
+      "reconfigure_successful": "Zugangsdaten aktualisiert."
     }
   },
   "config_subentries": {

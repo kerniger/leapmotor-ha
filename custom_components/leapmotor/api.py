@@ -11,7 +11,7 @@ import random
 import tempfile
 import time
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, tzinfo
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -123,7 +123,9 @@ class LeapmotorApiClient:
         device_id: str | None = None,
         language: str = DEFAULT_LANGUAGE,
         static_cert_dir: str | Path | None = None,
+        history_timezone: str = "Europe/Berlin",
     ) -> None:
+        self.history_timezone = ZoneInfo(history_timezone)
         self.username = username
         self.password = password
         self.operation_password = operation_password.strip() if operation_password else None
@@ -818,6 +820,7 @@ class LeapmotorApiClient:
                 consumption_today_json=consumption_today,
                 picture_json=picture,
                 charging_daily_json=charging_daily,
+                history_timezone=self.history_timezone,
             )
             vehicle_data["notifications"] = notifications
             result["vehicles"][vehicle.vin] = vehicle_data
@@ -1084,7 +1087,7 @@ class LeapmotorApiClient:
 
     def get_mileage_energy_detail(self, vehicle: Vehicle) -> dict[str, Any]:
         """Fetch read-only mileage and energy history summary."""
-        begintime, endtime = _last_seven_day_window_ms()
+        begintime, endtime = seven_day_window_ms(datetime.now(self.history_timezone))
         headers = self._build_mileage_energy_detail_headers(
             vin=vehicle.vin,
             begintime=str(begintime),
@@ -1118,7 +1121,7 @@ class LeapmotorApiClient:
 
     def get_consumption_last_week_breakdown(self, vehicle: Vehicle) -> dict[str, Any]:
         """Fetch read-only last-week energy split by driving, A/C, and other."""
-        begintime, endtime = _previous_week_window_seconds()
+        begintime, endtime = _previous_week_window_seconds(datetime.now(self.history_timezone))
         headers = self._build_consumption_last_week_headers(
             carvin=vehicle.vin,
             begintime=str(begintime),
@@ -1140,7 +1143,7 @@ class LeapmotorApiClient:
 
     def get_consumption_today_breakdown(self, vehicle: Vehicle) -> dict[str, Any]:
         """Fetch read-only today's energy split by driving, A/C, and other."""
-        begintime, endtime = _today_window_seconds()
+        begintime, endtime = _today_window_seconds(datetime.now(self.history_timezone))
         headers = self._build_consumption_last_week_headers(
             carvin=vehicle.vin,
             begintime=str(begintime),
@@ -1946,7 +1949,7 @@ class LeapmotorApiClient:
         )
         if status_code != 200 or data.get("code") != 0:
             message = data.get("message") or body[:200]
-            if label == "login":
+            if label == "login" and status_code == 200 and str(data.get("code")) == "302010108":
                 raise LeapmotorAuthError(f"Leapmotor login failed: {message}")
             if label == "remote verify":
                 raise LeapmotorAuthError(
@@ -2032,6 +2035,7 @@ def normalize_vehicle(
     consumption_today_json: dict[str, Any] | None = None,
     picture_json: dict[str, Any] | None = None,
     charging_daily_json: dict[str, Any] | None = None,
+    history_timezone: tzinfo | None = None,
 ) -> dict[str, Any]:
     """Normalize Leapmotor status payload into Home Assistant-friendly values."""
     status_data = status_json.get("data") or {}
@@ -2039,6 +2043,14 @@ def normalize_vehicle(
     config = status_data.get("config") or {}
     charge_plan = config.get("3") or _charge_plan_from_named_status(status_data)
     charge_plan = charge_plan if isinstance(charge_plan, dict) else {}
+    t03 = str(vehicle.car_type or "").strip().upper() == "T03"
+    paused_connector = (
+        t03 and not _vehicle_precludes_charging(signal)
+        and _safe_int(signal.get("1149")) == 0
+        and _safe_int(signal.get("1197")) == 1
+        and _safe_float(signal.get("1178")) == 0
+        and _safe_int(signal.get("1200")) == 0
+    )
     schedule_enabled = _safe_int(charge_plan.get("isEnable"))
     schedule_enabled = schedule_enabled if schedule_enabled in (0, 1) else None
     mileage_data = (mileage_json or {}).get("data") or {}
@@ -2060,6 +2072,7 @@ def normalize_vehicle(
         mileage_data.get("detail"),
         mileage_data.get("totalAccumulatedMileage"),
         car_type=vehicle.car_type,
+        local_timezone=history_timezone or ZoneInfo("Europe/Berlin"),
     )
     last_week_split = _energy_breakdown_percentages(breakdown_data)
     today_split = _energy_breakdown_percentages(today_data)
@@ -2153,15 +2166,22 @@ def normalize_vehicle(
         },
         "charging": {
             "is_charging": _is_charging(signal),
-            "is_plugged_in": _is_plugged_in(signal),
+            "is_plugged_in": True if paused_connector else _is_plugged_in(signal),
             "is_regening": _is_regening(signal),
-            "connection_state": _charging_connection_state(signal),
+            "connection_state": "plugged_in" if paused_connector else _charging_connection_state(signal),
             "charge_limit_percent": charge_plan.get("percent"),
+            "charge_limit_source": "config_3" if config.get("3") else "named_status",
+            "charge_limit_reliability": "unverified" if t03 else "reported",
             "remaining_charge_minutes": _safe_int(signal.get("1200")),
             "charging_power_kw": _charging_power_kw(signal),
             "charging_current_a": _safe_float(signal.get("1178")),
             "charging_voltage_v": _safe_float(signal.get("1177")),
-            "dc_cable_connected": _not_zero(signal.get("1197")),
+            # On T03, 1197=1 also appears in a paused AC session (#75).
+            # It proves no charger type; retain the raw value for diagnostics.
+            "dc_cable_connected": (
+                None if t03 and _not_zero(signal.get("1197"))
+                else _not_zero(signal.get("1197"))
+            ),
             "charging_planned_enabled": schedule_enabled,
             "charging_planned_start": (
                 charge_plan.get("beginTime") if schedule_enabled is not None else None
@@ -2181,6 +2201,8 @@ def normalize_vehicle(
             "last_7_days_energy_kwh": recent_history["energy_kwh"],
             "last_7_days_energy_complete": recent_history["energy_complete"],
             "last_7_days_energy_unit": recent_history["energy_unit"],
+            "last_7_days_energy_source_unit": recent_history["energy_source_unit"],
+            "last_7_days_timezone": str(history_timezone or ZoneInfo("Europe/Berlin")),
             "last_7_days_energy_unavailable_reason": recent_history["energy_unavailable_reason"],
             "last_7_days_detail_days": recent_history["detail_days"],
             "last_7_days_detail_mileage_km": recent_history["detail_mileage_km"],
@@ -2229,6 +2251,14 @@ def normalize_vehicle(
             "status_has_config": bool(config),
             "charging_plan_control_supported": charging_plan_control_supported(vehicle.car_type),
             "charging_plan_start_raw": charge_plan.get("beginTime"),
+            "charge_limit_plan_raw": charge_plan.get("percent"),
+            "charge_limit_named_status_raw": status_data.get("chargesocSetting"),
+            "battery_soc_named_raw": status_data.get("soc"),
+            "battery_soc_signal_raw": (
+                status_data["signal"].get("1204")
+                if isinstance(status_data.get("signal"), dict) else None
+            ),
+            "available_energy_raw_wh": status_data.get("dumpEnergy"),
             "charge_plug_signal": signal.get("47"),
             "raw_signal_47": signal.get("47"),
             "raw_signal_1149": signal.get("1149"),
@@ -2809,9 +2839,9 @@ def _last_seven_day_window_ms() -> tuple[int, int]:
     return seven_day_window_ms(_berlin_now())
 
 
-def _previous_week_window_seconds() -> tuple[int, int]:
+def _previous_week_window_seconds(now: datetime | None = None) -> tuple[int, int]:
     """Return the previous Monday-Sunday window used by getLastweekEC."""
-    now = _berlin_now()
+    now = now or _berlin_now()
     this_monday = (now - timedelta(days=now.weekday())).replace(
         hour=0,
         minute=0,
@@ -2823,9 +2853,9 @@ def _previous_week_window_seconds() -> tuple[int, int]:
     return int(start.timestamp()), int(end.timestamp())
 
 
-def _today_window_seconds() -> tuple[int, int]:
+def _today_window_seconds(now: datetime | None = None) -> tuple[int, int]:
     """Return the start of today to the current time, in seconds."""
-    now = _berlin_now()
+    now = now or _berlin_now()
     start = now.replace(
         hour=0,
         minute=0,
