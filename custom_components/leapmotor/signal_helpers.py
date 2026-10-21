@@ -20,6 +20,18 @@ def nonzero_state(raw: object) -> bool | None:
         return None
 
 
+def steering_wheel_heating_state(raw: object) -> bool | None:
+    """Return steering-wheel heating state from signal 1816.
+
+    Signal 1816 carries the heating mode, verified on A10: 0 = off,
+    1 = level 1, 2 = level 2, 3 = remote heating. Any non-zero value is on.
+    """
+    value = _safe_int(raw)
+    if value is None:
+        return None
+    return value != 0
+
+
 def window_open_state(
     status_value: object,
     position_percent: object,
