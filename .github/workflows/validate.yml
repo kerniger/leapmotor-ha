@@ -9,12 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install API test dependencies
         run: python -m pip install 'requests>=2.31.0' 'cryptography>=42.0.0'
@@ -81,13 +81,29 @@ jobs:
             .
 
   ha-issue-runtime:
+    name: ha-issue-runtime (HA ${{ matrix.homeassistant }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Minimum version declared in hacs.json.
+          - homeassistant: "2025.3.4"
+            requirement: "homeassistant==2025.3.4"
+            python: "3.13"
+          # Newest release supported by this Python version; raise the
+          # Python version when Home Assistant requires a newer one.
+          - homeassistant: "latest"
+            requirement: "homeassistant"
+            python: "3.14"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python }}
       - name: Install Home Assistant runtime
-        run: python -m pip install 'homeassistant==2025.12.5' 'requests>=2.31.0'
+        run: |
+          python -m pip install '${{ matrix.requirement }}' 'requests>=2.31.0'
+          python -m pip show homeassistant | grep '^Version:'
       - name: Test diagnostics, entity defaults and T03 service boundary offline
         run: python tools/ha_issue_runtime.py -v
