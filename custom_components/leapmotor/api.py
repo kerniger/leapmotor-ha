@@ -91,6 +91,7 @@ from .model_helpers import (
 from .signal_helpers import (
     charge_connection_allows_charging,
     nonzero_state,
+    steering_wheel_heating_state,
     vehicle_precludes_charging,
     window_open_state,
 )
@@ -2326,7 +2327,7 @@ def normalize_vehicle(
             "fast_heating_active": _two_is_on(signal.get("2681")),
             "windshield_defrosting": _positive_int(signal.get("1945")),
             "rear_window_heating": _one_is_on(signal.get("1946")),
-            "steering_wheel_heating": _two_is_on(signal.get("1816")),
+            "steering_wheel_heating": steering_wheel_heating_state(signal.get("1816")),
             "steering_wheel_heating_remaining_minutes": _safe_int(signal.get("1624")),
             "driver_seat_heating_level": _safe_int(signal.get("2100")),
             "passenger_seat_heating_level": _safe_int(signal.get("2118")),
