@@ -57,6 +57,21 @@ class WindowOpenStateTests(unittest.TestCase):
         self.assertIs(signals.nonzero_state("0.0"), False)
 
 
+class SteeringWheelHeatingStateTests(unittest.TestCase):
+    """Cover A10 steering-wheel heating modes from signal 1816."""
+
+    def test_level_and_remote_modes_are_on(self) -> None:
+        self.assertIs(signals.steering_wheel_heating_state(1), True)
+        self.assertIs(signals.steering_wheel_heating_state(2), True)
+        self.assertIs(signals.steering_wheel_heating_state("3"), True)
+
+    def test_zero_is_off(self) -> None:
+        self.assertIs(signals.steering_wheel_heating_state(0), False)
+
+    def test_missing_value_is_unknown(self) -> None:
+        self.assertIsNone(signals.steering_wheel_heating_state(None))
+
+
 class ChargingPlausibilityTests(unittest.TestCase):
     """Cover the B10 READY/unplugged phantom-charge sequence."""
 
