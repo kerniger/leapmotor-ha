@@ -1,7 +1,7 @@
 """Offline HA regressions for diagnostics, entity defaults and service boundaries.
 
 Run separately from unit tests: python tools/ha_issue_runtime.py -v
-CI runs it against homeassistant 2025.3.4 (minimum) and the latest release;
+CI runs it against homeassistant 2025.3.0 (minimum) and the latest release;
 all vehicle data is synthetic.
 """
 import asyncio
@@ -77,7 +77,7 @@ class IssueRuntimeTests(unittest.IsolatedAsyncioTestCase):
         vehicle = self.api.Vehicle(VIN, "private-car-123456", model, "Private Owner", False)
         self.client._find_vehicle_by_vin.return_value = vehicle
         result = self.api.normalize_vehicle(vehicle, {"data": {
-            "signal": {"1204": 75, "1939": 0}, "ptcState": 2,
+            "signal": {"1204": 75, "1939": 0, **({"1816": 0} if model == "A10" else {})}, "ptcState": 2,
             "chargesocSetting": 95, "chargeTimeSetting": "00:00"}}, None)
         result["diagnostics"].update(available_energy_kwh=36.13, climate_air_direction=0)
         self.client.fetch_data.return_value = {"vehicles": {VIN: result}}
@@ -136,6 +136,41 @@ class IssueRuntimeTests(unittest.IsolatedAsyncioTestCase):
         registry = entity_registry.async_get(self.hass)
         self.assertIsNotNone(registry.async_get_entity_id("number", "leapmotor", f"{VIN}_charge_limit_setting"))
         self.assertIsNotNone(registry.async_get_entity_id("switch", "leapmotor", f"{VIN}_charging_schedule"))
+
+    async def test_a10_heating_state_reaches_switch_and_binary_sensor(self):
+        entry = await self.load_entry("A10")
+        coordinator = self.hass.data["leapmotor"][entry.entry_id]
+        registry = entity_registry.async_get(self.hass)
+        vehicle = self.api.Vehicle(VIN, None, "A10", None, False)
+        for value, expected in ((3, "on"), (0, "off"), (1, "on"), (2, "on"), (255, "unknown")):
+            data = self.api.normalize_vehicle(vehicle, {"data": {"signal": {"1816": value}}}, None)
+            self.client.fetch_data.return_value = {"vehicles": {VIN: data}}
+            await coordinator.async_refresh()
+            await self.hass.async_block_till_done()
+            for domain, key in (("switch", "steering_wheel_heat"), ("binary_sensor", "steering_wheel_heating")):
+                entity_id = registry.async_get_entity_id(domain, "leapmotor", f"{VIN}_{key}")
+                self.assertIsNotNone(entity_id)
+                self.assertEqual(self.hass.states.get(entity_id).state, expected)
+
+    async def test_b10_unreliable_energy_reaches_entities_with_raw_detail(self):
+        entry = await self.load_entry("B10")
+        coordinator = self.hass.data["leapmotor"][entry.entry_id]
+        registry = entity_registry.async_get(self.hass)
+        vehicle = self.api.Vehicle(VIN, None, "B10", None, False)
+        data = self.api.normalize_vehicle(vehicle, {"data": {}}, None, mileage_json={"data": {
+            "totalAccumulatedMileage": 17,
+            "detail": [{"accumulatedMileage": 17, "accumulatedEnergyConsume": 0}]}})
+        self.client.fetch_data.return_value = {"vehicles": {VIN: data}}
+        await coordinator.async_refresh()
+        await self.hass.async_block_till_done()
+        for key, expected in (("last_7_days_energy_kwh", "unknown"), ("last_7_days_mileage_km", "17")):
+            entity_id = registry.async_get_entity_id("sensor", "leapmotor", f"{VIN}_{key}")
+            state = self.hass.states.get(entity_id)
+            self.assertEqual(state.state, expected)
+            self.assertEqual(state.attributes["energy_unavailable_reason"], "unreliable_source")
+            self.assertTrue(state.attributes["energy_complete"])
+            self.assertEqual(state.attributes["energy_scope"], "unconfirmed")
+            self.assertEqual(state.attributes["daily_detail"][0]["energy_raw"], 0)
 
     async def test_t03_wallbox_pause_reaches_evcc_and_cable_entities(self):
         entry = await self.load_entry()

@@ -88,8 +88,8 @@ jobs:
       matrix:
         include:
           # Minimum version declared in hacs.json.
-          - homeassistant: "2025.3.4"
-            requirement: "homeassistant==2025.3.4"
+          - homeassistant: "2025.3.0"
+            requirement: "homeassistant==2025.3.0"
             python: "3.13"
           # Newest release supported by this Python version; raise the
           # Python version when Home Assistant requires a newer one.

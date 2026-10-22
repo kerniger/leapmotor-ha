@@ -1035,7 +1035,7 @@ class LeapmotorSensor(CoordinatorEntity[LeapmotorDataUpdateCoordinator], SensorE
                 {
                     "energy_complete": history.get("last_7_days_energy_complete"),
                     "energy_source": "accumulatedEnergyConsume",
-                    "energy_scope": "presumed_driving_only",
+                    "energy_scope": "unconfirmed",
                     "energy_scope_confirmed": False,
                     "energy_unit": history.get("last_7_days_energy_unit"),
                     "energy_source_unit": history.get("last_7_days_energy_source_unit"),
