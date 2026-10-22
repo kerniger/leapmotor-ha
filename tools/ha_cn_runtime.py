@@ -142,14 +142,15 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
     async def test_non_b05_creates_only_confirmed_signal_entities(self):
         self.car_type = "C11"
         self.signal_map = {"1204": 64, "1318": 9876, "999999": 1}
-        await self.import_entry()
+        entry = await self.import_entry()
         states = self.hass.states.async_all("sensor")
         self.assertEqual(len(states), 2)
         self.assertEqual(sorted(float(state.state) for state in states), [64, 9876])
-        device = device_registry.async_get(self.hass).async_get_device(
-            identifiers={("leapmotor_cn", "SYNTHETIC-B05")})
-        self.assertIsNotNone(device)
-        self.assertEqual(device.model, "C11")
+        devices = [device for device in device_registry.async_entries_for_config_entry(
+            device_registry.async_get(self.hass), entry.entry_id
+        ) if ("leapmotor_cn", "SYNTHETIC-B05") in device.identifiers]
+        self.assertEqual(len(devices), 1)
+        self.assertEqual(devices[0].model, "C11")
 
     async def test_proxy_persists_and_options_reload_only_cn(self):
         proxy = "http://synthetic-user:synthetic-password@proxy.invalid:3128"
