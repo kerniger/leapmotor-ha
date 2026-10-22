@@ -61,9 +61,18 @@ class SteeringWheelHeatingStateTests(unittest.TestCase):
     """Cover A10 steering-wheel heating modes from signal 1816."""
 
     def test_level_and_remote_modes_are_on(self) -> None:
-        self.assertIs(signals.steering_wheel_heating_state(1), True)
-        self.assertIs(signals.steering_wheel_heating_state(2), True)
-        self.assertIs(signals.steering_wheel_heating_state("3"), True)
+        self.assertIs(signals.steering_wheel_heating_state(1, "A10"), True)
+        self.assertIs(signals.steering_wheel_heating_state(2, "A10"), True)
+        self.assertIs(signals.steering_wheel_heating_state("3", " a10 "), True)
+
+    def test_other_models_keep_existing_mapping(self):
+        for model in ("C10", "B10", "T03", None):
+            for value in (0, 1, 2, 3):
+                self.assertIs(signals.steering_wheel_heating_state(value, model), value == 2)
+
+    def test_unknown_a10_modes_are_not_guessed(self):
+        for value in (-1, 4, 255, "bad", "NaN", "inf", 1.5, True, None):
+            self.assertIsNone(signals.steering_wheel_heating_state(value, "A10"))
 
     def test_zero_is_off(self) -> None:
         self.assertIs(signals.steering_wheel_heating_state(0), False)
