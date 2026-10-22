@@ -40,7 +40,10 @@ def summarize_mileage_energy_detail(
     """Normalize daily history and return energy only when coverage is complete."""
     # T03 aligned daily/today readings in #67 establish Wh (1250 -> 1.25 kWh).
     # Other models keep their existing contract; never infer units from magnitude.
-    source_unit = "Wh" if str(car_type or "").strip().upper() == "T03" else "kWh"
+    model = str(car_type or "").strip().upper()
+    source_unit = "Wh" if model == "T03" else "kWh"
+    # Aligned B10 app/today/week evidence in #67 disproves this daily source.
+    unreliable_energy = model == "B10"
     expected_mileage = _finite_float(period_mileage_km)
     source_rows = detail if isinstance(detail, list) else []
     daily_detail: list[dict[str, Any]] = []
@@ -60,6 +63,8 @@ def summarize_mileage_energy_detail(
         energy_kwh = energy_raw
         if energy_raw is not None and source_unit == "Wh":
             energy_kwh = energy_raw / 1000
+        if unreliable_energy:
+            energy_kwh = None
         if mileage_km is None or energy_raw is None:
             rows_valid = False
 
@@ -78,10 +83,12 @@ def summarize_mileage_energy_detail(
                 "odometer_km": _finite_float(item.get("currentMileage")),
                 "mileage_km": mileage_km,
                 "mileage_mi": _finite_float(item.get("accumulatedMileageMile")),
-                # Working interpretation from aligned B10 week data (#67).
-                # Preserve cloud precision; truncation is not established.
+                # Keep the legacy alias, but withhold known unreliable B10 energy.
                 "driving_energy_kwh": energy_kwh,
                 "energy_raw": energy_raw,
+                "energy_unavailable_reason": (
+                    "unreliable_source" if unreliable_energy else None
+                ),
                 "energy_unit": "kWh",
                 "energy_source_unit": source_unit,
                 "energy_kwh": energy_kwh,  # Legacy compatibility alias.
@@ -104,11 +111,12 @@ def summarize_mileage_energy_detail(
         "energy_unit": "kWh",
         "energy_source_unit": source_unit,
         "energy_unavailable_reason": (
-            "incomplete_data" if not energy_complete else None
+            "unreliable_source" if unreliable_energy
+            else "incomplete_data" if not energy_complete else None
         ),
         "energy_kwh": (
             round(energy_total, 3 if source_unit == "Wh" else 1)
-            if energy_complete else None
+            if energy_complete and not unreliable_energy else None
         ),
     }
 

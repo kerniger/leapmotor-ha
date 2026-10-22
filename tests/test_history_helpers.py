@@ -164,3 +164,27 @@ class LocalHistoryDateTests(unittest.TestCase):
         self.assertFalse(result["energy_complete"])
         self.assertIsNone(result["energy_kwh"])
         self.assertEqual(result["energy_unavailable_reason"], "incomplete_data")
+
+
+class B10UnreliableEnergyTests(unittest.TestCase):
+    def test_reported_week_preserves_coverage_and_raw_but_withholds_energy(self):
+        rows = [{"accumulatedMileage": km, "accumulatedEnergyConsume": energy}
+                for km, energy in ((27, 1), (76, 8), (58, 3), (24, 2), (63, 5), (17, 0), (0, 0))]
+        result = history.summarize_mileage_energy_detail(rows, 265, car_type=" b10 ")
+        self.assertTrue(result["energy_complete"])
+        self.assertEqual(result["detail_mileage_km"], 265)
+        self.assertIsNone(result["energy_kwh"])
+        self.assertEqual(result["energy_unavailable_reason"], "unreliable_source")
+        self.assertEqual(sum(row["energy_raw"] for row in result["daily_detail"]), 19)
+        for row in result["daily_detail"]:
+            self.assertIsNone(row["energy_kwh"])
+            self.assertIsNone(row["driving_energy_kwh"])
+            self.assertEqual(row["energy_unavailable_reason"], "unreliable_source")
+
+    def test_other_models_keep_daily_energy(self):
+        for model, energy in (("T03", 1.25), ("C10", 1250), ("A10", 1250)):
+            result = history.summarize_mileage_energy_detail(
+                [{"accumulatedMileage": 13, "accumulatedEnergyConsume": 1250}],
+                13, car_type=model)
+            self.assertEqual(result["energy_kwh"], energy)
+            self.assertIsNone(result["energy_unavailable_reason"])

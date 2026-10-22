@@ -103,12 +103,20 @@ class NormalizationTests(unittest.TestCase):
             self.assertEqual(history["last_7_days_detail"][0]["driving_energy_kwh"], value / 1000)
             self.assertEqual(history["last_7_days_mileage_km"], distance)
 
-    def test_b10_energy_keeps_original_scale_and_precision(self):
+    def test_b10_unreliable_energy_keeps_raw_precision(self):
         history = self.normalize("B10", {}, mileage_json={"data": {
             "totalAccumulatedMileage": 22, "detail": [
                 {"accumulatedMileage": 22, "accumulatedEnergyConsume": 2.75}]}})["history"]
-        self.assertEqual(history["last_7_days_detail"][0]["energy_kwh"], 2.75)
+        self.assertIsNone(history["last_7_days_detail"][0]["energy_kwh"])
+        self.assertEqual(history["last_7_days_detail"][0]["energy_raw"], 2.75)
+        self.assertIsNone(history["last_7_days_energy_kwh"])
+        self.assertEqual(history["last_7_days_energy_unavailable_reason"], "unreliable_source")
         self.assertEqual(history["last_7_days_energy_unit"], "kWh")
+
+    def test_steering_heating_normalization_uses_vehicle_model(self):
+        for model, expected in (("A10", True), ("C10", False), ("B10", False)):
+            result = self.normalize(model, {"signal": {"1816": "3"}})
+            self.assertIs(result["diagnostics"]["steering_wheel_heating"], expected)
 
     def test_real_zero_soc_is_not_discarded(self):
         result = self.normalize("T03", {"signal": {"1204": 0}})

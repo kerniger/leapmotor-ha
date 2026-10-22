@@ -63,22 +63,20 @@ raw diagnostic sensor defaults.
   mark energy unavailable when the cloud returns an incomplete daily series.
   The window includes today and the preceding six calendar days. `energy_complete`
   validates field and mileage coverage only, not physical energy accuracy.
-  Daily `driving_energy_kwh` exposes `accumulatedEnergyConsume`, provisionally
-  interpreted as driving energy excluding climate/accessories (#67). The sensor
-  name marks this interpretation as presumed; attributes expose
-  `energy_scope: presumed_driving_only` and `energy_scope_confirmed: false`.
-  Existing entity IDs and the daily `energy_kwh` compatibility alias are retained.
-  An aligned B10 week reports 38 kWh in daily values versus 40.5 kWh driving
-  energy and 53.1 kWh including climate/other energy. Later short-trip data do
-  not fully reconcile that hypothesis; the field's meaning remains unconfirmed. B10 daily values
-  were whole kWh; rounding/truncation is unconfirmed and cloud decimals are
-  preserved when present. Do not interpret these values or a derived kWh/100 km
-  as total vehicle consumption. Weekly consumption
-  rates are normalized to numbers; the captured weekly response contains no
-  corresponding weekly distance or energy totals. T03 daily energy uses Wh and
-  is converted to kWh; `daily_detail.energy_raw` retains the original value and
-  `energy_source_unit` describes that source unit; `energy_unit` remains kWh. This conversion follows aligned
-  daily/today readings in #67 and does not confirm the field's energy scope.
+  B10 daily `accumulatedEnergyConsume` is demonstrably unreliable (#67):
+  a day with 2.0 kWh driving consumption can report 0, and an aligned week
+  reports 19 kWh versus 32.3 kWh driving. B10 daily `energy_kwh` and
+  `driving_energy_kwh`, and the rolling energy total, therefore remain unknown
+  with `energy_unavailable_reason: unreliable_source`. Original `energy_raw`,
+  dates, mileage and coverage information remain available. `energy_complete`
+  may still be true: coverage does not establish reliability. No scaling or
+  replacement of historical statistics is applied. The `today_*` and weekly
+  breakdown sources are unchanged; they are not substituted for missing days.
+  The energy scope remains unconfirmed (`energy_scope: unconfirmed`).
+  Other models retain their existing daily energy behavior. T03 daily energy
+  uses Wh and is converted to kWh; `daily_detail.energy_raw` retains the source
+  value and `energy_source_unit` describes its unit; `energy_unit` remains kWh.
+  This conversion follows aligned daily/today readings and does not confirm scope.
   Daily `date` labels and history request windows use the Home Assistant timezone;
   the cloud's original day label remains in `daily_detail.source_date`.
 - Vehicle READY/ON3 diagnostic based on signal `1258`.
