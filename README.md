@@ -9,13 +9,13 @@ This repository is the cleaned public version of the project. It does not
 contain client certificates, private keys, captured tokens, account data,
 research logs, or reverse-engineering workfiles.
 
-## China support: 0.8.0b3 prerelease
+## China support: 0.8.0b4 prerelease
 
-**[Download the EU/CN beta 0.8.0b3](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.8.0b3)**
+**[Download the EU/CN beta 0.8.0b4](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.8.0b4)**
 
 The beta adds **China / Rest of the World** to setup within the existing
 Leapmotor integration. Existing EU entries retain their configuration and entity
-identities. **0.7.4 is the stable release; CN support is experimental.**
+identities. **0.7.5 is the stable release; CN support is experimental.**
 
 | Region | Available in the beta |
 | --- | --- |
@@ -30,14 +30,26 @@ outstanding. A previous standalone CN gateway connection failure remains
 unresolved, so successful cloud connectivity is not guaranteed.
 
 **Install:** Back up Home Assistant, open Leapmotor in HACS, choose
-**Redownload**, enable prerelease versions if needed, select **0.8.0b3**, and
+**Redownload**, enable prerelease versions if needed, select **0.8.0b4**, and
 restart Home Assistant. Alternatively, use the release asset `leapmotor-ha.zip`.
 The standalone `leapmotor_cn` beta is not migrated automatically; disable its
 entry before setting up the same CN account in the shared integration.
 
-Read the [CN setup, limitations and rollback guide](https://github.com/kerniger/leapmotor-ha/blob/v0.8.0b3/docs/cn/README.md).
+Read the [CN setup, limitations and rollback guide](https://github.com/kerniger/leapmotor-ha/blob/v0.8.0b4/docs/cn/README.md).
 For feedback, include model/year, HA version and the failing step or missing
 entities. Never post session JSON, credentials, VINs or raw locations.
+
+## October 22 follow-up
+
+[Stable 0.7.5](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.7.5) and
+[EU/CN beta 0.8.0b4](https://github.com/kerniger/leapmotor-ha/releases/tag/v0.8.0b4)
+correct A10 steering-wheel heating state for levels 1/2 and remote mode 3.
+Other models keep their existing mapping; unknown A10 modes remain unknown.
+B10 daily energy is withheld as `unreliable_source`, with raw values, mileage
+and dates preserved. Daily energy scope is unconfirmed; today's and last week's
+breakdowns are unchanged. CI now tests the declared HA minimum 2025.3.0 and
+the newest release installable on Python 3.14, printing the resolved version.
+Thanks to Mikado8231 for the heating fix and HA test-matrix contributions.
 
 ## October maintenance fixes
 

@@ -1,6 +1,6 @@
 """Real HA lifecycle tests with synthetic transport; run separately from stub tests.
 
-Requires homeassistant==2025.12.5 on Python 3.13. No cloud calls or credentials.
+CI tests the declared HA minimum and latest installable release. No cloud calls or credentials.
 Run: python tools/ha_cn_runtime.py -v
 """
 import asyncio
@@ -17,7 +17,7 @@ from unittest.mock import AsyncMock, Mock, patch
 
 from homeassistant import config_entries, loader
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers import area_registry, device_registry, entity_registry
+from homeassistant.helpers import area_registry, device_registry, entity_registry, frame
 from homeassistant.setup import async_setup_component
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -48,6 +48,9 @@ class RuntimeTests(unittest.IsolatedAsyncioTestCase):
         loader.async_setup(self.hass)
         self.hass.config_entries = config_entries.ConfigEntries(self.hass, {})
         await self.hass.config_entries.async_initialize()
+        for helper in (frame, device_registry):
+            if hasattr(helper, "async_setup"):
+                helper.async_setup(self.hass)
         await asyncio.gather(area_registry.async_load(self.hass),
                              device_registry.async_load(self.hass),
                              entity_registry.async_load(self.hass))
